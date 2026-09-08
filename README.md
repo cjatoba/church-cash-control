@@ -23,11 +23,14 @@ processo de desenvolvimento deste projeto.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # preencha DATABASE_URL com a connection string do Neon
+cp .env.example .env.local   # preencha DATABASE_URL e AUTH_SECRET
+pnpm db:migrate               # cria a tabela de usuários
+pnpm user:create voce@exemplo.com "senha-com-8-ou-mais-caracteres"
 pnpm dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000).
+Abra [http://localhost:3000](http://localhost:3000) — a aplicação exige login;
+use o e-mail/senha criados acima.
 
 ## Banco de dados (Neon)
 
@@ -40,17 +43,18 @@ Abra [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Script                                       | Descrição                                        |
-| -------------------------------------------- | ------------------------------------------------ |
-| `pnpm dev`                                   | Sobe o servidor de desenvolvimento               |
-| `pnpm build`                                 | Build de produção                                |
-| `pnpm lint`                                  | ESLint                                           |
-| `pnpm format` / `format:check`               | Prettier (aplica / apenas verifica)              |
-| `pnpm typecheck`                             | `tsc --noEmit`                                   |
-| `pnpm test` / `test:watch` / `test:coverage` | Vitest (uma vez / watch / com cobertura)         |
-| `pnpm db:generate`                           | Gera migrations Drizzle a partir do schema       |
-| `pnpm db:migrate`                            | Aplica migrations pendentes no banco configurado |
-| `pnpm db:studio`                             | Abre o Drizzle Studio para inspecionar o banco   |
+| Script                                       | Descrição                                                  |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| `pnpm dev`                                   | Sobe o servidor de desenvolvimento                         |
+| `pnpm build`                                 | Build de produção                                          |
+| `pnpm lint`                                  | ESLint                                                     |
+| `pnpm format` / `format:check`               | Prettier (aplica / apenas verifica)                        |
+| `pnpm typecheck`                             | `tsc --noEmit`                                             |
+| `pnpm test` / `test:watch` / `test:coverage` | Vitest (uma vez / watch / com cobertura)                   |
+| `pnpm db:generate`                           | Gera migrations Drizzle a partir do schema                 |
+| `pnpm db:migrate`                            | Aplica migrations pendentes no banco configurado           |
+| `pnpm db:studio`                             | Abre o Drizzle Studio para inspecionar o banco             |
+| `pnpm user:create <email> <senha>`           | Cria um usuário para login (não há tela de cadastro ainda) |
 
 ## Fluxo de contribuição
 
