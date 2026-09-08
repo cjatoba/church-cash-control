@@ -55,3 +55,11 @@ Abra [http://localhost:3000](http://localhost:3000).
 Nunca commitar diretamente na `main`. Toda mudança segue: branch própria →
 commits (Conventional Commits) → Pull Request → CI verde → revisão → merge.
 Detalhes completos em [`CLAUDE.md`](./CLAUDE.md).
+
+## Versionamento
+
+A versão segue [SemVer](https://semver.org/), calculada automaticamente a
+partir dos Conventional Commits mergeados na `main` via
+[semantic-release](https://semantic-release.gitbook.io/) — cada merge gera
+tag e GitHub Release quando aplicável, sem bump manual. Detalhes em
+[`CLAUDE.md`](./CLAUDE.md#versionamento-semver).

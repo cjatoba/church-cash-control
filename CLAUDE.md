@@ -84,7 +84,9 @@ sem banco de dados.
   branch própria (`feat/...`, `fix/...`, `chore/...`).
 - Commits seguem [Conventional Commits](https://www.conventionalcommits.org/)
   (`commitlint` valida via hook `commit-msg`). O hook `pre-commit` roda
-  `lint-staged` (ESLint + Prettier nos arquivos alterados).
+  `lint-staged` (ESLint + Prettier nos arquivos alterados). O tipo do commit
+  (`fix`, `feat`, `BREAKING CHANGE`) não é só estilo — é o que determina o
+  bump de versão SemVer (ver seção abaixo), então use o tipo certo.
 - Ao terminar uma implementação, **abra um Pull Request contra `main`** —
   nunca faça merge/push direto. O CI (`.github/workflows/ci.yml`: lint,
   format check, typecheck, testes com cobertura, build) precisa estar verde
@@ -92,6 +94,26 @@ sem banco de dados.
 - Branch protection na `main` (exigir PR + checks verdes antes de mergear)
   deve estar habilitada nas configurações do repositório no GitHub —
   configuração manual, fora do alcance de comandos git.
+
+## Versionamento (SemVer)
+
+A versão do projeto segue [SemVer](https://semver.org/) e é derivada
+automaticamente dos Conventional Commits mergeados na `main`, via
+[semantic-release](https://semantic-release.gitbook.io/) (job `release` em
+`.github/workflows/ci.yml`, roda depois que `quality` passa):
+
+- `fix:` → **patch** (`x.y.Z`)
+- `feat:` → **minor** (`x.Y.0`)
+- `feat!:`, `fix!:` ou rodapé `BREAKING CHANGE:` → **major** (`X.0.0`)
+- `chore:`, `docs:`, `test:`, `refactor:`, `ci:` sem `!` → não geram release
+
+A cada push na `main` (isto é, a cada PR mergeada) o semantic-release calcula
+a próxima versão, cria a tag git e uma GitHub Release com o changelog gerado
+a partir das mensagens de commit — sem exigir nenhum passo manual de bump de
+versão. Ele **não** commita de volta na `main` (sem plugin `@semantic-release/git`):
+isso mantém "nunca commitar direto na main" sem exceção, mas por consequência
+o campo `version` do `package.json` não é atualizado automaticamente — a
+versão real do projeto é a última tag/GitHub Release, não esse campo.
 
 ## Banco de dados
 
