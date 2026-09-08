@@ -1,8 +1,10 @@
 # Church Cash Control
 
-Sistema de controle de caixa para igrejas. A primeira frente de uso é o
-controle de arrecadação de uma campanha específica (ex.: compra de cadeiras);
-o escopo será ampliado conforme novas regras de negócio forem definidas.
+Sistema de controle de caixa para igrejas. Cada igreja configura suas
+próprias campanhas de arrecadação (nome, meta, período, regras) como dados
+no banco — este repositório não conhece nem documenta campanhas de uma
+igreja específica. Veja [`CLAUDE.md`](./CLAUDE.md#campanhas-e-regras-de-negócio-dados-no-banco-não-no-repositório)
+para a convenção completa.
 
 ## Stack
 
@@ -63,3 +65,11 @@ partir dos Conventional Commits mergeados na `main` via
 [semantic-release](https://semantic-release.gitbook.io/) — cada merge gera
 tag e GitHub Release quando aplicável, sem bump manual. Detalhes em
 [`CLAUDE.md`](./CLAUDE.md#versionamento-semver).
+
+## Dados sensíveis e LGPD
+
+Nenhum dado real (campanha, doador, telefone, CPF, chave Pix, credencial)
+deve aparecer neste repositório — nem em código, nem em docs, nem em
+testes. Esses dados vivem só no banco de dados de cada instância, com
+acesso controlado. Ver [`CLAUDE.md`](./CLAUDE.md#dados-sensíveis-e-lgpd)
+para as regras completas.

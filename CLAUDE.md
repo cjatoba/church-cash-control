@@ -2,10 +2,12 @@
 
 # Church Cash Control — Guia do projeto
 
-Controle de caixa para igrejas. Primeira frente: arrecadação para uma
-campanha específica (compra de cadeiras). Mais regras de negócio serão
-adicionadas incrementalmente — este arquivo descreve como qualquer mudança
-neste repositório deve ser feita, não o que ainda falta construir.
+Controle de caixa para igrejas: cada igreja cadastra suas próprias
+campanhas de arrecadação (nome, meta, período, categorias) como **dados
+configuráveis no banco** — o código não conhece nem hardcoda qual campanha
+existe. Mais regras de negócio serão adicionadas incrementalmente — este
+arquivo descreve como qualquer mudança neste repositório deve ser feita,
+não o que ainda falta construir nem detalhes de uma instância específica.
 
 ## Stack
 
@@ -126,6 +128,53 @@ versão real do projeto é a última tag/GitHub Release, não esse campo.
 - Variáveis de ambiente sempre passam por `src/shared/env.ts`
   (`parseEnv`/`getEnv`), nunca acesse `process.env` diretamente fora desse
   módulo.
+
+## Campanhas e regras de negócio: dados no banco, não no repositório
+
+Este projeto é a base para **qualquer** igreja configurar suas próprias
+campanhas de arrecadação, cada uma com seu nome, meta, período e regras.
+Isso é dado, não código:
+
+- **Nunca** referenciar uma campanha, meta ou regra de negócio específica
+  de uma instância real em código, nomes de variáveis/tabelas/branches,
+  comentários, mensagens de commit, testes (além de fixtures claramente
+  genéricas, ex.: `"Campanha de teste"`), `README.md` ou `CLAUDE.md`. Esses
+  arquivos descrevem a plataforma, não uma instância dela.
+- Se uma feature exige um exemplo, use um nome de campanha obviamente
+  fictício e genérico (ex.: `"Campanha X"`), nunca uma campanha real da
+  igreja do usuário.
+- `domain`/`application` modelam o **conceito** de campanha (nome, meta,
+  período, categorias de lançamento) de forma agnóstica — a instância de
+  cada igreja é uma linha no banco, cadastrada em tempo de uso, não uma
+  branch, config file ou constante no código.
+
+## Dados sensíveis e LGPD
+
+Este sistema lida com dados financeiros e, potencialmente, dados pessoais
+(nome, telefone, CPF, chave Pix de doadores/tesoureiros). Trate tudo isso
+como dado sensível sob a LGPD (Lei 13.709/2018) desde o design:
+
+- **Nunca commitar** credenciais, connection strings reais, tokens de API,
+  números de telefone, chave Pix, CPF ou qualquer dado pessoal real — nem
+  em código, nem em `.env*` versionado, nem em comentários, nem em
+  `README.md`/`CLAUDE.md`, nem em fixtures/seeds de teste. Segredos vivem
+  em variáveis de ambiente (Neon/Vercel), nunca no repositório; use sempre
+  dados fictícios em exemplos e testes.
+- **Minimização**: colete e persista só os dados pessoais estritamente
+  necessários para a finalidade (ex.: identificar um doador para emitir
+  recibo), nunca "pra garantir" ou "pode ser útil depois".
+- **Nunca logar dado pessoal** (`console.log`, mensagens de erro, eventos de
+  analytics) — nem acidentalmente ao logar um objeto inteiro; logue apenas
+  identificadores técnicos (ids), nunca nome/telefone/CPF/chave Pix.
+- Campos pessoais sensíveis (CPF, telefone, chave Pix) devem ser tratados
+  como tal no schema/repositório desde o início (controle de acesso por
+  papel, nunca expostos em endpoints/relatórios que não precisem deles).
+- Ao implementar cadastro de doadores/titulares de dados, prever desde já
+  os mecanismos que a LGPD exige: acesso aos próprios dados, correção e
+  exclusão/anonimização mediante solicitação do titular.
+- Isso vale para qualquer artefato que possa ser publicado ou compartilhado
+  (README, PR, issue, log de CI): nada de dado real de uma igreja/pessoa
+  específica neles.
 
 ## Comandos úteis
 
