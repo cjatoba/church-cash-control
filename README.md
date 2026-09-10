@@ -17,7 +17,8 @@ para a convenção completa.
 - Deploy na [Vercel](https://vercel.com/docs)
 
 Veja [`CLAUDE.md`](./CLAUDE.md) para as convenções de arquitetura, código e
-processo de desenvolvimento deste projeto.
+processo de desenvolvimento deste projeto, e [`ROADMAP.md`](./ROADMAP.md)
+para o estado atual da implementação (o que já existe e o que falta).
 
 ## Rodando localmente
 

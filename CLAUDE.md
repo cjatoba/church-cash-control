@@ -1,4 +1,5 @@
 @AGENTS.md
+@ROADMAP.md
 
 # Church Cash Control — Guia do projeto
 
