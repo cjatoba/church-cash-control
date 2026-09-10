@@ -13,8 +13,8 @@ implementar.
 ## Concluído
 
 - Fundação do projeto: Next.js (App Router) + TypeScript `strict`,
-  Tailwind, ESLint/Prettier, Husky + commitlint, Vitest com cobertura, CI
-  (`.github/workflows/ci.yml`), semantic-release (SemVer automático).
+  Tailwind, ESLint/Prettier, Husky + commitlint, Vitest com cobertura,
+  semantic-release (SemVer automático).
 - Infraestrutura de banco: Drizzle ORM + Neon, cliente de conexão,
   validação de env vars via Zod (`src/shared/env.ts`).
 - Value object `Money` (domínio, centavos inteiros) — TDD completo.
@@ -25,16 +25,25 @@ implementar.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Cadastro de campanha** — depende do login (PR #3). Domínio
+1. **Adicionar `.github/workflows/ci.yml`** (job `quality`: lint, format
+   check, typecheck, testes com cobertura, build; job `release`:
+   semantic-release após `quality` passar em push na `main`). O
+   `CLAUDE.md` já descreve esse pipeline, mas o arquivo nunca existiu de
+   fato — hoje PRs mergeiam sem nenhum check automático além do deploy
+   preview da Vercel. **Bloqueado**: a integração GitHub do Claude não
+   tem o escopo `workflow`, necessário para criar/atualizar arquivos
+   nesse caminho — precisa ser aplicado manualmente por quem tem acesso
+   (branch `chore/add-ci-workflow`, conteúdo já revisado).
+2. **Cadastro de campanha** — depende do login (PR #3). Domínio
    `Campaign` (nome, meta monetária, período de início/fim), caso de uso
    de criação, schema/migration, repositório e uma tela protegida para
    cadastrar.
-2. Categorias de lançamento associadas a uma campanha.
-3. Registro de lançamentos financeiros (entradas/saídas de caixa).
-4. Relatórios / acompanhamento de progresso de arrecadação por campanha.
-5. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
+3. Categorias de lançamento associadas a uma campanha.
+4. Registro de lançamentos financeiros (entradas/saídas de caixa).
+5. Relatórios / acompanhamento de progresso de arrecadação por campanha.
+6. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
    acesso, correção e exclusão exigidos pela LGPD (ver `CLAUDE.md`).
-6. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+7. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
