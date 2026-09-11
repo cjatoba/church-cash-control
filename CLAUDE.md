@@ -58,6 +58,17 @@ testar regras de negócio sem banco de dados real.
 - **Sem código especulativo**: não adicionar abstrações, flags ou
   tratamentos de erro para cenários que a feature atual não exige.
 
+## Telas novas: preview antes de implementar
+
+Antes de criar ou alterar visualmente qualquer tela (`app/**/page.tsx` novo,
+ou mudança de layout/navegação em uma existente), apresente um preview
+(mockup) do resultado para aprovação do usuário **antes** de aplicar no
+código do projeto. Só depois da aprovação explícita, implemente a tela de
+fato (componente React/Tailwind real, integrado à `application`/`domain`
+como o resto do projeto). Isso vale tanto para telas novas quanto para
+navegação/links entre telas existentes (ex.: uma home vinculando às telas
+de cadastro).
+
 ## TDD — obrigatório
 
 Todo código de `domain` e `application` é feito em ciclo RED → GREEN →
