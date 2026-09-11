@@ -29,6 +29,13 @@ implementar.
   rotas, página `/login`. Primeiro usuário é criado via
   `pnpm user:create <email> <senha>` — não há tela de cadastro (fica para
   quando papéis de usuário forem definidos, ver backlog).
+- **Troca de senha obrigatória no primeiro acesso** — PR #12: todo usuário
+  nasce com `mustChangePassword = true`; o callback `authorized`
+  (`src/auth.config.ts`) força redirecionamento para `/change-password`
+  enquanto a flag estiver ativa, bloqueando o resto da aplicação. Ao salvar
+  a nova senha a flag é zerada e a sessão é encerrada, exigindo novo login
+  já com a senha definitiva. TDD completo em `domain`/`application`
+  (`change-password.ts`), cobertura 100%.
 - **Cadastro de campanha** — PR #8: domínio `Campaign` (nome, meta
   monetária, período de início/fim) + caso de uso de criação
   (`CampaignRepository` como porta, Dependency Inversion) + tabela
