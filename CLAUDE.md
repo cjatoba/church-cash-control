@@ -69,6 +69,24 @@ como o resto do projeto). Isso vale tanto para telas novas quanto para
 navegação/links entre telas existentes (ex.: uma home vinculando às telas
 de cadastro).
 
+## Feedback de interação do usuário
+
+Toda ação do usuário (clique em botão, submit de formulário) precisa de
+feedback visível de que foi recebida — nunca deixar a tela parada e sem
+resposta enquanto uma ação assíncrona processa (ex.: server action de
+formulário). Concretamente:
+
+- **Estado de carregamento**: botão de submit mostra estado
+  pendente/desabilitado (ex.: `useFormStatus` do `react-dom`) enquanto a
+  action roda — nunca fica com aparência de "nada aconteceu" por vários
+  segundos. Como o padrão se repete em todo formulário do app, use um
+  componente compartilhado (ex.: `SubmitButton`) em vez de duplicar a
+  lógica em cada tela.
+- **Resultado com próximo passo**: toda tela de sucesso/erro após uma ação
+  (ex.: "Campanha criada com sucesso") também precisa indicar o que fazer
+  em seguida — nunca deixar o usuário num beco sem saída sem link de
+  volta/continuação.
+
 ## TDD — obrigatório
 
 Todo código de `domain` e `application` é feito em ciclo RED → GREEN →
