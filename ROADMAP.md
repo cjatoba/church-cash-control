@@ -71,11 +71,22 @@ Nenhuma no momento.
    Vercel) que rode as migrations pendentes contra o banco de cada
    ambiente antes/durante o deploy.
 2. Categorias de lançamento associadas a uma campanha.
-3. Registro de lançamentos financeiros (entradas/saídas de caixa).
-4. Relatórios / acompanhamento de progresso de arrecadação por campanha.
-5. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
+3. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
+   cadastro (criação) das duas — sem edição nem exclusão. Entra **antes**
+   de "Registro de lançamentos financeiros" (item 4) de propósito: uma vez
+   que lançamentos existirem referenciando `campaigns`/
+   `transaction_categories` por FK, excluir uma campanha/categoria passa a
+   arriscar apagar dado financeiro real junto (a FK de
+   `transaction_categories` já é `ON DELETE CASCADE` em relação a
+   `campaigns` — ver `schema.ts`). É bem mais seguro decidir e implementar
+   a regra de exclusão (cascata vs. bloqueio vs. soft delete) agora, sem
+   nenhum lançamento em jogo, do que retrofitar isso depois com dado real
+   em risco.
+4. Registro de lançamentos financeiros (entradas/saídas de caixa).
+5. Relatórios / acompanhamento de progresso de arrecadação por campanha.
+6. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
    acesso, correção e exclusão exigidos pela LGPD (ver `CLAUDE.md`).
-6. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+7. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
