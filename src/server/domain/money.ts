@@ -5,6 +5,10 @@
 export class Money {
   private constructor(private readonly cents: number) {}
 
+  static fromReais(reais: number): Money {
+    return Money.fromCents(Math.round(reais * 100));
+  }
+
   static fromCents(cents: number): Money {
     if (!Number.isInteger(cents)) {
       throw new Error("Money deve ser um número inteiro de centavos");

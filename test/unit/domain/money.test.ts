@@ -38,4 +38,20 @@ describe("Money", () => {
     expect(Money.fromCents(300).equals(Money.fromCents(300))).toBe(true);
     expect(Money.fromCents(300).equals(Money.fromCents(301))).toBe(false);
   });
+
+  it("cria um valor a partir de reais", () => {
+    const money = Money.fromReais(50.9);
+
+    expect(money.toCents()).toBe(5090);
+  });
+
+  it("arredonda imprecisões de ponto flutuante ao converter reais", () => {
+    const money = Money.fromReais(19.9 * 3);
+
+    expect(money.toCents()).toBe(5970);
+  });
+
+  it("rejeita reais negativos", () => {
+    expect(() => Money.fromReais(-10)).toThrow("Money não pode ser negativo");
+  });
 });

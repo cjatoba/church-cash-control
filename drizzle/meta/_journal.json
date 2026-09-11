@@ -8,6 +8,13 @@
       "when": 1788904587768,
       "tag": "0000_charming_genesis",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789085692980,
+      "tag": "0001_classy_chronomancer",
+      "breakpoints": true
     }
   ]
 }
