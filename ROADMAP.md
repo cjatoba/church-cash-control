@@ -24,28 +24,27 @@ implementar.
   push na `main`. Antes desta fatia, o arquivo era só referenciado no
   `CLAUDE.md` mas nunca existiu de fato — PRs eram mergeadas sem nenhum
   check automático além do deploy preview da Vercel.
+- **Login mínimo (Auth.js v5, usuários individuais)** — PR #3: tabela
+  `users`, regras de validação de credenciais, hash de senha, proteção de
+  rotas, página `/login`. Primeiro usuário é criado via
+  `pnpm user:create <email> <senha>` — não há tela de cadastro (fica para
+  quando papéis de usuário forem definidos, ver backlog).
+- **Cadastro de campanha** — PR #8: domínio `Campaign` (nome, meta
+  monetária, período de início/fim) + caso de uso de criação
+  (`CampaignRepository` como porta, Dependency Inversion) + tabela
+  `campaigns`/migration + repositório Drizzle + tela protegida
+  `/campaigns/new`. TDD completo em `domain`/`application`, cobertura
+  100%. Sem categorias de lançamento ainda (fica para o backlog).
+- **Fix de CI** — PR #10: `pnpm lint` rodava antes do Next.js gerar
+  `.next/types`, fazendo o ESLint tipado enxergar `PageProps<"/rota">`
+  como `any` num checkout limpo (exatamente o que o CI faz) e falhar em
+  `no-unsafe-assignment` em qualquer página que use `PageProps` — afetava
+  as PRs #3 e #8. Corrigido no script `lint` (`package.json`), que agora
+  roda `next typegen` antes do `eslint`, igual o `typecheck` já fazia.
 
-## Em andamento (PRs abertas, empilhadas nessa ordem)
+## Em andamento (PRs abertas)
 
-1. **Login mínimo (Auth.js v5, usuários individuais)** — PR #3
-   (`feat/minimal-login` → `main`), **aberta, ainda não mergeada**: tabela
-   `users`, regras de validação de credenciais, hash de senha, proteção de
-   rotas, página `/login`. Primeiro usuário é criado via `pnpm user:create`.
-   Precisa de teste manual ponta a ponta com banco real antes de mergear
-   (o ambiente que a implementou não tinha `DATABASE_URL` real disponível).
-2. **Cadastro de campanha** — PR #8 (`feat/campaign-registration` →
-   `feat/minimal-login`), **aberta, ainda não mergeada**, empilhada sobre a
-   PR #3 (depende da proteção de rota que ela introduz). Domínio `Campaign`
-   (nome, meta monetária, período de início/fim) + caso de uso de criação
-   (`CampaignRepository` como porta, Dependency Inversion) + tabela
-   `campaigns`/migration + repositório Drizzle + tela protegida
-   `/campaigns/new`. TDD completo em `domain`/`application`, cobertura
-   100%. Sem categorias de lançamento ainda (fica para uma fatia futura).
-   Como o CI (`.github/workflows/ci.yml`) só dispara em PR contra `main`,
-   esta PR não recebe CI automático enquanto sua base for a PR #3 — a
-   suíte completa (lint, format, typecheck, testes, build) foi validada
-   localmente antes do push. Também precisa de teste manual com banco real
-   (`pnpm db:migrate` para aplicar a migration `0001`) antes de mergear.
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
