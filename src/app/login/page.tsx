@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  const { error, passwordChanged } = await searchParams;
+  const { error, passwordChanged, callbackUrl } = await searchParams;
+  const redirectTo = typeof callbackUrl === "string" ? callbackUrl : "/";
 
   async function authenticate(formData: FormData): Promise<void> {
     "use server";
@@ -32,6 +33,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
             Senha alterada com sucesso. Faça login com a nova senha.
           </p>
         ) : null}
+        <input type="hidden" name="redirectTo" value={redirectTo} />
         <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
           Email
           <input
