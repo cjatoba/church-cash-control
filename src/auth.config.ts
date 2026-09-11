@@ -1,4 +1,5 @@
-import type { NextAuthConfig } from "next-auth";
+import type { NextAuthConfig, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
 export const authConfig = {
@@ -32,11 +33,14 @@ export const authConfig = {
     // NextAuth só com authConfig, então se jwt/session ficassem apenas na
     // config completa, mustChangePassword nunca chegaria em auth.user
     // dentro do authorized acima, mesmo com o token já carregando o campo.
-    jwt({ token, user }) {
-      if (user.id) {
+    jwt({ token, user }: { token: JWT; user?: User }) {
+      // `user` só vem preenchido no login (trigger "signIn"/"signUp"); em
+      // toda outra checagem de sessão (ex.: a cada request pelo proxy) ele
+      // vem undefined, mesmo o tipo do Auth.js não marcando isso.
+      if (user?.id) {
         token.id = user.id;
       }
-      if (typeof user.mustChangePassword === "boolean") {
+      if (typeof user?.mustChangePassword === "boolean") {
         token.mustChangePassword = user.mustChangePassword;
       }
       return token;
