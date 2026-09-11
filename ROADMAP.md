@@ -28,24 +28,24 @@ implementar.
 ## Em andamento (PRs abertas, empilhadas nessa ordem)
 
 1. **Login mínimo (Auth.js v5, usuários individuais)** — PR #3
-  (`feat/minimal-login` → `main`), **aberta, ainda não mergeada**: tabela
-  `users`, regras de validação de credenciais, hash de senha, proteção de
-  rotas, página `/login`. Primeiro usuário é criado via `pnpm user:create`.
-  Precisa de teste manual ponta a ponta com banco real antes de mergear
-  (o ambiente que a implementou não tinha `DATABASE_URL` real disponível).
+   (`feat/minimal-login` → `main`), **aberta, ainda não mergeada**: tabela
+   `users`, regras de validação de credenciais, hash de senha, proteção de
+   rotas, página `/login`. Primeiro usuário é criado via `pnpm user:create`.
+   Precisa de teste manual ponta a ponta com banco real antes de mergear
+   (o ambiente que a implementou não tinha `DATABASE_URL` real disponível).
 2. **Cadastro de campanha** — PR #8 (`feat/campaign-registration` →
-  `feat/minimal-login`), **aberta, ainda não mergeada**, empilhada sobre a
-  PR #3 (depende da proteção de rota que ela introduz). Domínio `Campaign`
-  (nome, meta monetária, período de início/fim) + caso de uso de criação
-  (`CampaignRepository` como porta, Dependency Inversion) + tabela
-  `campaigns`/migration + repositório Drizzle + tela protegida
-  `/campaigns/new`. TDD completo em `domain`/`application`, cobertura
-  100%. Sem categorias de lançamento ainda (fica para uma fatia futura).
-  Como o CI (`.github/workflows/ci.yml`) só dispara em PR contra `main`,
-  esta PR não recebe CI automático enquanto sua base for a PR #3 — a
-  suíte completa (lint, format, typecheck, testes, build) foi validada
-  localmente antes do push. Também precisa de teste manual com banco real
-  (`pnpm db:migrate` para aplicar a migration `0001`) antes de mergear.
+   `feat/minimal-login`), **aberta, ainda não mergeada**, empilhada sobre a
+   PR #3 (depende da proteção de rota que ela introduz). Domínio `Campaign`
+   (nome, meta monetária, período de início/fim) + caso de uso de criação
+   (`CampaignRepository` como porta, Dependency Inversion) + tabela
+   `campaigns`/migration + repositório Drizzle + tela protegida
+   `/campaigns/new`. TDD completo em `domain`/`application`, cobertura
+   100%. Sem categorias de lançamento ainda (fica para uma fatia futura).
+   Como o CI (`.github/workflows/ci.yml`) só dispara em PR contra `main`,
+   esta PR não recebe CI automático enquanto sua base for a PR #3 — a
+   suíte completa (lint, format, typecheck, testes, build) foi validada
+   localmente antes do push. Também precisa de teste manual com banco real
+   (`pnpm db:migrate` para aplicar a migration `0001`) antes de mergear.
 
 ## Backlog (próximas fatias, em ordem)
 
