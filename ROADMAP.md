@@ -77,8 +77,14 @@ CASCADE`) + repositório Drizzle + tela protegida
     não existia nenhuma saída antes de submeter).
   - Aplicação manual das migrations de `campaigns`/`transaction_categories`
     nos bancos Neon de `production` e `preview`, que estavam pendentes
-    desde a PR #8 (ver item 1 do backlog abaixo — a automação desse passo
-    ainda não existe).
+    desde a PR #8 (a automação desse passo foi resolvida depois, ver
+    entrada abaixo).
+- **Migrations aplicadas automaticamente no deploy da Vercel.** O script
+  `vercel-build` (`package.json`) roda `pnpm db:migrate` antes de
+  `next build`, contra o `DATABASE_URL` do ambiente do deploy (Production
+  ou Preview) — resolve a causa raiz da quebra de PR #19 (migrations de
+  `campaigns`/`transaction_categories` pendentes em produção/preview por
+  dias sem ninguém notar). Ver `CLAUDE.md`, seção "Banco de dados".
 
 ## Em andamento (PRs abertas)
 
@@ -86,19 +92,9 @@ Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Aplicar migrations automaticamente no fluxo de deploy/release.** Hoje
-   `pnpm db:migrate` é um passo manual (ver `CLAUDE.md`, seção "Banco de
-   dados") — isso já causou uma quebra real: as migrations de `campaigns`
-   (PR #8) e `transaction_categories` ficaram pendentes tanto na branch
-   `production` quanto na `preview` do Neon por dias sem ninguém notar, até
-   a tela inicial (PR #19) tentar consultar `campaigns` e quebrar com
-   `relation "campaigns" does not exist` em produção/preview. Precisa de um
-   passo automático (ex.: no job de release do CI, ou hook de build da
-   Vercel) que rode as migrations pendentes contra o banco de cada
-   ambiente antes/durante o deploy.
-2. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
+1. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
    cadastro (criação) das duas — sem edição nem exclusão. Entra **antes**
-   de "Registro de lançamentos financeiros" (item 3) de propósito: uma vez
+   de "Registro de lançamentos financeiros" (item 2) de propósito: uma vez
    que lançamentos existirem referenciando `campaigns`/
    `transaction_categories` por FK, excluir uma campanha/categoria passa a
    arriscar apagar dado financeiro real junto (a FK de
@@ -107,11 +103,11 @@ Nenhuma no momento.
    a regra de exclusão (cascata vs. bloqueio vs. soft delete) agora, sem
    nenhum lançamento em jogo, do que retrofitar isso depois com dado real
    em risco.
-3. Registro de lançamentos financeiros (entradas/saídas de caixa).
-4. Relatórios / acompanhamento de progresso de arrecadação por campanha.
-5. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
+2. Registro de lançamentos financeiros (entradas/saídas de caixa).
+3. Relatórios / acompanhamento de progresso de arrecadação por campanha.
+4. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
    acesso, correção e exclusão exigidos pela LGPD (ver `CLAUDE.md`).
-6. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+5. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
