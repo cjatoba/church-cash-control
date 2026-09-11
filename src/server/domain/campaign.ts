@@ -20,6 +20,10 @@ export interface Campaign {
   endDate: Date;
 }
 
+export interface CampaignSummary extends Campaign {
+  id: string;
+}
+
 export function parseCampaign(input: unknown): Campaign {
   const data = campaignInputSchema.parse(input);
   return {
