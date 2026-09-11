@@ -22,28 +22,25 @@ implementar.
   (`feat/minimal-login`), **aberta, ainda não mergeada**: tabela `users`,
   regras de validação de credenciais, hash de senha, proteção de rotas,
   página `/login`. Primeiro usuário é criado via `pnpm user:create`.
+- **CI real** (`.github/workflows/ci.yml`, PR #6): job `quality` (lint,
+  format check, typecheck, testes com cobertura, build) em push/PR para
+  `main`, e job `release` (semantic-release) após o `quality` passar em
+  push na `main`. Antes desta fatia, o arquivo era só referenciado no
+  `CLAUDE.md` mas nunca existiu de fato — PRs eram mergeadas sem nenhum
+  check automático além do deploy preview da Vercel.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Adicionar `.github/workflows/ci.yml`** (job `quality`: lint, format
-   check, typecheck, testes com cobertura, build; job `release`:
-   semantic-release após `quality` passar em push na `main`). O
-   `CLAUDE.md` já descreve esse pipeline, mas o arquivo nunca existiu de
-   fato — hoje PRs mergeiam sem nenhum check automático além do deploy
-   preview da Vercel. **Bloqueado**: a integração GitHub do Claude não
-   tem o escopo `workflow`, necessário para criar/atualizar arquivos
-   nesse caminho — precisa ser aplicado manualmente por quem tem acesso
-   (branch `chore/add-ci-workflow`, conteúdo já revisado).
-2. **Cadastro de campanha** — depende do login (PR #3). Domínio
+1. **Cadastro de campanha** — depende do login (PR #3). Domínio
    `Campaign` (nome, meta monetária, período de início/fim), caso de uso
    de criação, schema/migration, repositório e uma tela protegida para
    cadastrar.
-3. Categorias de lançamento associadas a uma campanha.
-4. Registro de lançamentos financeiros (entradas/saídas de caixa).
-5. Relatórios / acompanhamento de progresso de arrecadação por campanha.
-6. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
+2. Categorias de lançamento associadas a uma campanha.
+3. Registro de lançamentos financeiros (entradas/saídas de caixa).
+4. Relatórios / acompanhamento de progresso de arrecadação por campanha.
+5. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
    acesso, correção e exclusão exigidos pela LGPD (ver `CLAUDE.md`).
-7. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+6. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
