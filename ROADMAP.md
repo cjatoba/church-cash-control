@@ -53,6 +53,32 @@ implementar.
   para `/` quem já está autenticado e acessa `/login` (ou `/change-password`
   já com a troca de senha concluída), em vez de mostrar o formulário de
   novo.
+- **Categorias de lançamento associadas a uma campanha** — PR #19: domínio
+  `TransactionCategory` (`campaignId`, nome, tipo entrada/saída) + caso de
+  uso de criação (`TransactionCategoryRepository` como porta) + tabela
+  `transaction_categories`/migration (FK para `campaigns`, `ON DELETE
+CASCADE`) + repositório Drizzle + tela protegida
+  `/campaigns/[id]/categories/new`. TDD completo, cobertura 100%. A
+  mesma PR também cobriu lacunas descobertas durante a validação em
+  preview, fora do escopo original da fatia:
+  - Painel inicial (`/`) substituindo o placeholder padrão do Next.js:
+    lista campanhas cadastradas com atalhos "+ Nova campanha" e "+
+    Categoria" por campanha, em vez de exigir digitar rota na mão
+    (`listCampaigns`/`CampaignListRepository`, `CampaignSummary` no
+    domínio).
+  - Feedback de interação em todo formulário do app (login, trocar senha,
+    nova campanha, nova categoria): botão com estado de carregamento
+    (`SubmitButton` compartilhado, `useFormStatus`) e fluxo de
+    erro/sucesso via `useActionState` — erro mantém a pessoa no
+    formulário com os dados preservados (antes recarregava a página e
+    perdia tudo); sucesso de campanha volta pro painel, sucesso de
+    categoria limpa o formulário para cadastrar a próxima. Link fixo "←
+    Voltar para o painel" nos formulários de campanha/categoria (antes
+    não existia nenhuma saída antes de submeter).
+  - Aplicação manual das migrations de `campaigns`/`transaction_categories`
+    nos bancos Neon de `production` e `preview`, que estavam pendentes
+    desde a PR #8 (ver item 1 do backlog abaixo — a automação desse passo
+    ainda não existe).
 
 ## Em andamento (PRs abertas)
 
@@ -70,10 +96,9 @@ Nenhuma no momento.
    passo automático (ex.: no job de release do CI, ou hook de build da
    Vercel) que rode as migrations pendentes contra o banco de cada
    ambiente antes/durante o deploy.
-2. Categorias de lançamento associadas a uma campanha.
-3. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
+2. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
    cadastro (criação) das duas — sem edição nem exclusão. Entra **antes**
-   de "Registro de lançamentos financeiros" (item 4) de propósito: uma vez
+   de "Registro de lançamentos financeiros" (item 3) de propósito: uma vez
    que lançamentos existirem referenciando `campaigns`/
    `transaction_categories` por FK, excluir uma campanha/categoria passa a
    arriscar apagar dado financeiro real junto (a FK de
@@ -82,11 +107,11 @@ Nenhuma no momento.
    a regra de exclusão (cascata vs. bloqueio vs. soft delete) agora, sem
    nenhum lançamento em jogo, do que retrofitar isso depois com dado real
    em risco.
-4. Registro de lançamentos financeiros (entradas/saídas de caixa).
-5. Relatórios / acompanhamento de progresso de arrecadação por campanha.
-6. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
+3. Registro de lançamentos financeiros (entradas/saídas de caixa).
+4. Relatórios / acompanhamento de progresso de arrecadação por campanha.
+5. Cadastro de doadores/titulares de dados pessoais, com os mecanismos de
    acesso, correção e exclusão exigidos pela LGPD (ver `CLAUDE.md`).
-7. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+6. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
