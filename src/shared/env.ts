@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  AUTH_SECRET: z.string().min(1, "AUTH_SECRET é obrigatório"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

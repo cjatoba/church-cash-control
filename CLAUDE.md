@@ -130,6 +130,24 @@ versão real do projeto é a última tag/GitHub Release, não esse campo.
   (`parseEnv`/`getEnv`), nunca acesse `process.env` diretamente fora desse
   módulo.
 
+## Autenticação
+
+Login mínimo via [Auth.js v5](https://authjs.dev) (usuários individuais,
+tabela `users`, sessão JWT — sem tabelas de conta/sessão do adapter):
+
+- `src/auth.config.ts`: configuração leve (páginas, callback `authorized`
+  que decide o que fica atrás do login) — usada pelo `src/proxy.ts`.
+- `src/auth.ts`: configuração completa, com o Credentials provider
+  (`authorize` valida via `parseCredentials` + `verifyPassword`).
+- `src/proxy.ts`: Proxy do Next.js (renomeado de `middleware` na v16) que
+  protege todas as rotas exceto `/login` e assets, via `NextAuth(authConfig).auth`.
+- Não há tela de cadastro de usuário — o primeiro usuário é criado com
+  `pnpm user:create <email> <senha>` (`scripts/create-user.ts`). Uma feature
+  de convite/cadastro fica para quando houver papéis definidos.
+- `token`/`session` do Auth.js são tipados como `Record<string, unknown>`
+  internamente; sempre estreite com `typeof x === "..."` antes de atribuir
+  (ver `src/auth.ts`) em vez de usar `as`/`any`.
+
 ## Campanhas e regras de negócio: dados no banco, não no repositório
 
 Este projeto é a base para **qualquer** igreja configurar suas próprias
