@@ -10,20 +10,20 @@ export const authConfig = {
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
       const isOnLogin = pathname.startsWith("/login");
-
-      if (isOnLogin) {
-        return true;
-      }
+      const isOnChangePassword = pathname.startsWith("/change-password");
 
       if (!auth?.user) {
-        return false;
+        return isOnLogin;
       }
 
-      const isOnChangePassword = pathname.startsWith("/change-password");
-      if (auth.user.mustChangePassword && !isOnChangePassword) {
+      if (auth.user.mustChangePassword) {
+        if (isOnChangePassword) {
+          return true;
+        }
         return NextResponse.redirect(new URL("/change-password", request.nextUrl));
       }
-      if (!auth.user.mustChangePassword && isOnChangePassword) {
+
+      if (isOnLogin || isOnChangePassword) {
         return NextResponse.redirect(new URL("/", request.nextUrl));
       }
 
