@@ -94,6 +94,10 @@ sem banco de dados.
   nunca faça merge/push direto. O CI (`.github/workflows/ci.yml`: lint,
   format check, typecheck, testes com cobertura, build) precisa estar verde
   antes da revisão.
+- **Nunca mergear a PR sem validação explícita do usuário.** Após abrir a
+  PR, o usuário valida a feature no ambiente de preview (deploy automático
+  da Vercel por PR) e só então confirma se o merge pode ser feito. CI verde
+  é pré-requisito, não substituto dessa validação manual.
 - Branch protection na `main` (exigir PR + checks verdes antes de mergear)
   deve estar habilitada nas configurações do repositório no GitHub —
   configuração manual, fora do alcance de comandos git.
