@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { NextResponse } from "next/server";
 
 export const authConfig = {
   pages: {
@@ -6,14 +7,26 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request }) {
-      const isLoggedIn = Boolean(auth?.user);
-      const isOnLogin = request.nextUrl.pathname.startsWith("/login");
+      const { pathname } = request.nextUrl;
+      const isOnLogin = pathname.startsWith("/login");
 
       if (isOnLogin) {
         return true;
       }
 
-      return isLoggedIn;
+      if (!auth?.user) {
+        return false;
+      }
+
+      const isOnChangePassword = pathname.startsWith("/change-password");
+      if (auth.user.mustChangePassword && !isOnChangePassword) {
+        return NextResponse.redirect(new URL("/change-password", request.nextUrl));
+      }
+      if (!auth.user.mustChangePassword && isOnChangePassword) {
+        return NextResponse.redirect(new URL("/", request.nextUrl));
+      }
+
+      return true;
     },
   },
   providers: [],

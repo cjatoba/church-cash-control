@@ -147,6 +147,13 @@ tabela `users`, sessão JWT — sem tabelas de conta/sessão do adapter):
 - `token`/`session` do Auth.js são tipados como `Record<string, unknown>`
   internamente; sempre estreite com `typeof x === "..."` antes de atribuir
   (ver `src/auth.ts`) em vez de usar `as`/`any`.
+- Todo usuário nasce com `mustChangePassword = true` (default da coluna
+  `must_change_password`). O callback `authorized` (`src/auth.config.ts`)
+  força redirecionamento para `/change-password` enquanto essa flag for
+  verdadeira, bloqueando o resto da aplicação. Ao salvar a nova senha
+  (`changePassword`, `src/server/application/change-password.ts`), a flag é
+  zerada e a sessão é encerrada (`signOut`) para obrigar um novo login já
+  com a senha definitiva — evita ter que reemitir o JWT em memória.
 
 ## Campanhas e regras de negócio: dados no banco, não no repositório
 

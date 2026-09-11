@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  const { error } = await searchParams;
+  const { error, passwordChanged } = await searchParams;
 
   async function authenticate(formData: FormData): Promise<void> {
     "use server";
@@ -26,6 +26,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Entrar</h1>
         {error ? (
           <p className="text-sm text-red-600 dark:text-red-400">Email ou senha inválidos.</p>
+        ) : null}
+        {passwordChanged ? (
+          <p className="text-sm text-green-600 dark:text-green-400">
+            Senha alterada com sucesso. Faça login com a nova senha.
+          </p>
         ) : null}
         <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
           Email
