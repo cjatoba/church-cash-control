@@ -159,15 +159,13 @@ versão real do projeto é a última tag/GitHub Release, não esse campo.
 - Alterações de schema: editar `src/server/infrastructure/db/schema.ts`,
   rodar `pnpm db:generate` para gerar a migration SQL em `./drizzle/`, e
   commitar o SQL gerado junto com a mudança de schema.
-- **Aplicar a migration no banco real (`pnpm db:migrate`) ainda é um passo
-  manual — não há nenhuma automação hoje** (nem no CI, nem em hook de
-  build da Vercel) que rode migrations pendentes contra os bancos Neon de
-  `production`/`preview`. Isso já causou uma tela quebrando em produção e
-  preview por migration não aplicada (ver `ROADMAP.md`, backlog). Até essa
-  automação existir: **sempre que uma mudança de schema for commitada,
-  aplique a migration manualmente no(s) ambiente(s) relevante(s) antes de
-  pedir validação de preview ao usuário** — não assuma que o schema do
-  banco está em dia só porque a migration SQL foi gerada e commitada.
+- **Migrations são aplicadas automaticamente no deploy da Vercel**: o
+  script `vercel-build` (`package.json`) roda `pnpm db:migrate` antes de
+  `next build`, usando o `DATABASE_URL` do ambiente do deploy (Production
+  ou Preview). Ou seja, qualquer migration SQL commitada em `./drizzle/`
+  é aplicada automaticamente no banco correto antes de cada deploy — não
+  há passo manual pendente. Isso não roda no CI do GitHub Actions (job
+  `quality`), que continua usando `next build` sem tocar em banco real.
 - Variáveis de ambiente sempre passam por `src/shared/env.ts`
   (`parseEnv`/`getEnv`), nunca acesse `process.env` diretamente fora desse
   módulo.
