@@ -58,6 +58,35 @@ testar regras de negócio sem banco de dados real.
 - **Sem código especulativo**: não adicionar abstrações, flags ou
   tratamentos de erro para cenários que a feature atual não exige.
 
+## Telas novas: preview antes de implementar
+
+Antes de criar ou alterar visualmente qualquer tela (`app/**/page.tsx` novo,
+ou mudança de layout/navegação em uma existente), apresente um preview
+(mockup) do resultado para aprovação do usuário **antes** de aplicar no
+código do projeto. Só depois da aprovação explícita, implemente a tela de
+fato (componente React/Tailwind real, integrado à `application`/`domain`
+como o resto do projeto). Isso vale tanto para telas novas quanto para
+navegação/links entre telas existentes (ex.: uma home vinculando às telas
+de cadastro).
+
+## Feedback de interação do usuário
+
+Toda ação do usuário (clique em botão, submit de formulário) precisa de
+feedback visível de que foi recebida — nunca deixar a tela parada e sem
+resposta enquanto uma ação assíncrona processa (ex.: server action de
+formulário). Concretamente:
+
+- **Estado de carregamento**: botão de submit mostra estado
+  pendente/desabilitado (ex.: `useFormStatus` do `react-dom`) enquanto a
+  action roda — nunca fica com aparência de "nada aconteceu" por vários
+  segundos. Como o padrão se repete em todo formulário do app, use um
+  componente compartilhado (ex.: `SubmitButton`) em vez de duplicar a
+  lógica em cada tela.
+- **Resultado com próximo passo**: toda tela de sucesso/erro após uma ação
+  (ex.: "Campanha criada com sucesso") também precisa indicar o que fazer
+  em seguida — nunca deixar o usuário num beco sem saída sem link de
+  volta/continuação.
+
 ## TDD — obrigatório
 
 Todo código de `domain` e `application` é feito em ciclo RED → GREEN →
@@ -94,6 +123,10 @@ sem banco de dados.
   nunca faça merge/push direto. O CI (`.github/workflows/ci.yml`: lint,
   format check, typecheck, testes com cobertura, build) precisa estar verde
   antes da revisão.
+- **Nunca mergear a PR sem validação explícita do usuário.** Após abrir a
+  PR, o usuário valida a feature no ambiente de preview (deploy automático
+  da Vercel por PR) e só então confirma se o merge pode ser feito. CI verde
+  é pré-requisito, não substituto dessa validação manual.
 - Branch protection na `main` (exigir PR + checks verdes antes de mergear)
   deve estar habilitada nas configurações do repositório no GitHub —
   configuração manual, fora do alcance de comandos git.
@@ -126,6 +159,15 @@ versão real do projeto é a última tag/GitHub Release, não esse campo.
 - Alterações de schema: editar `src/server/infrastructure/db/schema.ts`,
   rodar `pnpm db:generate` para gerar a migration SQL em `./drizzle/`, e
   commitar o SQL gerado junto com a mudança de schema.
+- **Aplicar a migration no banco real (`pnpm db:migrate`) ainda é um passo
+  manual — não há nenhuma automação hoje** (nem no CI, nem em hook de
+  build da Vercel) que rode migrations pendentes contra os bancos Neon de
+  `production`/`preview`. Isso já causou uma tela quebrando em produção e
+  preview por migration não aplicada (ver `ROADMAP.md`, backlog). Até essa
+  automação existir: **sempre que uma mudança de schema for commitada,
+  aplique a migration manualmente no(s) ambiente(s) relevante(s) antes de
+  pedir validação de preview ao usuário** — não assuma que o schema do
+  banco está em dia só porque a migration SQL foi gerada e commitada.
 - Variáveis de ambiente sempre passam por `src/shared/env.ts`
   (`parseEnv`/`getEnv`), nunca acesse `process.env` diretamente fora desse
   módulo.
