@@ -15,6 +15,13 @@
       "when": 1789085692980,
       "tag": "0001_classy_chronomancer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789089693545,
+      "tag": "0002_superb_abomination",
+      "breakpoints": true
     }
   ]
 }
