@@ -38,25 +38,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    ...authConfig.callbacks,
-    jwt({ token, user }) {
-      if (user.id) {
-        token.id = user.id;
-      }
-      if (typeof user.mustChangePassword === "boolean") {
-        token.mustChangePassword = user.mustChangePassword;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      if (typeof token.id === "string") {
-        session.user.id = token.id;
-      }
-      if (typeof token.mustChangePassword === "boolean") {
-        session.user.mustChangePassword = token.mustChangePassword;
-      }
-      return session;
-    },
-  },
 });

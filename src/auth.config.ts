@@ -28,6 +28,28 @@ export const authConfig = {
 
       return true;
     },
+    // Precisa viver aqui (não só em auth.ts): o proxy roda uma instância
+    // NextAuth só com authConfig, então se jwt/session ficassem apenas na
+    // config completa, mustChangePassword nunca chegaria em auth.user
+    // dentro do authorized acima, mesmo com o token já carregando o campo.
+    jwt({ token, user }) {
+      if (user.id) {
+        token.id = user.id;
+      }
+      if (typeof user.mustChangePassword === "boolean") {
+        token.mustChangePassword = user.mustChangePassword;
+      }
+      return token;
+    },
+    session({ session, token }) {
+      if (typeof token.id === "string") {
+        session.user.id = token.id;
+      }
+      if (typeof token.mustChangePassword === "boolean") {
+        session.user.mustChangePassword = token.mustChangePassword;
+      }
+      return session;
+    },
   },
   providers: [],
 } satisfies NextAuthConfig;
