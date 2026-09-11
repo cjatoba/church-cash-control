@@ -48,6 +48,11 @@ implementar.
   `no-unsafe-assignment` em qualquer página que use `PageProps` — afetava
   as PRs #3 e #8. Corrigido no script `lint` (`package.json`), que agora
   roda `next typegen` antes do `eslint`, igual o `typecheck` já fazia.
+- **Redirecionamento de usuário autenticado para fora do `/login`** — PR
+  #17: o callback `authorized` (`src/auth.config.ts`) agora redireciona
+  para `/` quem já está autenticado e acessa `/login` (ou `/change-password`
+  já com a troca de senha concluída), em vez de mostrar o formulário de
+  novo.
 
 ## Em andamento (PRs abertas)
 
