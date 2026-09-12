@@ -129,7 +129,19 @@ CASCADE`) + repositório Drizzle + tela protegida
   completo) + telas `/campaigns/[id]/edit`, `/campaigns/[id]/categories`
   (lista de categorias, não existia antes) e
   `/campaigns/[id]/categories/[categoryId]/edit`. Aguardando validação no
-  preview da Vercel antes do merge.
+  preview da Vercel antes do merge. A mesma PR também cobriu lacunas
+  descobertas durante essa validação, fora do escopo original da fatia:
+  - Editar uma campanha para encurtar o período não atualizava as
+    parcelas de carnês já geradas. `updateCampaign` agora remove as
+    parcelas ainda não pagas cujo vencimento ficou fora do novo período
+    (`selectInstallmentsOutsidePeriod` em `domain/pledge.ts`); parcelas já
+    pagas nunca são removidas, pois são histórico financeiro.
+  - "Dar baixa" numa parcela sempre registrava o pagamento com a data
+    atual, sem opção de informar uma data anterior. A tela de carnê
+    (`/campaigns/[id]/pledges/[pledgeId]`) ganhou um campo de data por
+    parcela (padrão: hoje, editável para qualquer data passada);
+    `payInstallment` (domínio) passa a rejeitar data de pagamento no
+    futuro.
 
 ## Backlog (próximas fatias, em ordem)
 
