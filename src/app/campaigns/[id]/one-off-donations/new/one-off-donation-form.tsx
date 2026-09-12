@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 
 export interface CreateOneOffDonationState {
@@ -9,9 +9,50 @@ export interface CreateOneOffDonationState {
   success?: string;
 }
 
+function ReceivedBySelect({
+  users,
+  currentUserId,
+}: {
+  users: { id: string; email: string }[];
+  currentUserId: string;
+}) {
+  const [receivedByUserId, setReceivedByUserId] = useState(currentUserId);
+
+  return (
+    <>
+      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        Recebido por
+        <select
+          name="receivedByUserId"
+          value={receivedByUserId}
+          onChange={(event) => {
+            setReceivedByUserId(event.target.value);
+          }}
+          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+        >
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.id === currentUserId ? `Eu mesmo (${user.email})` : user.email}
+            </option>
+          ))}
+        </select>
+      </label>
+      {receivedByUserId !== currentUserId ? (
+        <p className="rounded bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          ⚠ Registrando em nome de outra pessoa
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 export function OneOffDonationForm({
+  users,
+  currentUserId,
   action,
 }: {
+  users: { id: string; email: string }[];
+  currentUserId: string;
   action: (
     prevState: CreateOneOffDonationState,
     formData: FormData,
@@ -77,6 +118,24 @@ export function OneOffDonationForm({
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
+      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        Forma de pagamento
+        <div className="flex gap-4 pt-1">
+          <label className="flex items-center gap-2">
+            <input type="radio" name="paymentMethod" value="pix" defaultChecked required />
+            Pix
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="paymentMethod" value="cash" />
+            Dinheiro
+          </label>
+        </div>
+      </label>
+      <ReceivedBySelect
+        key={state.success ?? "initial"}
+        users={users}
+        currentUserId={currentUserId}
+      />
       <SubmitButton pendingLabel="Registrando…">Registrar doação</SubmitButton>
     </form>
   );

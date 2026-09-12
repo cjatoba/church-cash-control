@@ -1,10 +1,19 @@
 import { eq } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { PledgeRepository } from "@/server/application/create-pledge";
 import type { PledgeListRepository } from "@/server/application/list-pledges";
 import type { PledgeDetailReader } from "@/server/application/get-pledge-detail";
 import { Money } from "@/server/domain/money";
+import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
-import { donors, installments, pledges, pledgeTypes } from "./schema";
+import { donors, installments, pledges, pledgeTypes, users } from "./schema";
+
+function toPaymentMethod(value: string | null): PaymentMethod | null {
+  return value === "pix" || value === "cash" ? value : null;
+}
+
+const receivedByUser = alias(users, "received_by_user");
+const registeredByUser = alias(users, "registered_by_user");
 
 export function createPledgeRepository(
   db: DbClient,
@@ -96,8 +105,19 @@ export function createPledgeRepository(
       }
 
       const installmentRows = await db
-        .select()
+        .select({
+          id: installments.id,
+          dueDate: installments.dueDate,
+          amountCents: installments.amountCents,
+          paidAt: installments.paidAt,
+          paidAmountCents: installments.paidAmountCents,
+          paymentMethod: installments.paymentMethod,
+          receivedByEmail: receivedByUser.email,
+          registeredByEmail: registeredByUser.email,
+        })
         .from(installments)
+        .leftJoin(receivedByUser, eq(installments.receivedByUserId, receivedByUser.id))
+        .leftJoin(registeredByUser, eq(installments.registeredByUserId, registeredByUser.id))
         .where(eq(installments.pledgeId, pledgeId));
 
       return {
@@ -112,6 +132,9 @@ export function createPledgeRepository(
             amount: Money.fromCents(row.amountCents),
             paidAt: row.paidAt,
             paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
+            paymentMethod: toPaymentMethod(row.paymentMethod),
+            receivedByLabel: row.receivedByEmail,
+            registeredByLabel: row.registeredByEmail,
           }))
           .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()),
       };

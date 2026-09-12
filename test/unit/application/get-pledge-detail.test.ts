@@ -25,6 +25,9 @@ describe("getPledgeDetail", () => {
           amount: Money.fromReais(100),
           paidAt: null,
           paidAmount: null,
+          paymentMethod: null,
+          receivedByLabel: null,
+          registeredByLabel: null,
         },
       ],
     };

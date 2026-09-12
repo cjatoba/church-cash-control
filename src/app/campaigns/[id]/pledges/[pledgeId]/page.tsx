@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
 import { payInstallment } from "@/server/application/pay-installment";
 import { correctInstallmentPaymentDate } from "@/server/application/correct-installment-payment-date";
 import { revertInstallmentPayment } from "@/server/application/revert-installment-payment";
+import { listUsers } from "@/server/application/list-users";
+import { parsePaymentMethod } from "@/server/domain/payment-method";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
+import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { PayInstallmentButton } from "../_components/pay-installment-button";
 import { EditPaymentDateButton } from "../_components/edit-payment-date-button";
@@ -14,6 +18,11 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
+
+const paymentMethodLabels: Record<string, string> = {
+  pix: "Pix",
+  cash: "Dinheiro",
+};
 
 function formatMonthLabel(date: Date): string {
   const label = new Intl.DateTimeFormat("pt-BR", {
@@ -30,9 +39,18 @@ export default async function PledgeDetailPage({
   params,
 }: PageProps<"/campaigns/[id]/pledges/[pledgeId]">) {
   const { id: campaignId, pledgeId } = await params;
+  const session = await auth();
+  if (!session) {
+    redirect("/login");
+  }
+
   const db = createDbClient();
   const pledgeRepository = createPledgeRepository(db);
-  const pledge = await getPledgeDetail(pledgeRepository, pledgeId);
+  const userListRepository = createUserListRepository(db);
+  const [pledge, users] = await Promise.all([
+    getPledgeDetail(pledgeRepository, pledgeId),
+    listUsers(userListRepository),
+  ]);
 
   if (!pledge) {
     notFound();
@@ -41,9 +59,20 @@ export default async function PledgeDetailPage({
   async function markInstallmentAsPaid(formData: FormData): Promise<void> {
     "use server";
 
+    const registeredByUserId = (await auth())?.user.id;
+    if (!registeredByUserId) {
+      throw new Error("Não autenticado");
+    }
+
     const installmentId = formData.get("installmentId");
     const paidAtValue = formData.get("paidAt");
-    if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
+    const paymentMethodValue = formData.get("paymentMethod");
+    const receivedByUserId = formData.get("receivedByUserId");
+    if (
+      typeof installmentId !== "string" ||
+      typeof paidAtValue !== "string" ||
+      typeof receivedByUserId !== "string"
+    ) {
       throw new Error("Dados inválidos para dar baixa na parcela");
     }
 
@@ -53,6 +82,9 @@ export default async function PledgeDetailPage({
       { installmentReader: installmentRepository, installmentRepository },
       installmentId,
       new Date(paidAtValue),
+      parsePaymentMethod(paymentMethodValue),
+      receivedByUserId,
+      registeredByUserId,
     );
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
@@ -136,17 +168,31 @@ export default async function PledgeDetailPage({
                 {currencyFormatter.format(installment.amount.toCents() / 100)}
               </span>
               {installment.paidAt ? (
-                <span className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                    Pago em {dateFormatter.format(installment.paidAt)}
+                <span className="flex flex-col items-end gap-1">
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                      Pago em {dateFormatter.format(installment.paidAt)}
+                      {installment.paymentMethod
+                        ? ` · ${paymentMethodLabels[installment.paymentMethod] ?? installment.paymentMethod}`
+                        : ""}
+                      {installment.receivedByLabel
+                        ? ` · Recebido por ${installment.receivedByLabel}`
+                        : ""}
+                    </span>
+                    <EditPaymentDateButton
+                      installmentId={installment.id}
+                      currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
+                      todayIso={todayIso}
+                      correctAction={correctPaymentDate}
+                      revertAction={revertPayment}
+                    />
                   </span>
-                  <EditPaymentDateButton
-                    installmentId={installment.id}
-                    currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
-                    todayIso={todayIso}
-                    correctAction={correctPaymentDate}
-                    revertAction={revertPayment}
-                  />
+                  {installment.registeredByLabel &&
+                  installment.registeredByLabel !== installment.receivedByLabel ? (
+                    <span className="text-xs text-amber-700 dark:text-amber-400">
+                      ⚠ Registrado por {installment.registeredByLabel}
+                    </span>
+                  ) : null}
                 </span>
               ) : (
                 <PayInstallmentButton
@@ -154,6 +200,8 @@ export default async function PledgeDetailPage({
                   monthLabel={formatMonthLabel(installment.dueDate)}
                   amountLabel={currencyFormatter.format(installment.amount.toCents() / 100)}
                   todayIso={todayIso}
+                  users={users}
+                  currentUserId={session.user.id}
                   action={markInstallmentAsPaid}
                 />
               )}

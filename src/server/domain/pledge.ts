@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Money } from "./money";
+import type { PaymentMethod } from "./payment-method";
 
 const pledgeInputSchema = z.object({
   campaignId: z.string().trim().min(1, "Campanha é obrigatória"),
@@ -74,6 +75,9 @@ export interface InstallmentDetail {
   amount: Money;
   paidAt: Date | null;
   paidAmount: Money | null;
+  paymentMethod: PaymentMethod | null;
+  receivedByLabel: string | null;
+  registeredByLabel: string | null;
 }
 
 export interface PledgeDetail {
