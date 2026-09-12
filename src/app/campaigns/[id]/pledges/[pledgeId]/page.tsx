@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
 import { payInstallment } from "@/server/application/pay-installment";
 import { correctInstallmentPaymentDate } from "@/server/application/correct-installment-payment-date";
+import { revertInstallmentPayment } from "@/server/application/revert-installment-payment";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
@@ -77,6 +78,24 @@ export default async function PledgeDetailPage({
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
 
+  async function revertPayment(formData: FormData): Promise<void> {
+    "use server";
+
+    const installmentId = formData.get("installmentId");
+    if (typeof installmentId !== "string") {
+      throw new Error("Parcela inválida");
+    }
+
+    const db = createDbClient();
+    const installmentRepository = createInstallmentRepository(db);
+    await revertInstallmentPayment(
+      { installmentReader: installmentRepository, installmentRepository },
+      installmentId,
+    );
+
+    redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
+  }
+
   const todayIso = new Date().toISOString().slice(0, 10);
 
   const paidCount = pledge.installments.filter((installment) => installment.paidAt).length;
@@ -125,7 +144,8 @@ export default async function PledgeDetailPage({
                     installmentId={installment.id}
                     currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
                     todayIso={todayIso}
-                    action={correctPaymentDate}
+                    correctAction={correctPaymentDate}
+                    revertAction={revertPayment}
                   />
                 </span>
               ) : (

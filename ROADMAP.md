@@ -166,6 +166,12 @@ CASCADE`) + repositório Drizzle + tela protegida
     (pill, `py-2.5`) e mais espaçados; o mesmo padrão foi aplicado nos
     outros modais desta PR (editar campanha, corrigir data de pagamento)
     por consistência.
+  - Corrigir a data não resolvia o caso de dar baixa por engano numa
+    parcela que nem deveria estar paga. O modal "Editar" ganhou uma
+    segunda seção ("Reverter para pendente") com confirmação em dois
+    passos (mais fricção de propósito, por ser mais consequente que só
+    corrigir a data); `revertInstallmentPayment` (domínio) só permite
+    reverter uma parcela que já está paga.
 
 ## Backlog (próximas fatias, em ordem)
 

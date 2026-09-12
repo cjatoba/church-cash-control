@@ -37,3 +37,9 @@ export function correctInstallmentPaymentDate(
   }
   return { paidAt, paidAmount: installment.amount };
 }
+
+export function revertInstallmentPayment(installment: InstallmentState): void {
+  if (!installment.paidAt) {
+    throw new Error("Parcela ainda não foi paga");
+  }
+}

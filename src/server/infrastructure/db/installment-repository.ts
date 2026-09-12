@@ -8,6 +8,7 @@ import type {
   CampaignInstallmentsReader,
   InstallmentsRemover,
 } from "@/server/application/update-campaign";
+import type { InstallmentUnpayRepository } from "@/server/application/revert-installment-payment";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
 import { donors, installments, pledges } from "./schema";
@@ -18,7 +19,8 @@ export function createInstallmentRepository(
   InstallmentRepository &
   InstallmentsForMonthReader &
   CampaignInstallmentsReader &
-  InstallmentsRemover {
+  InstallmentsRemover &
+  InstallmentUnpayRepository {
   return {
     async findById(installmentId) {
       const [row] = await db
@@ -86,6 +88,13 @@ export function createInstallmentRepository(
         return;
       }
       await db.delete(installments).where(inArray(installments.id, installmentIds));
+    },
+
+    async markAsUnpaid(installmentId) {
+      await db
+        .update(installments)
+        .set({ paidAt: null, paidAmountCents: null })
+        .where(eq(installments.id, installmentId));
     },
   };
 }

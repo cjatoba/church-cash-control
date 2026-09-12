@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { correctInstallmentPaymentDate, payInstallment } from "@/server/domain/installment";
+import {
+  correctInstallmentPaymentDate,
+  payInstallment,
+  revertInstallmentPayment,
+} from "@/server/domain/installment";
 import { Money } from "@/server/domain/money";
 
 describe("payInstallment", () => {
@@ -65,5 +69,23 @@ describe("correctInstallmentPaymentDate", () => {
     expect(() =>
       correctInstallmentPaymentDate(installment, new Date("2026-03-11"), new Date("2026-03-10")),
     ).toThrow();
+  });
+});
+
+describe("revertInstallmentPayment", () => {
+  it("permite reverter uma parcela paga", () => {
+    const installment = { amount: Money.fromReais(100), paidAt: new Date("2026-03-10") };
+
+    expect(() => {
+      revertInstallmentPayment(installment);
+    }).not.toThrow();
+  });
+
+  it("rejeita reverter uma parcela que ainda não foi paga", () => {
+    const installment = { amount: Money.fromReais(100), paidAt: null };
+
+    expect(() => {
+      revertInstallmentPayment(installment);
+    }).toThrow();
   });
 });
