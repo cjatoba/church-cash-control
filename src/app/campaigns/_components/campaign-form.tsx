@@ -128,29 +128,29 @@ export function CampaignForm({
       {pendingInstallments ? (
         <dialog
           ref={dialogRef}
-          className="rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.145] dark:bg-zinc-950 dark:text-zinc-50"
+          className="w-72 rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.145] dark:bg-zinc-950 dark:text-zinc-50"
         >
           <p className="mb-1 font-semibold">Confirmar alteração de período</p>
-          <p className="mb-4 max-w-xs text-zinc-600 dark:text-zinc-400">
+          <p className="mb-4 text-zinc-600 dark:text-zinc-400">
             Isso vai remover {affectedCount}{" "}
             {affectedCount === 1 ? "parcela pendente" : "parcelas pendentes"} que ainda{" "}
             {affectedCount === 1 ? "não foi paga" : "não foram pagas"}. Parcelas já pagas não são
             afetadas.
           </p>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => dialogRef.current?.close()}
-              className="rounded-full border border-black/[.08] px-4 py-1.5 text-xs text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
-            >
-              Cancelar
-            </button>
+          <div className="flex flex-col gap-3">
             <button
               type="button"
               onClick={confirmSubmit}
-              className="rounded-full bg-foreground px-4 py-1.5 text-xs text-background"
+              className="rounded-full bg-foreground px-4 py-2.5 text-sm text-background"
             >
               Remover parcelas e salvar
+            </button>
+            <button
+              type="button"
+              onClick={() => dialogRef.current?.close()}
+              className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
+            >
+              Cancelar
             </button>
           </div>
         </dialog>

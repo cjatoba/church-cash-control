@@ -160,6 +160,12 @@ CASCADE`) + repositório Drizzle + tela protegida
     registrado não muda); `correctInstallmentPaymentDate` (domínio)
     exige que a parcela já esteja paga e rejeita data futura, espelhando
     `payInstallment`.
+  - No modal de "Dar baixa", as opções "Escolher outra data"/"Cancelar"
+    eram dois links de texto pequenos colados um no outro — risco real de
+    toque errado no celular. Viraram botões com alvo de toque maior
+    (pill, `py-2.5`) e mais espaçados; o mesmo padrão foi aplicado nos
+    outros modais desta PR (editar campanha, corrigir data de pagamento)
+    por consistência.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -195,6 +201,13 @@ CASCADE`) + repositório Drizzle + tela protegida
    armazenamento no Neon) — definir se há retenção/expurgo; se o log
    guardar nome de doador/valor vinculado a uma ação, entra na mesma
    categoria de dado sensível da seção LGPD do `CLAUDE.md`.
+9. Revisão de usabilidade mobile em todo o app: a maior parte do uso real
+   deve ser pelo celular, então vale um passe geral em telas já existentes
+   por alvos de toque maiores/mais espaçados (evitar links de texto
+   pequenos colados — foi o caso do modal de "Dar baixa", já corrigido),
+   mais uso de ícones e textos maiores para leitura rápida. Escopo maior
+   que uma correção pontual — decidir com o usuário quais telas entram
+   primeiro antes de começar.
 
 ## Como usar este arquivo
 
