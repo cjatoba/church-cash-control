@@ -24,23 +24,39 @@ describe("createOneOffDonation", () => {
     donorName: "João Pereira",
     amount: 50,
     date: "2026-03-10",
+    paymentMethod: "pix",
+    receivedByUserId: "user-1",
   };
 
   it("persiste a doação avulsa válida e retorna o id gerado", async () => {
     const repository = createInMemoryOneOffDonationRepository();
 
-    const result = await createOneOffDonation(repository, validInput);
+    const result = await createOneOffDonation(repository, validInput, "user-1");
 
     expect(result.id).toBe("one-off-donation-1");
     expect(repository.saved).toHaveLength(1);
     expect(repository.saved[0]?.donorName).toBe("João Pereira");
     expect(repository.saved[0]?.amount.toCents()).toBe(5000);
+    expect(repository.saved[0]?.paymentMethod).toBe("pix");
+    expect(repository.saved[0]?.receivedByUserId).toBe("user-1");
+    expect(repository.saved[0]?.registeredByUserId).toBe("user-1");
+  });
+
+  it("registra quem de fato registrou mesmo quando recebedor é outra pessoa", async () => {
+    const repository = createInMemoryOneOffDonationRepository();
+
+    await createOneOffDonation(repository, { ...validInput, receivedByUserId: "user-2" }, "user-1");
+
+    expect(repository.saved[0]?.receivedByUserId).toBe("user-2");
+    expect(repository.saved[0]?.registeredByUserId).toBe("user-1");
   });
 
   it("rejeita entrada inválida sem persistir nada", async () => {
     const repository = createInMemoryOneOffDonationRepository();
 
-    await expect(createOneOffDonation(repository, { ...validInput, amount: 0 })).rejects.toThrow();
+    await expect(
+      createOneOffDonation(repository, { ...validInput, amount: 0 }, "user-1"),
+    ).rejects.toThrow();
     expect(repository.saved).toHaveLength(0);
   });
 });

@@ -50,6 +50,13 @@
       "when": 1789187993550,
       "tag": "0006_brief_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789220015213,
+      "tag": "0007_nappy_mach_iv",
+      "breakpoints": true
     }
   ]
 }

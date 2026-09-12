@@ -29,6 +29,9 @@ describe("revertInstallmentPayment", () => {
     const dependencies = createDependencies({
       amount: Money.fromReais(100),
       paidAt: new Date("2026-03-10"),
+      paymentMethod: "pix",
+      receivedByUserId: "user-1",
+      registeredByUserId: "user-1",
     });
 
     await revertInstallmentPayment(dependencies, "installment-1");
@@ -44,7 +47,13 @@ describe("revertInstallmentPayment", () => {
   });
 
   it("rejeita quando a parcela ainda não foi paga", async () => {
-    const dependencies = createDependencies({ amount: Money.fromReais(100), paidAt: null });
+    const dependencies = createDependencies({
+      amount: Money.fromReais(100),
+      paidAt: null,
+      paymentMethod: null,
+      receivedByUserId: null,
+      registeredByUserId: null,
+    });
 
     await expect(revertInstallmentPayment(dependencies, "installment-1")).rejects.toThrow();
     expect(dependencies.revertedIds).toHaveLength(0);

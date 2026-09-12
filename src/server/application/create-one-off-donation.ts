@@ -7,7 +7,8 @@ export interface OneOffDonationRepository {
 export async function createOneOffDonation(
   repository: OneOffDonationRepository,
   input: unknown,
+  registeredByUserId: string,
 ): Promise<{ id: string }> {
-  const donation = parseOneOffDonation(input);
+  const donation = parseOneOffDonation(input, registeredByUserId);
   return repository.create(donation);
 }

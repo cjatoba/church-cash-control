@@ -32,6 +32,8 @@ export const transactionCategoryTypeEnum = pgEnum("transaction_category_type", [
   "expense",
 ]);
 
+export const paymentMethodEnum = pgEnum("payment_method", ["pix", "cash"]);
+
 export const transactionCategories = pgTable("transaction_categories", {
   id: uuid("id").primaryKey().defaultRandom(),
   campaignId: uuid("campaign_id")
@@ -81,6 +83,9 @@ export const oneOffDonations = pgTable("one_off_donations", {
   donorName: varchar("donor_name", { length: 255 }),
   amountCents: integer("amount_cents").notNull(),
   date: date("date", { mode: "date" }).notNull(),
+  paymentMethod: paymentMethodEnum("payment_method"),
+  receivedByUserId: uuid("received_by_user_id").references(() => users.id),
+  registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -93,5 +98,26 @@ export const installments = pgTable("installments", {
   amountCents: integer("amount_cents").notNull(),
   paidAt: timestamp("paid_at", { withTimezone: true }),
   paidAmountCents: integer("paid_amount_cents"),
+  paymentMethod: paymentMethodEnum("payment_method"),
+  receivedByUserId: uuid("received_by_user_id").references(() => users.id),
+  registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const custodyTransfers = pgTable("custody_transfers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  fromUserId: uuid("from_user_id")
+    .notNull()
+    .references(() => users.id),
+  registeredByUserId: uuid("registered_by_user_id")
+    .notNull()
+    .references(() => users.id),
+  recipientName: varchar("recipient_name", { length: 255 }).notNull(),
+  amountCents: integer("amount_cents").notNull(),
+  transferDate: date("transfer_date", { mode: "date" }).notNull(),
+  description: varchar("description", { length: 500 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

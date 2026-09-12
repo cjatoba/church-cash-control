@@ -25,10 +25,13 @@ function createDependencies(installment: InstallmentState | null) {
 }
 
 describe("correctInstallmentPaymentDate", () => {
-  it("corrige a data de pagamento mantendo o valor já registrado", async () => {
+  it("corrige a data de pagamento mantendo valor, forma de pagamento e recebedor", async () => {
     const dependencies = createDependencies({
       amount: Money.fromReais(100),
       paidAt: new Date("2026-03-10"),
+      paymentMethod: "pix",
+      receivedByUserId: "user-1",
+      registeredByUserId: "user-1",
     });
 
     await correctInstallmentPaymentDate(
@@ -43,6 +46,9 @@ describe("correctInstallmentPaymentDate", () => {
         installmentId: "installment-1",
         paidAt: new Date("2026-03-05"),
         paidAmount: Money.fromReais(100),
+        paymentMethod: "pix",
+        receivedByUserId: "user-1",
+        registeredByUserId: "user-1",
       },
     ]);
   });
@@ -62,7 +68,13 @@ describe("correctInstallmentPaymentDate", () => {
   });
 
   it("rejeita quando a parcela ainda não foi paga", async () => {
-    const dependencies = createDependencies({ amount: Money.fromReais(100), paidAt: null });
+    const dependencies = createDependencies({
+      amount: Money.fromReais(100),
+      paidAt: null,
+      paymentMethod: null,
+      receivedByUserId: null,
+      registeredByUserId: null,
+    });
 
     await expect(
       correctInstallmentPaymentDate(
@@ -79,6 +91,9 @@ describe("correctInstallmentPaymentDate", () => {
     const dependencies = createDependencies({
       amount: Money.fromReais(100),
       paidAt: new Date("2026-03-10"),
+      paymentMethod: "pix",
+      receivedByUserId: "user-1",
+      registeredByUserId: "user-1",
     });
 
     await expect(

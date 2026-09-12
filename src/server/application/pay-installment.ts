@@ -1,5 +1,6 @@
 import { payInstallment as computePayment, type InstallmentState } from "../domain/installment";
 import type { InstallmentPayment } from "../domain/installment";
+import type { PaymentMethod } from "../domain/payment-method";
 
 export interface InstallmentReader {
   findById(installmentId: string): Promise<InstallmentState | null>;
@@ -17,7 +18,10 @@ export interface PayInstallmentDependencies {
 export async function payInstallment(
   dependencies: PayInstallmentDependencies,
   installmentId: string,
-  paidAt: Date = new Date(),
+  paidAt: Date,
+  paymentMethod: PaymentMethod,
+  receivedByUserId: string,
+  registeredByUserId: string,
   today: Date = new Date(),
 ): Promise<void> {
   const installment = await dependencies.installmentReader.findById(installmentId);
@@ -25,6 +29,13 @@ export async function payInstallment(
     throw new Error("Parcela não encontrada");
   }
 
-  const payment = computePayment(installment, paidAt, today);
+  const payment = computePayment(
+    installment,
+    paidAt,
+    paymentMethod,
+    receivedByUserId,
+    registeredByUserId,
+    today,
+  );
   await dependencies.installmentRepository.markAsPaid(installmentId, payment);
 }

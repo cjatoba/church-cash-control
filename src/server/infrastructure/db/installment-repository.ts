@@ -10,8 +10,13 @@ import type {
 } from "@/server/application/update-campaign";
 import type { InstallmentUnpayRepository } from "@/server/application/revert-installment-payment";
 import { Money } from "@/server/domain/money";
+import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
 import { donors, installments, pledges } from "./schema";
+
+function toPaymentMethod(value: string | null): PaymentMethod | null {
+  return value === "pix" || value === "cash" ? value : null;
+}
 
 export function createInstallmentRepository(
   db: DbClient,
@@ -35,6 +40,9 @@ export function createInstallmentRepository(
       return {
         amount: Money.fromCents(row.amountCents),
         paidAt: row.paidAt,
+        paymentMethod: toPaymentMethod(row.paymentMethod),
+        receivedByUserId: row.receivedByUserId,
+        registeredByUserId: row.registeredByUserId,
       };
     },
 
@@ -44,6 +52,9 @@ export function createInstallmentRepository(
         .set({
           paidAt: payment.paidAt,
           paidAmountCents: payment.paidAmount.toCents(),
+          paymentMethod: payment.paymentMethod,
+          receivedByUserId: payment.receivedByUserId,
+          registeredByUserId: payment.registeredByUserId,
         })
         .where(eq(installments.id, installmentId));
     },
@@ -93,7 +104,13 @@ export function createInstallmentRepository(
     async markAsUnpaid(installmentId) {
       await db
         .update(installments)
-        .set({ paidAt: null, paidAmountCents: null })
+        .set({
+          paidAt: null,
+          paidAmountCents: null,
+          paymentMethod: null,
+          receivedByUserId: null,
+          registeredByUserId: null,
+        })
         .where(eq(installments.id, installmentId));
     },
   };

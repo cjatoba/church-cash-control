@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { UserListRepository } from "@/server/application/list-users";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
@@ -33,4 +34,12 @@ export async function completeUserPasswordChange(
     .update(users)
     .set({ passwordHash, mustChangePassword: false })
     .where(eq(users.id, userId));
+}
+
+export function createUserListRepository(db: DbClient): UserListRepository {
+  return {
+    async findAll() {
+      return db.select({ id: users.id, email: users.email }).from(users);
+    },
+  };
 }

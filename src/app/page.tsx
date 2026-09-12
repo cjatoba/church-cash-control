@@ -165,6 +165,12 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     Painel mensal
                   </Link>
                   <Link
+                    href={`/campaigns/${campaign.id}/money-in-hand`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    Dinheiro em mãos
+                  </Link>
+                  <Link
                     href={`/campaigns/${campaign.id}/edit`}
                     className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                   >

@@ -17,6 +17,9 @@ export function createOneOffDonationRepository(
           donorName: donation.donorName,
           amountCents: donation.amount.toCents(),
           date: donation.date,
+          paymentMethod: donation.paymentMethod,
+          receivedByUserId: donation.receivedByUserId,
+          registeredByUserId: donation.registeredByUserId,
         })
         .returning({ id: oneOffDonations.id });
 
