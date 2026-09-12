@@ -209,19 +209,30 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-- **Papéis de usuário (admin/tesoureiro) e convite de novos usuários** —
-  PR #28: tabela `users` ganha `role` (enum admin/tesoureiro, usuários
-  existentes migram como admin) e `phone` (opcional). Tela `/users` lista
-  usuários cadastrados; `/users/new` convida um novo usuário (e-mail,
+- **Papéis de usuário (admin/responsável pela arrecadação) e convite de
+  novos usuários** — PR #28: tabela `users` ganha `role` (enum
+  admin/fundraiser — rótulo "Responsável pela arrecadação"; usuários
+  existentes migram como admin), `phone` (opcional) e `active` (soft
+  delete). Tela `/users` lista usuários ativos e desativados, com opção
+  de desativar (bloqueia login; admin não pode desativar a própria
+  conta) e reativar; `/users/new` convida um novo usuário (e-mail,
   celular opcional, papel) gerando senha temporária mostrada uma única
   vez — reaproveita `mustChangePassword` já existente — com botão
   opcional para abrir o WhatsApp já com a mensagem de convite pronta
-  quando o celular é informado (sem depender de provedor de e-mail);
-  `/users/[id]/reset-password` gera nova senha temporária para quem
-  ainda não trocou a original. Papel restringe, por ora, só o acesso à
-  própria tela de gerenciar usuários (`canManageUsers`) — decisão
-  registrada de não implementar um sistema de permissões granulares
-  (tabela de features por usuário) enquanto só existir esse único gate.
+  (incluindo a URL de login do próprio ambiente — produção ou preview,
+  derivada do host da requisição) quando o celular é informado (sem
+  depender de provedor de e-mail); `/users/[id]/reset-password` gera
+  nova senha temporária para quem ainda não trocou a original. Papel
+  restringe, por ora, só o acesso à própria tela de gerenciar usuários
+  (`canManageUsers`) — decisão registrada de não implementar múltiplos
+  papéis por usuário nem um sistema de permissões granulares (tabela de
+  features por usuário): cada regra de permissão futura (ex.: só quem
+  tem papel X cria campanha) deve tratar `admin` como superusuário
+  (`role === "admin" || role === "X"`), o que já cobre o caso de uma
+  mesma pessoa ser admin e também responsável pela arrecadação sem
+  precisar acumular papéis. Ver item 3 do backlog para os próximos
+  papéis/gates cogitados (gerenciador de campanha, visualização para o
+  pastor).
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -239,28 +250,42 @@ CASCADE`) + repositório Drizzle + tela protegida
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-3. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+3. Mais papéis de usuário e permissões por tela — pedido concreto do
+   uso real do app (hoje só existe o gate de gerenciar usuários, ver "Em
+   andamento"): restringir quem cria/edita campanha (papel "gerenciador
+   de campanha") e quem dá baixa em parcela/doação avulsa (papel
+   "responsável pela arrecadação", já existente), e adicionar um papel
+   de só visualização (ex.: pastor acompanhando o que entra e o status
+   geral, sem poder editar nada). Decisão já registrada (ver "Em
+   andamento"): continuar com um único papel por usuário, tratando
+   `admin` como superusuário em cada checagem de permissão — evita
+   precisar de múltiplos papéis por usuário (ex.: admin que também é
+   responsável pela arrecadação já teria acesso de qualquer forma).
+   Escopo maior que o gate único de hoje: precisa mapear, tela a tela,
+   quais ações ficam restritas a qual papel antes de implementar.
+4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-4. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-5. Skeletons de carregamento em todas as telas que buscam dado no
+6. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes
    (`/users` já nasceu com o próprio `loading.tsx`, ver "Em andamento").
-6. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+7. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
-   antes de implementar: hoje só existe o papel admin/tesoureiro para
-   restringir quem gerencia usuários (ver "Em andamento") — definir se
-   esse mesmo papel controla quem pode consultar o log, ou se log de
-   auditoria exige um papel próprio; log fica maior com o tempo (custo de
-   armazenamento no Neon) — definir se há retenção/expurgo; se o log
-   guardar nome de doador/valor vinculado a uma ação, entra na mesma
-   categoria de dado sensível da seção LGPD do `CLAUDE.md`.
-7. Revisão de usabilidade/poluição visual em **todas as telas existentes
+   antes de implementar: hoje só existe o papel admin/responsável pela
+   arrecadação para restringir quem gerencia usuários (ver "Em
+   andamento") — definir se esse mesmo papel controla quem pode
+   consultar o log, ou se log de auditoria exige um papel próprio; log
+   fica maior com o tempo (custo de armazenamento no Neon) — definir se
+   há retenção/expurgo; se o log guardar nome de doador/valor vinculado a
+   uma ação, entra na mesma categoria de dado sensível da seção LGPD do
+   `CLAUDE.md`.
+8. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -274,13 +299,13 @@ CASCADE`) + repositório Drizzle + tela protegida
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-8. Revisão de nomenclatura simples em todas as telas existentes: nomes
+9. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 7 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 8 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
 

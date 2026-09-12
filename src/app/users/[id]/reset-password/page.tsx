@@ -8,6 +8,7 @@ import { hashPassword } from "@/server/infrastructure/auth/password";
 import { generateTemporaryPassword } from "@/server/infrastructure/auth/temporary-password";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { ResetPasswordForm, type ResetPasswordState } from "./reset-password-form";
 
 export default async function ResetPasswordPage({
@@ -38,9 +39,10 @@ export default async function ResetPasswordPage({
     try {
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
+      const loginUrl = await getLoginUrl();
       const result = await regenerateTemporaryPassword(
         repository,
-        { generateTemporaryPassword, hashPassword },
+        { generateTemporaryPassword, hashPassword, loginUrl },
         userId,
       );
 

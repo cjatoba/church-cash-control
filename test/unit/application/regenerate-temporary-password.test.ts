@@ -23,6 +23,7 @@ function createInMemoryRepository(
 const dependencies = {
   generateTemporaryPassword: () => "k7Rt9mQx",
   hashPassword: (password: string) => Promise.resolve(`hashed:${password}`),
+  loginUrl: "https://church-cash-control.vercel.app/login",
 };
 
 describe("regenerateTemporaryPassword", () => {

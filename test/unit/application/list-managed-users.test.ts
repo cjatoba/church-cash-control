@@ -21,6 +21,7 @@ describe("listManagedUsers", () => {
       phone: null,
       role: "admin",
       mustChangePassword: false,
+      active: true,
     };
     const repository = createInMemoryRepository([user]);
 

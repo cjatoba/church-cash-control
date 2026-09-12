@@ -14,6 +14,7 @@ export interface RegenerateTemporaryPasswordRepository {
 export interface RegenerateTemporaryPasswordDependencies {
   generateTemporaryPassword: () => string;
   hashPassword: (password: string) => Promise<string>;
+  loginUrl: string;
 }
 
 export interface RegeneratedTemporaryPassword {
@@ -45,7 +46,12 @@ export async function regenerateTemporaryPassword(
     phone: user.phone,
     temporaryPassword,
     whatsappLink: user.phone
-      ? buildTemporaryPasswordWhatsAppLink(user.phone, user.email, temporaryPassword)
+      ? buildTemporaryPasswordWhatsAppLink(
+          user.phone,
+          user.email,
+          temporaryPassword,
+          dependencies.loginUrl,
+        )
       : undefined,
   };
 }

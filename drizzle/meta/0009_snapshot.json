@@ -1,6 +1,6 @@
 {
-  "id": "82eb7f7f-307c-435c-8f3b-b9d60b77f51d",
-  "prevId": "ef77864e-6d63-479e-a15a-8835035f30ba",
+  "id": "446a941e-d582-4cee-b15e-1807c092b9f5",
+  "prevId": "82eb7f7f-307c-435c-8f3b-b9d60b77f51d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -684,6 +684,13 @@
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         },
         "created_at": {
           "name": "created_at",

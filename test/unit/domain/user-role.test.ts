@@ -6,7 +6,7 @@ describe("canManageUsers", () => {
     expect(canManageUsers("admin")).toBe(true);
   });
 
-  it("não permite tesoureiro gerenciar usuários", () => {
-    expect(canManageUsers("treasurer")).toBe(false);
+  it("não permite responsável pela arrecadação gerenciar usuários", () => {
+    expect(canManageUsers("fundraiser")).toBe(false);
   });
 });

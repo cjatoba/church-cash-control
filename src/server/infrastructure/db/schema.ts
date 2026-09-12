@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const userRoleEnum = pgEnum("user_role", ["admin", "treasurer"]);
+export const userRoleEnum = pgEnum("user_role", ["admin", "fundraiser"]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -18,6 +18,7 @@ export const users = pgTable("users", {
   mustChangePassword: boolean("must_change_password").notNull().default(true),
   role: userRoleEnum("role").notNull().default("admin"),
   phone: varchar("phone", { length: 20 }),
+  active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

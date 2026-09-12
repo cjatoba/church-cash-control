@@ -20,6 +20,7 @@ function createInMemoryRepository(existingEmails: string[] = []): InviteUserRepo
 const dependencies = {
   generateTemporaryPassword: () => "k7Rt9mQx",
   hashPassword: (password: string) => Promise.resolve(`hashed:${password}`),
+  loginUrl: "https://church-cash-control.vercel.app/login",
 };
 
 describe("inviteUser", () => {
@@ -29,19 +30,20 @@ describe("inviteUser", () => {
     const result = await inviteUser(repository, dependencies, {
       email: "Voluntario@Igreja.Exemplo",
       phone: "(11) 91234-5678",
-      role: "treasurer",
+      role: "fundraiser",
     });
 
     expect(repository.created).toEqual([
       {
         email: "voluntario@igreja.exemplo",
         phone: "11912345678",
-        role: "treasurer",
+        role: "fundraiser",
         passwordHash: "hashed:k7Rt9mQx",
       },
     ]);
     expect(result.temporaryPassword).toBe("k7Rt9mQx");
     expect(result.whatsappLink).toContain("https://wa.me/5511912345678?text=");
+    expect(decodeURIComponent(result.whatsappLink ?? "")).toContain(dependencies.loginUrl);
   });
 
   it("não gera link do WhatsApp quando o telefone não é informado", async () => {

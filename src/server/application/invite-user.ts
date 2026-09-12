@@ -15,6 +15,7 @@ export interface InviteUserRepository {
 export interface InviteUserDependencies {
   generateTemporaryPassword: () => string;
   hashPassword: (password: string) => Promise<string>;
+  loginUrl: string;
 }
 
 export interface InvitedUser {
@@ -48,7 +49,12 @@ export async function inviteUser(
     role: invite.role,
     temporaryPassword,
     whatsappLink: invite.phone
-      ? buildTemporaryPasswordWhatsAppLink(invite.phone, invite.email, temporaryPassword)
+      ? buildTemporaryPasswordWhatsAppLink(
+          invite.phone,
+          invite.email,
+          temporaryPassword,
+          dependencies.loginUrl,
+        )
       : undefined,
   };
 }

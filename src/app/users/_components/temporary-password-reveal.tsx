@@ -15,7 +15,7 @@ export function TemporaryPasswordReveal({
   whatsappLink?: string;
   backHref: string;
   backLabel?: string;
-  secondaryAction?: { href: string; label: string };
+  secondaryAction?: { onClick: () => void; label: string };
 }) {
   return (
     <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
@@ -53,12 +53,13 @@ export function TemporaryPasswordReveal({
 
       <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
         {secondaryAction ? (
-          <Link
-            href={secondaryAction.href}
-            className="text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
+          <button
+            type="button"
+            onClick={secondaryAction.onClick}
+            className="text-left text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
           >
             {secondaryAction.label}
-          </Link>
+          </button>
         ) : null}
         <Link
           href={backHref}

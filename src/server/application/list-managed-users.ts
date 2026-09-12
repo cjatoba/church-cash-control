@@ -6,6 +6,7 @@ export interface ManagedUser {
   phone: string | null;
   role: UserRole;
   mustChangePassword: boolean;
+  active: boolean;
 }
 
 export interface ManagedUserListRepository {

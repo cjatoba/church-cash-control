@@ -6,13 +6,13 @@ describe("parseInvite", () => {
     const invite = parseInvite({
       email: "Voluntario@Igreja.Exemplo",
       phone: "(11) 91234-5678",
-      role: "treasurer",
+      role: "fundraiser",
     });
 
     expect(invite).toEqual({
       email: "voluntario@igreja.exemplo",
       phone: "11912345678",
-      role: "treasurer",
+      role: "fundraiser",
     });
   });
 

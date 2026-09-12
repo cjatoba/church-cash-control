@@ -60,7 +60,7 @@ export const authConfig = {
       if (typeof token.mustChangePassword === "boolean") {
         session.user.mustChangePassword = token.mustChangePassword;
       }
-      if (token.role === "admin" || token.role === "treasurer") {
+      if (token.role === "admin" || token.role === "fundraiser") {
         session.user.role = token.role;
       }
       return session;

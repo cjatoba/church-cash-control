@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { UserActiveRepository } from "@/server/application/deactivate-user";
 import type { InviteUserRepository } from "@/server/application/invite-user";
 import type { ManagedUserListRepository } from "@/server/application/list-managed-users";
 import type { RegenerateTemporaryPasswordRepository } from "@/server/application/regenerate-temporary-password";
@@ -7,7 +8,10 @@ import { users } from "./schema";
 
 export function createUserManagementRepository(
   db: DbClient,
-): InviteUserRepository & ManagedUserListRepository & RegenerateTemporaryPasswordRepository {
+): InviteUserRepository &
+  ManagedUserListRepository &
+  RegenerateTemporaryPasswordRepository &
+  UserActiveRepository {
   return {
     async emailInUse(email) {
       const rows = await db
@@ -43,6 +47,7 @@ export function createUserManagementRepository(
           phone: users.phone,
           role: users.role,
           mustChangePassword: users.mustChangePassword,
+          active: users.active,
         })
         .from(users);
     },
@@ -64,6 +69,10 @@ export function createUserManagementRepository(
 
     async updatePasswordHash(userId, passwordHash) {
       await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+    },
+
+    async setActive(userId, active) {
+      await db.update(users).set({ active }).where(eq(users.id, userId));
     },
   };
 }

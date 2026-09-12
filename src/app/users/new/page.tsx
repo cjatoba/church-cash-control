@@ -6,6 +6,7 @@ import { hashPassword } from "@/server/infrastructure/auth/password";
 import { generateTemporaryPassword } from "@/server/infrastructure/auth/temporary-password";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { InviteUserForm, type InviteUserState } from "./invite-user-form";
 
 export default async function NewUserPage() {
@@ -31,9 +32,10 @@ export default async function NewUserPage() {
     try {
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
+      const loginUrl = await getLoginUrl();
       const result = await inviteUser(
         repository,
-        { generateTemporaryPassword, hashPassword },
+        { generateTemporaryPassword, hashPassword, loginUrl },
         input,
       );
 

@@ -10,6 +10,7 @@ export interface UserRecord {
   passwordHash: string;
   mustChangePassword: boolean;
   role: UserRole;
+  active: boolean;
 }
 
 export async function findUserByEmail(db: DbClient, email: string): Promise<UserRecord | null> {
@@ -20,6 +21,7 @@ export async function findUserByEmail(db: DbClient, email: string): Promise<User
       passwordHash: users.passwordHash,
       mustChangePassword: users.mustChangePassword,
       role: users.role,
+      active: users.active,
     })
     .from(users)
     .where(eq(users.email, email))

@@ -1,26 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { TemporaryPasswordReveal } from "../_components/temporary-password-reveal";
 
-const roleLabels = { admin: "Administrador", treasurer: "Tesoureiro" } as const;
+const roleLabels = { admin: "Administrador", fundraiser: "Responsável pela arrecadação" } as const;
 
 export interface InviteUserState {
   error?: string;
   result?: {
     email: string;
-    role: "admin" | "treasurer";
+    role: "admin" | "fundraiser";
     temporaryPassword: string;
     whatsappLink?: string;
   };
 }
 
-export function InviteUserForm({
+type InviteAction = (prevState: InviteUserState, formData: FormData) => Promise<InviteUserState>;
+
+export function InviteUserForm({ action }: { action: InviteAction }) {
+  const [formKey, setFormKey] = useState(0);
+
+  return (
+    <InviteUserFormFields
+      key={formKey}
+      action={action}
+      onInviteAnother={() => {
+        setFormKey((key) => key + 1);
+      }}
+    />
+  );
+}
+
+function InviteUserFormFields({
   action,
+  onInviteAnother,
 }: {
-  action: (prevState: InviteUserState, formData: FormData) => Promise<InviteUserState>;
+  action: InviteAction;
+  onInviteAnother: () => void;
 }) {
   const [state, formAction] = useActionState<InviteUserState, FormData>(action, {});
 
@@ -32,7 +50,7 @@ export function InviteUserForm({
         temporaryPassword={state.result.temporaryPassword}
         whatsappLink={state.result.whatsappLink}
         backHref="/users"
-        secondaryAction={{ href: "/users/new", label: "+ Convidar outro usuário" }}
+        secondaryAction={{ onClick: onInviteAnother, label: "+ Convidar outro usuário" }}
       />
     );
   }
@@ -84,7 +102,7 @@ export function InviteUserForm({
             Selecione
           </option>
           <option value="admin">Administrador</option>
-          <option value="treasurer">Tesoureiro</option>
+          <option value="fundraiser">Responsável pela arrecadação</option>
         </select>
       </label>
       <SubmitButton pendingLabel="Convidando…">Convidar</SubmitButton>
