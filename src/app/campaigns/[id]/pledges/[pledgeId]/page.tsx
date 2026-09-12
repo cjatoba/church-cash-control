@@ -39,8 +39,9 @@ export default async function PledgeDetailPage({
     "use server";
 
     const installmentId = formData.get("installmentId");
-    if (typeof installmentId !== "string") {
-      throw new Error("Parcela inválida");
+    const paidAtValue = formData.get("paidAt");
+    if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
+      throw new Error("Dados inválidos para dar baixa na parcela");
     }
 
     const db = createDbClient();
@@ -48,10 +49,13 @@ export default async function PledgeDetailPage({
     await payInstallment(
       { installmentReader: installmentRepository, installmentRepository },
       installmentId,
+      new Date(paidAtValue),
     );
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
+
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   const paidCount = pledge.installments.filter((installment) => installment.paidAt).length;
   const totalCents = pledge.installments.length * pledge.installmentValue.toCents();
@@ -95,8 +99,17 @@ export default async function PledgeDetailPage({
                   Pago em {dateFormatter.format(installment.paidAt)}
                 </span>
               ) : (
-                <form action={markInstallmentAsPaid}>
+                <form action={markInstallmentAsPaid} className="flex items-center gap-2">
                   <input type="hidden" name="installmentId" value={installment.id} />
+                  <input
+                    type="date"
+                    name="paidAt"
+                    defaultValue={todayIso}
+                    max={todayIso}
+                    required
+                    aria-label="Data do pagamento"
+                    className="rounded border border-black/[.08] px-2 py-1 text-xs dark:border-white/[.145] dark:bg-black"
+                  />
                   <SubmitButton pendingLabel="Registrando…">Dar baixa</SubmitButton>
                 </form>
               )}

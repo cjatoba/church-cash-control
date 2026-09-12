@@ -17,13 +17,14 @@ export interface PayInstallmentDependencies {
 export async function payInstallment(
   dependencies: PayInstallmentDependencies,
   installmentId: string,
-  now: Date = new Date(),
+  paidAt: Date = new Date(),
+  today: Date = new Date(),
 ): Promise<void> {
   const installment = await dependencies.installmentReader.findById(installmentId);
   if (!installment) {
     throw new Error("Parcela não encontrada");
   }
 
-  const payment = computePayment(installment, now);
+  const payment = computePayment(installment, paidAt, today);
   await dependencies.installmentRepository.markAsPaid(installmentId, payment);
 }
