@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCampaign } from "@/server/application/get-campaign";
 import { updateCampaign } from "@/server/application/update-campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
+import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { CampaignForm, type CreateCampaignState } from "../../_components/campaign-form";
 
@@ -30,8 +31,17 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
 
     try {
       const db = createDbClient();
-      const repository = createCampaignRepository(db);
-      await updateCampaign(repository, campaignId, input);
+      const campaignRepository = createCampaignRepository(db);
+      const installmentRepository = createInstallmentRepository(db);
+      await updateCampaign(
+        {
+          campaignRepository,
+          installmentsReader: installmentRepository,
+          installmentsRemover: installmentRepository,
+        },
+        campaignId,
+        input,
+      );
     } catch {
       return { error: "Não foi possível salvar a campanha. Confira os dados informados." };
     }

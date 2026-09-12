@@ -83,3 +83,24 @@ export interface PledgeDetail {
   installmentValue: Money;
   installments: InstallmentDetail[];
 }
+
+export interface PendingInstallmentCandidate {
+  id: string;
+  dueDate: Date;
+  paidAt: Date | null;
+}
+
+/**
+ * Ao encurtar o período de uma campanha, as parcelas ainda não pagas que
+ * caíam fora do novo fim devem ser removidas — parcelas pagas nunca são
+ * removidas, pois são histórico financeiro.
+ */
+export function selectInstallmentsOutsidePeriod(
+  installments: PendingInstallmentCandidate[],
+  campaignEndDate: Date,
+): string[] {
+  const end = firstDayOfMonth(campaignEndDate);
+  return installments
+    .filter((installment) => !installment.paidAt && installment.dueDate > end)
+    .map((installment) => installment.id);
+}

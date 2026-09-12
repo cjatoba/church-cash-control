@@ -1,16 +1,24 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type {
   InstallmentReader,
   InstallmentRepository,
 } from "@/server/application/pay-installment";
 import type { InstallmentsForMonthReader } from "@/server/application/get-monthly-progress";
+import type {
+  CampaignInstallmentsReader,
+  InstallmentsRemover,
+} from "@/server/application/update-campaign";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
 import { donors, installments, pledges } from "./schema";
 
 export function createInstallmentRepository(
   db: DbClient,
-): InstallmentReader & InstallmentRepository & InstallmentsForMonthReader {
+): InstallmentReader &
+  InstallmentRepository &
+  InstallmentsForMonthReader &
+  CampaignInstallmentsReader &
+  InstallmentsRemover {
   return {
     async findById(installmentId) {
       const [row] = await db
@@ -57,6 +65,27 @@ export function createInstallmentRepository(
         paidAt: row.paidAt,
         paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
       }));
+    },
+
+    async findInstallmentsByCampaign(campaignId) {
+      const rows = await db
+        .select({
+          id: installments.id,
+          dueDate: installments.dueDate,
+          paidAt: installments.paidAt,
+        })
+        .from(installments)
+        .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
+        .where(eq(pledges.campaignId, campaignId));
+
+      return rows;
+    },
+
+    async removeMany(installmentIds) {
+      if (installmentIds.length === 0) {
+        return;
+      }
+      await db.delete(installments).where(inArray(installments.id, installmentIds));
     },
   };
 }

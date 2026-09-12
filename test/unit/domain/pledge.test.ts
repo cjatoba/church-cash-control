@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { generateInstallments, isPledgeClosed, parsePledgeInput } from "@/server/domain/pledge";
+import {
+  generateInstallments,
+  isPledgeClosed,
+  parsePledgeInput,
+  selectInstallmentsOutsidePeriod,
+} from "@/server/domain/pledge";
 import { Money } from "@/server/domain/money";
-import type { PledgeSummary } from "@/server/domain/pledge";
+import type { PendingInstallmentCandidate, PledgeSummary } from "@/server/domain/pledge";
 
 describe("parsePledgeInput", () => {
   const validInput = {
@@ -93,5 +98,49 @@ describe("isPledgeClosed", () => {
     expect(isPledgeClosed(pledgeSummary({ totalInstallments: 6, paidInstallments: 5 }))).toBe(
       false,
     );
+  });
+});
+
+describe("selectInstallmentsOutsidePeriod", () => {
+  function candidate(overrides: Partial<PendingInstallmentCandidate>): PendingInstallmentCandidate {
+    return {
+      id: "installment-1",
+      dueDate: new Date("2026-01-01"),
+      paidAt: null,
+      ...overrides,
+    };
+  }
+
+  it("seleciona parcelas pendentes com vencimento depois do novo fim da campanha", () => {
+    const installments = [
+      candidate({ id: "installment-1", dueDate: new Date("2026-01-01") }),
+      candidate({ id: "installment-2", dueDate: new Date("2026-02-01") }),
+    ];
+
+    const result = selectInstallmentsOutsidePeriod(installments, new Date("2026-01-31"));
+
+    expect(result).toEqual(["installment-2"]);
+  });
+
+  it("nunca seleciona parcela já paga, mesmo fora do novo período", () => {
+    const installments = [
+      candidate({
+        id: "installment-1",
+        dueDate: new Date("2026-02-01"),
+        paidAt: new Date("2026-02-05"),
+      }),
+    ];
+
+    const result = selectInstallmentsOutsidePeriod(installments, new Date("2026-01-31"));
+
+    expect(result).toEqual([]);
+  });
+
+  it("não seleciona parcelas dentro do novo período", () => {
+    const installments = [candidate({ id: "installment-1", dueDate: new Date("2026-01-01") })];
+
+    const result = selectInstallmentsOutsidePeriod(installments, new Date("2026-01-31"));
+
+    expect(result).toEqual([]);
   });
 });
