@@ -85,81 +85,63 @@ CASCADE`) + repositório Drizzle + tela protegida
   ou Preview) — resolve a causa raiz da quebra de PR #19 (migrations de
   `campaigns`/`transaction_categories` pendentes em produção/preview por
   dias sem ninguém notar). Ver `CLAUDE.md`, seção "Banco de dados".
+- **Controle de carnês (compromisso de pagamento parcelado por doador) e
+  doação avulsa** — PR #23: domínio `Donor` (só nome, minimização de dado
+  pessoal), `PledgeType` (tipo de carnê configurável por campanha: nome +
+  valor de parcela) e `Pledge`/`Installment` (carnê + parcelas geradas
+  automaticamente, uma por mês, do mês de adesão até o fim do período da
+  campanha) + tabelas `donors`/`pledge_types`/`pledges`/`installments` +
+  repositórios Drizzle + telas `/campaigns/[id]/pledge-types`,
+  `/campaigns/[id]/donors(/new)`. TDD completo, cobertura 100%. A mesma
+  PR também cobriu, como sub-fatias:
+  - Dar baixa em parcela (`payInstallment`, domínio `installment.ts`):
+    tela `/campaigns/[id]/pledges/[pledgeId]` lista as parcelas do carnê
+    com botão "Dar baixa" nas pendentes (data = hoje, valor = o da
+    própria parcela; rejeita dar baixa em parcela já paga).
+  - Doação avulsa (`OneOffDonation`, tabela `one_off_donations`):
+    contribuição pontual (valor, data, nome livre opcional — em branco
+    fica anônima) para quem não tem carnê, sem vínculo com um cadastro de
+    doador; tela `/campaigns/[id]/one-off-donations/new`.
+  - Painel mensal de acompanhamento de meta (`domain/monthly-progress.ts`,
+    tela `/campaigns/[id]/monthly`): meta mensal = meta da campanha ÷ nº
+    de meses do período; mês selecionável (limitado ao período da
+    campanha, padrão = mês atual); lista quem pagou (parcela paga naquele
+    mês + doações avulsas daquele mês) e quem ainda tem parcela pendente.
+  - Categoria de lançamento (já existente antes desta PR) ficou fora
+    desse fluxo — carnê e doação avulsa são conceitos próprios.
 
 ## Em andamento (PRs abertas)
 
-- **Controle de carnês, completo (doador + tipo de carnê + carnê com
-  parcelas geradas automaticamente; dar baixa em parcela; doação avulsa;
-  painel mensal de meta)** — PR #23. Ver detalhes no item 1 do backlog
-  abaixo. Quando esta PR for mergeada, mover esta entrada para
-  "Concluído".
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Controle de carnês (compromisso de pagamento parcelado por doador) e
-   doação avulsa.** Motivação: além de acompanhar entrada/saída total por
-   categoria, uma campanha precisa saber, por doador, quanto já foi pago
-   de um compromisso parcelado (carnê), quanto falta, e quem já quitou (e
-   por isso não deve mais ser cobrado nos próximos meses) — além de
-   registrar contribuições avulsas de quem não tem carnê, e acompanhar se
-   a meta mensal (meta da campanha ÷ nº de meses do período) está sendo
-   atingida. Decisões de modelagem já fechadas:
-   - Doador cadastra só nome por enquanto (minimização de dado pessoal —
-     ver seção LGPD do `CLAUDE.md`); dado de contato fica para quando o
-     item "doadores/LGPD" (item 5) for retomado.
-   - Tipo de carnê é dado configurável por campanha (nome + valor de
-     parcela), não hardcoded.
-   - Parcelas são geradas automaticamente, uma por mês, com o valor do
-     tipo de carnê, do mês em que o carnê é criado até o mês final do
-     período da campanha — sem campo de "quantidade de parcelas" à parte.
-   - Categoria de lançamento (já existente) fica fora desse fluxo; carnê e
-     doação avulsa são conceitos próprios.
-
-   Fatiado em (agrupadas na mesma PR #23 enquanto ela estiver aberta):
-   1. Doador + tipo de carnê + carnê com parcelas geradas automaticamente
-      (cadastro de doador, cadastro de tipo de carnê por campanha, tela de
-      vincular doador a um tipo de carnê). **Implementada, ver "Em
-      andamento" acima.**
-   2. Dar baixa em parcela (registrar pagamento; data = hoje e valor = o
-      da própria parcela, sem pagamento parcial por enquanto) — tela
-      `/campaigns/[id]/pledges/[pledgeId]` com uma linha por parcela.
-      **Implementada, ver "Em andamento" acima.**
-   3. Doação avulsa (contribuição sem carnê): valor, data e nome do doador
-      em texto livre (opcional — em branco fica anônima), sem vínculo com
-      um cadastro de doador. **Implementada, ver "Em andamento" acima.**
-   4. Painel mensal de acompanhamento de meta (`/campaigns/[id]/monthly`):
-      meta mensal = meta da campanha ÷ nº de meses do período; mês
-      selecionável (limitado ao período da campanha, padrão = mês atual);
-      lista quem pagou (parcela paga naquele mês + doações avulsas
-      daquele mês) e quem ainda tem parcela pendente naquele mês.
-      **Implementada, ver "Em andamento" acima.**
-
-2. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
-   cadastro (criação) das duas — sem edição nem exclusão. A razão de vir
-   **antes** de "Registro de lançamentos financeiros" (item 3) continua
-   valendo mesmo com o adiantamento do item 1: uma vez que lançamentos ou
-   carnês existirem referenciando `campaigns`/`transaction_categories` por
-   FK, excluir uma campanha/categoria passa a arriscar apagar dado
-   financeiro real junto (a FK de `transaction_categories` já é
-   `ON DELETE CASCADE` em relação a `campaigns` — ver `schema.ts`). Regra
-   de exclusão já decidida: **exclusão lógica (soft delete)** — arquivar
-   marca a campanha/categoria como inativa (some das listas ativas e das
-   opções de novo lançamento/categoria/carnê) sem apagar nada, e é
-   reversível. Preview das telas (painel com "Editar"/"Arquivar", tela de
-   editar campanha, lista de categorias com editar/arquivar, tela de
-   editar categoria) já aprovado; falta implementar.
-3. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
+1. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
+   cadastro (criação) das duas — sem edição nem exclusão. Entra **antes**
+   de "Registro de lançamentos financeiros genéricos" (item 2) de
+   propósito, e a razão ficou mais forte agora que carnês/parcelas/doações
+   avulsas (ver `Concluído`) já existem referenciando `campaigns` por FK:
+   excluir uma campanha/categoria arrisca apagar dado financeiro real
+   junto (a FK de `transaction_categories` já é `ON DELETE CASCADE` em
+   relação a `campaigns` — ver `schema.ts`). Regra de exclusão já
+   decidida: **exclusão lógica (soft delete)** — arquivar marca a
+   campanha/categoria como inativa (some das listas ativas e das opções
+   de novo lançamento/categoria/carnê) sem apagar nada, e é reversível.
+   Preview das telas (painel com "Editar"/"Arquivar", tela de editar
+   campanha, lista de categorias com editar/arquivar, tela de editar
+   categoria) já aprovado; falta implementar.
+2. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
    fora do fluxo de carnê/doação avulsa) — revisar se ainda é necessário
-   como fatia própria depois do item 1, ou se carnê + doação avulsa já
-   cobre o caso de uso real.
-4. Relatórios / acompanhamento de progresso de arrecadação por campanha —
-   parte disso (meta mensal) já é coberta pela sub-fatia 4 do item 1;
-   revisar o que sobra como fatia própria depois dele.
-5. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
-   `Donor` (hoje só nome, ver item 1) com os demais dados quando
+   como fatia própria, ou se carnê + doação avulsa já cobre o caso de uso
+   real.
+3. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+   parte disso (meta mensal) já é coberta pelo painel mensal de carnês
+   (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
+4. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+   `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-6. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+5. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
