@@ -2,10 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
 import { payInstallment } from "@/server/application/pay-installment";
+import { correctInstallmentPaymentDate } from "@/server/application/correct-installment-payment-date";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { PayInstallmentButton } from "../_components/pay-installment-button";
+import { EditPaymentDateButton } from "../_components/edit-payment-date-button";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -55,6 +57,26 @@ export default async function PledgeDetailPage({
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
 
+  async function correctPaymentDate(formData: FormData): Promise<void> {
+    "use server";
+
+    const installmentId = formData.get("installmentId");
+    const paidAtValue = formData.get("paidAt");
+    if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
+      throw new Error("Dados inválidos para corrigir a data de pagamento");
+    }
+
+    const db = createDbClient();
+    const installmentRepository = createInstallmentRepository(db);
+    await correctInstallmentPaymentDate(
+      { installmentReader: installmentRepository, installmentRepository },
+      installmentId,
+      new Date(paidAtValue),
+    );
+
+    redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
+  }
+
   const todayIso = new Date().toISOString().slice(0, 10);
 
   const paidCount = pledge.installments.filter((installment) => installment.paidAt).length;
@@ -95,8 +117,16 @@ export default async function PledgeDetailPage({
                 {currencyFormatter.format(installment.amount.toCents() / 100)}
               </span>
               {installment.paidAt ? (
-                <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                  Pago em {dateFormatter.format(installment.paidAt)}
+                <span className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                    Pago em {dateFormatter.format(installment.paidAt)}
+                  </span>
+                  <EditPaymentDateButton
+                    installmentId={installment.id}
+                    currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
+                    todayIso={todayIso}
+                    action={correctPaymentDate}
+                  />
                 </span>
               ) : (
                 <PayInstallmentButton

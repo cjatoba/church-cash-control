@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { payInstallment } from "@/server/domain/installment";
+import { correctInstallmentPaymentDate, payInstallment } from "@/server/domain/installment";
 import { Money } from "@/server/domain/money";
 
 describe("payInstallment", () => {
@@ -33,6 +33,37 @@ describe("payInstallment", () => {
 
     expect(() =>
       payInstallment(installment, new Date("2026-03-11"), new Date("2026-03-10")),
+    ).toThrow();
+  });
+});
+
+describe("correctInstallmentPaymentDate", () => {
+  it("corrige a data de pagamento mantendo o valor já registrado", () => {
+    const installment = { amount: Money.fromReais(100), paidAt: new Date("2026-03-10") };
+
+    const payment = correctInstallmentPaymentDate(
+      installment,
+      new Date("2026-03-05"),
+      new Date("2026-03-10"),
+    );
+
+    expect(payment.paidAt).toEqual(new Date("2026-03-05"));
+    expect(payment.paidAmount.equals(Money.fromReais(100))).toBe(true);
+  });
+
+  it("rejeita corrigir parcela que ainda não foi paga", () => {
+    const installment = { amount: Money.fromReais(100), paidAt: null };
+
+    expect(() =>
+      correctInstallmentPaymentDate(installment, new Date("2026-03-05"), new Date("2026-03-10")),
+    ).toThrow();
+  });
+
+  it("rejeita nova data de pagamento no futuro", () => {
+    const installment = { amount: Money.fromReais(100), paidAt: new Date("2026-03-10") };
+
+    expect(() =>
+      correctInstallmentPaymentDate(installment, new Date("2026-03-11"), new Date("2026-03-10")),
     ).toThrow();
   });
 });

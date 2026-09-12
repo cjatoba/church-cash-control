@@ -154,6 +154,12 @@ CASCADE`) + repositório Drizzle + tela protegida
     já tem parcelas; a página de edição redireciona para
     `/?campaignExtended=1` e o painel mostra um aviso informativo (não
     bloqueante) explicando que os carnês não mudaram.
+  - Depois de "dar baixa" numa parcela, não havia como corrigir a data se
+    fosse informada errada por engano. Parcela paga ganhou um link
+    "Editar" que abre um modal para corrigir só a data (o valor
+    registrado não muda); `correctInstallmentPaymentDate` (domínio)
+    exige que a parcela já esteja paga e rejeita data futura, espelhando
+    `payInstallment`.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -181,6 +187,14 @@ CASCADE`) + repositório Drizzle + tela protegida
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes.
+8. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+   baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
+   fez e quando, consultável numa tela da aplicação. Pontos a decidir
+   antes de implementar: depende de papéis de usuário (item 4) para
+   controlar quem pode consultar; log fica maior com o tempo (custo de
+   armazenamento no Neon) — definir se há retenção/expurgo; se o log
+   guardar nome de doador/valor vinculado a uma ação, entra na mesma
+   categoria de dado sensível da seção LGPD do `CLAUDE.md`.
 
 ## Como usar este arquivo
 

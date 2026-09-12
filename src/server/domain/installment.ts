@@ -23,3 +23,17 @@ export function payInstallment(
   }
   return { paidAt, paidAmount: installment.amount };
 }
+
+export function correctInstallmentPaymentDate(
+  installment: InstallmentState,
+  paidAt: Date,
+  today: Date = new Date(),
+): InstallmentPayment {
+  if (!installment.paidAt) {
+    throw new Error("Parcela ainda não foi paga");
+  }
+  if (paidAt > today) {
+    throw new Error("Data de pagamento não pode ser no futuro");
+  }
+  return { paidAt, paidAmount: installment.amount };
+}
