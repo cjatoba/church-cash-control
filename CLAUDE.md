@@ -87,6 +87,20 @@ formulário). Concretamente:
   em seguida — nunca deixar o usuário num beco sem saída sem link de
   volta/continuação.
 
+## Nomenclatura simples
+
+Todo texto voltado ao usuário (rótulo de campo, título de tela, botão,
+mensagem de erro/sucesso) usa linguagem direta e de fácil entendimento para
+quem usa o app no dia a dia da igreja — nunca jargão técnico ou termo
+rebuscado, mesmo quando ele é tecnicamente mais preciso (ex.: "Recebido
+por" em vez de "Custodiante", "Dinheiro em mãos" em vez de "Custódia").
+Antes de nomear uma tela/campo/botão novo, prefira a palavra que uma pessoa
+sem vocabulário técnico entenderia de primeira. Isso vale tanto para telas
+novas quanto para revisão de telas existentes (ver backlog do
+`ROADMAP.md`) — ao encontrar um nome que não segue essa regra numa tela já
+implementada, ajuste-o como parte da fatia em andamento em vez de deixar
+para depois, já que é um ajuste pequeno e localizado.
+
 ## Escopo de uma fatia em andamento
 
 Se, durante a implementação de uma fatia, o usuário pedir algo novo que

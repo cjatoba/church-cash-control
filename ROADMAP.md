@@ -176,10 +176,34 @@ Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
-   fora do fluxo de carnê/doação avulsa) — revisar se ainda é necessário
-   como fatia própria, ou se carnê + doação avulsa já cobre o caso de uso
-   real.
+1. **Dinheiro em mãos** (rastreio de custódia) e forma de pagamento por
+   doação — substitui a fatia genérica de "lançamentos financeiros de
+   entrada/saída" cogitada antes: o caso de uso real é este. Hoje uma
+   parcela paga ou doação avulsa não registra quem ficou responsável pelo
+   valor recebido nem a forma de pagamento (Pix/dinheiro); quando o valor
+   arrecadado passa por mais de uma pessoa até virar uma compra da
+   campanha, falta visibilidade de quem está com quanto. Adiciona:
+   - Forma de pagamento (Pix/dinheiro) e "recebido por" (usuário do
+     sistema, padrão o usuário logado, mas selecionável) em toda entrada
+     de dinheiro (parcela paga, doação avulsa).
+   - Tela "Dinheiro em mãos" por campanha: saldo de cada usuário e
+     histórico de recebimentos/repasses.
+   - Registro de repasse (parcial ou total) de um usuário para um
+     destinatário em texto livre (sem cadastro próprio por ora — só
+     promover para cadastro se aparecer necessidade concreta de ver
+     histórico por destinatário).
+   - "Recebido por"/"quem repassou" é sempre selecionável (não travado no
+     usuário logado, para cobrir quem recebeu o valor mas não tem acesso
+     ao app no momento de registrar), mas quem de fato executou o
+     registro (usuário da sessão) fica sempre gravado à parte e é
+     destacado sempre que diferir do valor selecionado — mantém
+     rastreabilidade sem exigir fluxo de aprovação.
+   - Decisão registrada: um fluxo de aprovação explícito (registro
+     pendente até confirmação de quem recebeu de fato) fica fora do
+     escopo por ora — revisar quando existirem papéis de usuário
+     definidos (item 4 abaixo). Categorias de lançamento (`TransactionCategory`,
+     já cadastráveis) continuam sem uso associado até aparecer necessidade
+     concreta de categorizar cada repasse/gasto por tipo.
 2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
@@ -229,6 +253,15 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
+10. Revisão de nomenclatura simples em todas as telas existentes: nomes
+    técnicos/jargão em rótulos de campo, títulos de tela, botões e
+    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
+    de desenho da fatia "Dinheiro em mãos", item 1) devem ser revisados e
+    simplificados retroativamente em toda a aplicação — ver regra
+    registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
+    combinado com o item 9 (revisão de usabilidade) por serem passes
+    gerais parecidos — decidir com o usuário se entram juntos ou em
+    momentos separados.
 
 ## Como usar este arquivo
 
