@@ -86,7 +86,7 @@ export default async function UsersPage() {
           {activeUsers.map((user) => (
             <li
               key={user.id}
-              className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
             >
               <div className="flex flex-col">
                 <span className="text-black dark:text-zinc-50">{user.email}</span>
@@ -94,7 +94,7 @@ export default async function UsersPage() {
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">{user.phone}</span>
                 ) : null}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {user.mustChangePassword ? (
                   <>
                     <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
@@ -137,7 +137,7 @@ export default async function UsersPage() {
               {inactiveUsers.map((user) => (
                 <li
                   key={user.id}
-                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm text-zinc-500 dark:border-white/[.145] dark:text-zinc-400"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm text-zinc-500 dark:border-white/[.145] dark:text-zinc-400"
                 >
                   <span>{user.email}</span>
                   <form action={reactivate}>
