@@ -172,39 +172,44 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Dinheiro em mãos** (rastreio de custódia) e forma de pagamento por
+  doação — PR #27. Substitui a fatia genérica de "lançamentos financeiros
+  de entrada/saída" cogitada antes: o caso de uso real era este. Hoje uma
+  parcela paga ou doação avulsa não registrava quem ficou responsável pelo
+  valor recebido nem a forma de pagamento (Pix/dinheiro); quando o valor
+  arrecadado passa por mais de uma pessoa até virar uma compra da
+  campanha, faltava visibilidade de quem está com quanto. Adicionado:
+  - Forma de pagamento (Pix/dinheiro) e "Recebido por" (usuário do
+    sistema, padrão o usuário logado, mas selecionável) em toda entrada
+    de dinheiro (parcela paga, doação avulsa) — visível na própria tela
+    do carnê (`/campaigns/[id]/pledges/[pledgeId]`).
+  - Tela "Dinheiro em mãos" por campanha (`/campaigns/[id]/money-in-hand`):
+    saldo de cada usuário (recebido menos repassado) e histórico de
+    repasses. Histórico de recebimentos (quem recebeu cada parcela/doação)
+    não entrou nessa tela — fica visível na tela do carnê; doação avulsa
+    ainda não tem tela de listagem própria (lacuna pré-existente, fora do
+    escopo desta fatia).
+  - Registro de repasse (parcial ou total) de um usuário para um
+    destinatário em texto livre (sem cadastro próprio por ora — só
+    promover para cadastro se aparecer necessidade concreta de ver
+    histórico por destinatário).
+  - "Recebido por"/"quem repassou" é sempre selecionável (não travado no
+    usuário logado, para cobrir quem recebeu o valor mas não tem acesso
+    ao app no momento de registrar), mas quem de fato executou o
+    registro (usuário da sessão) fica sempre gravado à parte e é
+    destacado sempre que diferir do valor selecionado — mantém
+    rastreabilidade sem exigir fluxo de aprovação.
+  - Decisão registrada: um fluxo de aprovação explícito (registro
+    pendente até confirmação de quem recebeu de fato) ficou fora do
+    escopo por ora — revisar quando existirem papéis de usuário
+    definidos (ver backlog abaixo). Categorias de lançamento
+    (`TransactionCategory`, já cadastráveis) continuam sem uso associado
+    até aparecer necessidade concreta de categorizar cada repasse/gasto
+    por tipo.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Dinheiro em mãos** (rastreio de custódia) e forma de pagamento por
-   doação — substitui a fatia genérica de "lançamentos financeiros de
-   entrada/saída" cogitada antes: o caso de uso real é este. Hoje uma
-   parcela paga ou doação avulsa não registra quem ficou responsável pelo
-   valor recebido nem a forma de pagamento (Pix/dinheiro); quando o valor
-   arrecadado passa por mais de uma pessoa até virar uma compra da
-   campanha, falta visibilidade de quem está com quanto. Adiciona:
-   - Forma de pagamento (Pix/dinheiro) e "recebido por" (usuário do
-     sistema, padrão o usuário logado, mas selecionável) em toda entrada
-     de dinheiro (parcela paga, doação avulsa).
-   - Tela "Dinheiro em mãos" por campanha: saldo de cada usuário e
-     histórico de recebimentos/repasses.
-   - Registro de repasse (parcial ou total) de um usuário para um
-     destinatário em texto livre (sem cadastro próprio por ora — só
-     promover para cadastro se aparecer necessidade concreta de ver
-     histórico por destinatário).
-   - "Recebido por"/"quem repassou" é sempre selecionável (não travado no
-     usuário logado, para cobrir quem recebeu o valor mas não tem acesso
-     ao app no momento de registrar), mas quem de fato executou o
-     registro (usuário da sessão) fica sempre gravado à parte e é
-     destacado sempre que diferir do valor selecionado — mantém
-     rastreabilidade sem exigir fluxo de aprovação.
-   - Decisão registrada: um fluxo de aprovação explícito (registro
-     pendente até confirmação de quem recebeu de fato) fica fora do
-     escopo por ora — revisar quando existirem papéis de usuário
-     definidos (item 4 abaixo). Categorias de lançamento (`TransactionCategory`,
-     já cadastráveis) continuam sem uso associado até aparecer necessidade
-     concreta de categorizar cada repasse/gasto por tipo.
-2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+1. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
    Inclui mostrar no card de cada campanha do painel inicial quanto já foi
@@ -214,32 +219,32 @@ Nenhuma no momento.
    as campanhas de uma vez — nunca uma query por campanha no loop da
    listagem, que degradaria com o número de campanhas e penaliza mais
    ainda por causa da latência de conexão do Neon serverless.
-3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-4. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+3. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
-5. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-6. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-7. Skeletons de carregamento em todas as telas que buscam dado no
+6. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes.
-8. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+7. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
-   antes de implementar: depende de papéis de usuário (item 4) para
+   antes de implementar: depende de papéis de usuário (item 3) para
    controlar quem pode consultar; log fica maior com o tempo (custo de
    armazenamento no Neon) — definir se há retenção/expurgo; se o log
    guardar nome de doador/valor vinculado a uma ação, entra na mesma
    categoria de dado sensível da seção LGPD do `CLAUDE.md`.
-9. Revisão de usabilidade/poluição visual em **todas as telas existentes
+8. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -253,15 +258,15 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-10. Revisão de nomenclatura simples em todas as telas existentes: nomes
-    técnicos/jargão em rótulos de campo, títulos de tela, botões e
-    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
-    de desenho da fatia "Dinheiro em mãos", item 1) devem ser revisados e
-    simplificados retroativamente em toda a aplicação — ver regra
-    registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-    combinado com o item 9 (revisão de usabilidade) por serem passes
-    gerais parecidos — decidir com o usuário se entram juntos ou em
-    momentos separados.
+9. Revisão de nomenclatura simples em todas as telas existentes: nomes
+   técnicos/jargão em rótulos de campo, títulos de tela, botões e
+   mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
+   de desenho da fatia "Dinheiro em mãos", ver "Em andamento" acima) devem
+   ser revisados e simplificados retroativamente em toda a aplicação — ver
+   regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
+   combinado com o item 8 (revisão de usabilidade) por serem passes gerais
+   parecidos — decidir com o usuário se entram juntos ou em momentos
+   separados.
 
 ## Como usar este arquivo
 
