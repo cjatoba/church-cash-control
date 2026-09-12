@@ -87,6 +87,30 @@ formulário). Concretamente:
   em seguida — nunca deixar o usuário num beco sem saída sem link de
   volta/continuação.
 
+## Escopo de uma fatia em andamento
+
+Se, durante a implementação de uma fatia, o usuário pedir algo novo que
+não faz parte do escopo dela, **adicione ao backlog do `ROADMAP.md` em
+vez de implementar na hora** — a menos que o pedido seja necessário para
+a fatia atual continuar (ex.: um bug/lacuna na própria funcionalidade que
+está sendo implementada, descoberto ao validar; ver exemplos de "lacunas
+descobertas durante a validação em preview" no `ROADMAP.md`). Nesse caso,
+sim, implemente como parte da fatia atual. Na dúvida se algo bloqueia a
+continuidade ou é só um pedido novo, pergunte antes de decidir sozinho.
+
+## Skeletons de carregamento
+
+Toda tela que busca dado no servidor antes de renderizar (`page.tsx` com
+`await` numa query) precisa de um `loading.tsx` (mecanismo nativo do
+Next.js App Router) com um skeleton no lugar do conteúdo — nunca deixar a
+tela em branco enquanto a query roda, nem só durante a navegação inicial:
+também vale quando a mesma rota recarrega dados por causa de uma mudança
+de estado (ex.: trocar um filtro que navega para a rota com outra
+`searchParams`). Use o componente `Skeleton` compartilhado
+(`src/app/_components/skeleton.tsx`) em vez de duplicar `animate-pulse`
+em cada tela. Telas que só renderizam um formulário sem nenhuma leitura
+prévia do banco (ex.: `/campaigns/new`) não precisam de `loading.tsx`.
+
 ## TDD — obrigatório
 
 Todo código de `domain` e `application` é feito em ciclo RED → GREEN →

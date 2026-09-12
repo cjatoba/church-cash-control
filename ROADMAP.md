@@ -159,6 +159,16 @@ CASCADE`) + repositório Drizzle + tela protegida
 4. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
+5. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+   sair?") antes de encerrar a sessão, em vez de sair direto no clique.
+6. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+   sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
+   botão de submit separado.
+7. Skeletons de carregamento em todas as telas que buscam dado no
+   servidor (painel inicial, listas de categorias/tipos de
+   carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
+   ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
+   carregamento"; falta aplicar retroativamente nas telas existentes.
 
 ## Como usar este arquivo
 
