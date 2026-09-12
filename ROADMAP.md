@@ -237,6 +237,25 @@ CASCADE`) + repositório Drizzle + tela protegida
   usuário acumular um ou mais papéis independentes (ex.: colunas
   booleanas por capacidade: gerenciar usuários, gerenciar campanha,
   receber arrecadação), não implementada ainda.
+  - Lição aprendida durante a validação em preview: a migration
+    `0008_add-user-role-and-phone.sql` foi editada in-place para trocar
+    o valor do enum de `treasurer` para `fundraiser` depois de já ter
+    sido aplicada no banco de preview num deploy anterior — o
+    `drizzle-kit migrate` não reaplica uma migration já registrada só
+    porque o conteúdo do arquivo mudou, então o banco de preview
+    continuou com o enum antigo (`treasurer`) mesmo com o código já
+    esperando `fundraiser`, quebrando o convite de usuário com esse
+    papel. Corrigido com uma migration nova
+    (`0010_rename_treasurer_to_fundraiser.sql`,
+    `ALTER TYPE ... RENAME VALUE`) em vez de editar a migration antiga de
+    novo. Regra prática: uma vez que uma migration foi commitada (e
+    principalmente depois de rodar em qualquer ambiente), sempre corrigir
+    com uma migration nova — nunca editar o arquivo de uma migration já
+    aplicada.
+  - Também corrigido nesta PR: formulários de convidar/editar usuário
+    limpavam os dados digitados quando a submissão dava erro, obrigando
+    redigitar tudo (ver item 10 do backlog para o mesmo problema nos
+    formulários mais antigos do app).
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -314,6 +333,16 @@ CASCADE`) + repositório Drizzle + tela protegida
    combinado com o item 8 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
+10. Revisar todos os formulários existentes do app (campanha, categoria,
+    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a
+    preservar os dados digitados quando a submissão dá erro — lacuna
+    encontrada e corrigida nos formulários de convidar/editar usuário
+    (ver "Em andamento"): o React reseta os campos não controlados assim
+    que a server action termina, mesmo em caso de erro de validação, não
+    só em sucesso; a correção é a action devolver os valores enviados no
+    estado de erro e usá-los como `defaultValue`. Os formulários mais
+    antigos do app provavelmente têm o mesmo problema e não foram
+    revisados ainda.
 
 ## Como usar este arquivo
 

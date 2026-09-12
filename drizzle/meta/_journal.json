@@ -71,6 +71,13 @@
       "when": 1789231136518,
       "tag": "0009_add-user-active",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789318861000,
+      "tag": "0010_rename_treasurer_to_fundraiser",
+      "breakpoints": true
     }
   ]
 }

@@ -229,6 +229,16 @@ versão real do projeto é a última tag/GitHub Release, não esse campo.
 - Variáveis de ambiente sempre passam por `src/shared/env.ts`
   (`parseEnv`/`getEnv`), nunca acesse `process.env` diretamente fora desse
   módulo.
+- **Nunca editar o SQL de uma migration já commitada** (e principalmente
+  já aplicada em algum ambiente — o deploy automático em preview faz
+  isso valer desde o primeiro push da PR). O `drizzle-kit migrate` decide
+  o que rodar por controle próprio de migrations já aplicadas, não pelo
+  conteúdo do arquivo — editar uma migration antiga não a reaplica em
+  bancos onde ela já rodou, deixando código e banco dessincronizados
+  (ver `ROADMAP.md`, entrada da PR #28, para um caso real disso com
+  enum). Precisou corrigir algo de uma migration já commitada? Sempre
+  criar uma migration nova (ex.: `ALTER TYPE ... RENAME VALUE` para
+  corrigir um valor de enum), nunca reescrever o arquivo antigo.
 
 ## Autenticação
 
