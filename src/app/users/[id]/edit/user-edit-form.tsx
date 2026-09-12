@@ -6,6 +6,7 @@ import { SubmitButton } from "@/app/_components/submit-button";
 
 export interface UserEditState {
   error?: string;
+  values?: { email: string; phone: string; role: string };
 }
 
 export function UserEditForm({
@@ -18,6 +19,10 @@ export function UserEditForm({
   isSelf: boolean;
 }) {
   const [state, formAction] = useActionState<UserEditState, FormData>(action, {});
+
+  const email = state.values?.email ?? defaultValues.email;
+  const phone = state.values?.phone ?? defaultValues.phone ?? "";
+  const role = state.values?.role ?? defaultValues.role;
 
   return (
     <form
@@ -38,7 +43,7 @@ export function UserEditForm({
           name="email"
           type="email"
           required
-          defaultValue={defaultValues.email}
+          defaultValue={email}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -48,7 +53,7 @@ export function UserEditForm({
           name="phone"
           type="tel"
           placeholder="(11) 91234-5678"
-          defaultValue={defaultValues.phone ?? ""}
+          defaultValue={phone}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -58,13 +63,13 @@ export function UserEditForm({
           <>
             <select
               disabled
-              defaultValue={defaultValues.role}
+              defaultValue={role}
               className="rounded border border-black/[.08] bg-zinc-100 px-3 py-2 text-zinc-500 dark:border-white/[.145] dark:bg-zinc-900 dark:text-zinc-500"
             >
               <option value="admin">Administrador</option>
               <option value="fundraiser">Responsável pela arrecadação</option>
             </select>
-            <input type="hidden" name="role" value={defaultValues.role} />
+            <input type="hidden" name="role" value={role} />
             <span className="text-xs text-zinc-500 dark:text-zinc-400">
               Você não pode alterar o próprio papel.
             </span>
@@ -73,7 +78,7 @@ export function UserEditForm({
           <select
             name="role"
             required
-            defaultValue={defaultValues.role}
+            defaultValue={role}
             className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
           >
             <option value="admin">Administrador</option>

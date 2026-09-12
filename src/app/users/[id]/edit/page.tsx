@@ -6,6 +6,10 @@ import { createUserManagementRepository } from "@/server/infrastructure/db/user-
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { UserEditForm, type UserEditState } from "./user-edit-form";
 
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
+
 export default async function EditUserPage({ params }: PageProps<"/users/[id]/edit">) {
   const session = await auth();
   if (!session || !canManageUsers(session.user.role)) {
@@ -40,7 +44,14 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
       const repository = createUserManagementRepository(db);
       await updateUser(repository, actionSession.user.id, userId, input);
     } catch {
-      return { error: "Não foi possível salvar o usuário. Confira os dados informados." };
+      return {
+        error: "Não foi possível salvar o usuário. Confira os dados informados.",
+        values: {
+          email: toStringValue(input.email),
+          phone: toStringValue(input.phone),
+          role: toStringValue(input.role),
+        },
+      };
     }
 
     redirect("/users");

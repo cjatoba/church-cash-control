@@ -9,6 +9,7 @@ const roleLabels = { admin: "Administrador", fundraiser: "Responsável pela arre
 
 export interface InviteUserState {
   error?: string;
+  values?: { email: string; phone: string; role: string };
   result?: {
     email: string;
     role: "admin" | "fundraiser";
@@ -78,6 +79,7 @@ function InviteUserFormFields({
           name="email"
           type="email"
           required
+          defaultValue={state.values?.email ?? ""}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -87,6 +89,7 @@ function InviteUserFormFields({
           name="phone"
           type="tel"
           placeholder="(11) 91234-5678"
+          defaultValue={state.values?.phone ?? ""}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -95,7 +98,7 @@ function InviteUserFormFields({
         <select
           name="role"
           required
-          defaultValue=""
+          defaultValue={state.values?.role ?? ""}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         >
           <option value="" disabled>

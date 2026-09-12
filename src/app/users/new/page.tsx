@@ -9,6 +9,10 @@ import { createDbClient } from "@/server/infrastructure/db/client";
 import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { InviteUserForm, type InviteUserState } from "./invite-user-form";
 
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
+
 export default async function NewUserPage() {
   const session = await auth();
   if (!session || !canManageUsers(session.user.role)) {
@@ -48,7 +52,14 @@ export default async function NewUserPage() {
         },
       };
     } catch {
-      return { error: "Não foi possível convidar o usuário. Confira os dados informados." };
+      return {
+        error: "Não foi possível convidar o usuário. Confira os dados informados.",
+        values: {
+          email: toStringValue(input.email),
+          phone: toStringValue(input.phone),
+          role: toStringValue(input.role),
+        },
+      };
     }
   }
 
