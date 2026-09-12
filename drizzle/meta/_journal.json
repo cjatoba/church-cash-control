@@ -29,6 +29,13 @@
       "when": 1789131175192,
       "tag": "0003_omniscient_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789181825871,
+      "tag": "0004_flippant_blazing_skull",
+      "breakpoints": true
     }
   ]
 }
