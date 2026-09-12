@@ -256,6 +256,15 @@ CASCADE`) + repositório Drizzle + tela protegida
     limpavam os dados digitados quando a submissão dava erro, obrigando
     redigitar tudo (ver item 10 do backlog para o mesmo problema nos
     formulários mais antigos do app).
+  - Também corrigido: erro de e-mail já cadastrado (e qualquer outro erro
+    de regra de negócio do domínio/aplicação) aparecia como mensagem
+    genérica "Confira os dados informados", sem dizer qual era o
+    problema de verdade. `toFriendlyErrorMessage`
+    (`src/app/_lib/action-error-message.ts`) agora mostra a mensagem do
+    próprio erro lançado pelo domínio/aplicação (já escrita em português
+    e pensada pro usuário final) e só cai no texto genérico para erro de
+    validação do Zod ou qualquer exceção inesperada — evita vazar
+    detalhe técnico sem esconder um erro que já é amigável.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -334,15 +343,21 @@ CASCADE`) + repositório Drizzle + tela protegida
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
 10. Revisar todos os formulários existentes do app (campanha, categoria,
-    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a
-    preservar os dados digitados quando a submissão dá erro — lacuna
-    encontrada e corrigida nos formulários de convidar/editar usuário
-    (ver "Em andamento"): o React reseta os campos não controlados assim
-    que a server action termina, mesmo em caso de erro de validação, não
-    só em sucesso; a correção é a action devolver os valores enviados no
-    estado de erro e usá-los como `defaultValue`. Os formulários mais
-    antigos do app provavelmente têm o mesmo problema e não foram
-    revisados ainda.
+    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
+    lacunas encontradas e corrigidas nos formulários de convidar/editar
+    usuário (ver "Em andamento"), que os formulários mais antigos
+    provavelmente também têm:
+    - Não preservar os dados digitados quando a submissão dá erro: o
+      React reseta os campos não controlados assim que a server action
+      termina, mesmo em caso de erro de validação, não só em sucesso; a
+      correção é a action devolver os valores enviados no estado de erro
+      e usá-los como `defaultValue`.
+    - Mostrar sempre uma mensagem genérica ("Confira os dados
+      informados") em vez da mensagem específica de um erro de regra de
+      negócio (ex.: "E-mail já cadastrado", "Nome da campanha já existe"
+      se aplicável) — usar `toFriendlyErrorMessage`
+      (`src/app/_lib/action-error-message.ts`) em vez de um `catch`
+      genérico.
 
 ## Como usar este arquivo
 

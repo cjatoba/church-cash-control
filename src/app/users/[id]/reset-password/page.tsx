@@ -9,6 +9,7 @@ import { generateTemporaryPassword } from "@/server/infrastructure/auth/temporar
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { getLoginUrl } from "@/server/infrastructure/http/login-url";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { ResetPasswordForm, type ResetPasswordState } from "./reset-password-form";
 
 export default async function ResetPasswordPage({
@@ -53,8 +54,10 @@ export default async function ResetPasswordPage({
           whatsappLink: result.whatsappLink,
         },
       };
-    } catch {
-      return { error: "Não foi possível gerar uma nova senha temporária." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(error, "Não foi possível gerar uma nova senha temporária."),
+      };
     }
   }
 

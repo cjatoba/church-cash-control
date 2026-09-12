@@ -4,6 +4,7 @@ import { updateUser } from "@/server/application/update-user";
 import { canManageUsers } from "@/server/domain/user-role";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { UserEditForm, type UserEditState } from "./user-edit-form";
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -43,9 +44,12 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
       await updateUser(repository, actionSession.user.id, userId, input);
-    } catch {
+    } catch (error) {
       return {
-        error: "Não foi possível salvar o usuário. Confira os dados informados.",
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível salvar o usuário. Confira os dados informados.",
+        ),
         values: {
           email: toStringValue(input.email),
           phone: toStringValue(input.phone),
