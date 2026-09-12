@@ -1,8 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import type { UserActiveRepository } from "@/server/application/deactivate-user";
 import type { InviteUserRepository } from "@/server/application/invite-user";
 import type { ManagedUserListRepository } from "@/server/application/list-managed-users";
 import type { RegenerateTemporaryPasswordRepository } from "@/server/application/regenerate-temporary-password";
+import type { UpdateUserRepository } from "@/server/application/update-user";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
@@ -11,7 +12,8 @@ export function createUserManagementRepository(
 ): InviteUserRepository &
   ManagedUserListRepository &
   RegenerateTemporaryPasswordRepository &
-  UserActiveRepository {
+  UserActiveRepository &
+  UpdateUserRepository {
   return {
     async emailInUse(email) {
       const rows = await db
@@ -73,6 +75,37 @@ export function createUserManagementRepository(
 
     async setActive(userId, active) {
       await db.update(users).set({ active }).where(eq(users.id, userId));
+    },
+
+    async findUserForEdit(userId) {
+      const [row] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          phone: users.phone,
+          role: users.role,
+        })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      return row ?? null;
+    },
+
+    async emailInUseByAnotherUser(email, userId) {
+      const rows = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(and(eq(users.email, email), ne(users.id, userId)))
+        .limit(1);
+      return rows.length > 0;
+    },
+
+    async update(userId, input) {
+      await db
+        .update(users)
+        .set({ email: input.email, phone: input.phone ?? null, role: input.role })
+        .where(eq(users.id, userId));
     },
   };
 }

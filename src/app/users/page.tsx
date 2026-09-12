@@ -111,6 +111,12 @@ export default async function UsersPage() {
                 <span className="rounded-full border border-black/[.14] px-3 py-1 text-xs font-medium text-zinc-700 dark:border-white/[.22] dark:text-zinc-300">
                   {roleLabels[user.role]}
                 </span>
+                <Link
+                  href={`/users/${user.id}/edit`}
+                  className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                >
+                  Editar
+                </Link>
                 {user.id !== currentUserId ? (
                   <form action={deactivate}>
                     <input type="hidden" name="userId" value={user.id} />

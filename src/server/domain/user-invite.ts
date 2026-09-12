@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { userRoleSchema } from "./user-role";
 
-const phoneSchema = z.preprocess(
+export const phoneSchema = z.preprocess(
   (value) => {
     if (typeof value !== "string") {
       return value;

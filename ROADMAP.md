@@ -222,17 +222,21 @@ CASCADE`) + repositório Drizzle + tela protegida
   (incluindo a URL de login do próprio ambiente — produção ou preview,
   derivada do host da requisição) quando o celular é informado (sem
   depender de provedor de e-mail); `/users/[id]/reset-password` gera
-  nova senha temporária para quem ainda não trocou a original. Papel
-  restringe, por ora, só o acesso à própria tela de gerenciar usuários
-  (`canManageUsers`) — decisão registrada de não implementar múltiplos
-  papéis por usuário nem um sistema de permissões granulares (tabela de
-  features por usuário): cada regra de permissão futura (ex.: só quem
-  tem papel X cria campanha) deve tratar `admin` como superusuário
-  (`role === "admin" || role === "X"`), o que já cobre o caso de uma
-  mesma pessoa ser admin e também responsável pela arrecadação sem
-  precisar acumular papéis. Ver item 3 do backlog para os próximos
-  papéis/gates cogitados (gerenciador de campanha, visualização para o
-  pastor).
+  nova senha temporária para quem ainda não trocou a original;
+  `/users/[id]/edit` permite corrigir e-mail, celular e papel de um
+  usuário já cadastrado (papel fica travado — select desabilitado — ao
+  editar a própria conta, para ninguém se trancar fora da tela de
+  gerenciar usuários por engano; reforçado também no caso de uso, não só
+  na tela). Papel restringe, por ora, só o acesso à própria tela de
+  gerenciar usuários (`canManageUsers`) — decisão registrada de não
+  implementar um sistema de permissões granulares baseado em tabela de
+  features por usuário. Ver item 3 do backlog: a ideia inicial era um
+  único papel por usuário com `admin` como superusuário, mas apareceu um
+  caso real (voluntário que cadastra campanha mas não gerencia usuário
+  nem faz arrecadação) que não cabe nisso — a direção revista é cada
+  usuário acumular um ou mais papéis independentes (ex.: colunas
+  booleanas por capacidade: gerenciar usuários, gerenciar campanha,
+  receber arrecadação), não implementada ainda.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -252,17 +256,19 @@ CASCADE`) + repositório Drizzle + tela protegida
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
 3. Mais papéis de usuário e permissões por tela — pedido concreto do
    uso real do app (hoje só existe o gate de gerenciar usuários, ver "Em
-   andamento"): restringir quem cria/edita campanha (papel "gerenciador
-   de campanha") e quem dá baixa em parcela/doação avulsa (papel
-   "responsável pela arrecadação", já existente), e adicionar um papel
-   de só visualização (ex.: pastor acompanhando o que entra e o status
-   geral, sem poder editar nada). Decisão já registrada (ver "Em
-   andamento"): continuar com um único papel por usuário, tratando
-   `admin` como superusuário em cada checagem de permissão — evita
-   precisar de múltiplos papéis por usuário (ex.: admin que também é
-   responsável pela arrecadação já teria acesso de qualquer forma).
-   Escopo maior que o gate único de hoje: precisa mapear, tela a tela,
-   quais ações ficam restritas a qual papel antes de implementar.
+   andamento"): restringir quem cria/edita campanha, quem dá baixa em
+   parcela/doação avulsa (hoje qualquer usuário logado pode), e
+   adicionar um acesso de só visualização (ex.: pastor acompanhando o
+   que entra e o status geral, sem poder editar nada). Decisão de modelo
+   revisada (ver "Em andamento"): um único papel por usuário com `admin`
+   como superusuário não cobre o caso real de um voluntário que cadastra
+   campanha mas não gerencia usuário nem faz arrecadação — cada usuário
+   precisa poder acumular **mais de uma capacidade independente** (ex.:
+   colunas booleanas: gerenciar usuários, gerenciar campanha, receber
+   arrecadação), com o acesso de só visualização sendo a ausência de
+   todas elas em vez de mais uma capacidade. Escopo maior que o gate
+   único de hoje: precisa mapear, tela a tela, quais ações ficam
+   restritas a qual capacidade antes de implementar.
 4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
 5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
