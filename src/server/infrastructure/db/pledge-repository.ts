@@ -1,11 +1,14 @@
 import { eq } from "drizzle-orm";
 import type { PledgeRepository } from "@/server/application/create-pledge";
 import type { PledgeListRepository } from "@/server/application/list-pledges";
+import type { PledgeDetailReader } from "@/server/application/get-pledge-detail";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
 import { donors, installments, pledges, pledgeTypes } from "./schema";
 
-export function createPledgeRepository(db: DbClient): PledgeRepository & PledgeListRepository {
+export function createPledgeRepository(
+  db: DbClient,
+): PledgeRepository & PledgeListRepository & PledgeDetailReader {
   return {
     async create(pledge) {
       const [row] = await db
@@ -72,6 +75,46 @@ export function createPledgeRepository(db: DbClient): PledgeRepository & PledgeL
           paidInstallments: counts.paid,
         };
       });
+    },
+
+    async findById(pledgeId) {
+      const [pledgeRow] = await db
+        .select({
+          id: pledges.id,
+          donorName: donors.name,
+          pledgeTypeName: pledgeTypes.name,
+          installmentValueCents: pledgeTypes.installmentValueCents,
+        })
+        .from(pledges)
+        .innerJoin(donors, eq(pledges.donorId, donors.id))
+        .innerJoin(pledgeTypes, eq(pledges.pledgeTypeId, pledgeTypes.id))
+        .where(eq(pledges.id, pledgeId))
+        .limit(1);
+
+      if (!pledgeRow) {
+        return null;
+      }
+
+      const installmentRows = await db
+        .select()
+        .from(installments)
+        .where(eq(installments.pledgeId, pledgeId));
+
+      return {
+        id: pledgeRow.id,
+        donorName: pledgeRow.donorName,
+        pledgeTypeName: pledgeRow.pledgeTypeName,
+        installmentValue: Money.fromCents(pledgeRow.installmentValueCents),
+        installments: installmentRows
+          .map((row) => ({
+            id: row.id,
+            dueDate: row.dueDate,
+            amount: Money.fromCents(row.amountCents),
+            paidAt: row.paidAt,
+            paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
+          }))
+          .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()),
+      };
     },
   };
 }

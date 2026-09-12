@@ -38,28 +38,30 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
             {pledges.map((pledge) => {
               const closed = isPledgeClosed(pledge);
               return (
-                <li
-                  key={pledge.id}
-                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
-                >
-                  <span>
-                    <span className="block text-zinc-900 dark:text-zinc-100">
-                      {pledge.donorName}
-                    </span>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                      Carnê {pledge.pledgeTypeName} · pago {pledge.paidInstallments} de{" "}
-                      {pledge.totalInstallments}
-                    </span>
-                  </span>
-                  <span
-                    className={
-                      closed
-                        ? "rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                        : "rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                    }
+                <li key={pledge.id}>
+                  <Link
+                    href={`/campaigns/${campaignId}/pledges/${pledge.id}`}
+                    className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:hover:border-white/[.22]"
                   >
-                    {closed ? "Fechado" : "Em aberto"}
-                  </span>
+                    <span>
+                      <span className="block text-zinc-900 dark:text-zinc-100">
+                        {pledge.donorName}
+                      </span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Carnê {pledge.pledgeTypeName} · pago {pledge.paidInstallments} de{" "}
+                        {pledge.totalInstallments}
+                      </span>
+                    </span>
+                    <span
+                      className={
+                        closed
+                          ? "rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                          : "rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                      }
+                    >
+                      {closed ? "Fechado" : "Em aberto"}
+                    </span>
+                  </Link>
                 </li>
               );
             })}

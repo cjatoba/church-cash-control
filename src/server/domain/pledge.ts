@@ -67,3 +67,19 @@ export interface PledgeSummary {
 export function isPledgeClosed(pledge: PledgeSummary): boolean {
   return pledge.totalInstallments > 0 && pledge.paidInstallments === pledge.totalInstallments;
 }
+
+export interface InstallmentDetail {
+  id: string;
+  dueDate: Date;
+  amount: Money;
+  paidAt: Date | null;
+  paidAmount: Money | null;
+}
+
+export interface PledgeDetail {
+  id: string;
+  donorName: string;
+  pledgeTypeName: string;
+  installmentValue: Money;
+  installments: InstallmentDetail[];
+}
