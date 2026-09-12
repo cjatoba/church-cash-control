@@ -109,14 +109,11 @@ CASCADE`) + repositório Drizzle + tela protegida
     mês + doações avulsas daquele mês) e quem ainda tem parcela pendente.
   - Categoria de lançamento (já existente antes desta PR) ficou fora
     desse fluxo — carnê e doação avulsa são conceitos próprios.
-
-## Em andamento (PRs abertas)
-
 - **Editar e arquivar campanha e categoria de lançamento** — PR #25: hoje
   só existia cadastro (criação) das duas — sem edição nem exclusão. A
   razão de entrar antes de "Registro de lançamentos financeiros genéricos"
-  ficou mais forte porque carnês/parcelas/doações avulsas (ver
-  `Concluído`) já referenciam `campaigns` por FK: excluir uma
+  ficou mais forte porque carnês/parcelas/doações avulsas (ver acima)
+  já referenciam `campaigns` por FK: excluir uma
   campanha/categoria arriscaria apagar dado financeiro real junto (a FK de
   `transaction_categories` já é `ON DELETE CASCADE` em relação a
   `campaigns` — ver `schema.ts`). Implementado como **exclusão lógica
@@ -128,9 +125,9 @@ CASCADE`) + repositório Drizzle + tela protegida
   `archiveTransactionCategory`/`restoreTransactionCategory` (TDD
   completo) + telas `/campaigns/[id]/edit`, `/campaigns/[id]/categories`
   (lista de categorias, não existia antes) e
-  `/campaigns/[id]/categories/[categoryId]/edit`. Aguardando validação no
-  preview da Vercel antes do merge. A mesma PR também cobriu lacunas
-  descobertas durante essa validação, fora do escopo original da fatia:
+  `/campaigns/[id]/categories/[categoryId]/edit`. A mesma PR também
+  cobriu lacunas descobertas durante a validação em preview, fora do
+  escopo original da fatia:
   - Editar uma campanha para encurtar o período não atualizava as
     parcelas de carnês já geradas. `updateCampaign` agora remove as
     parcelas ainda não pagas cujo vencimento ficou fora do novo período
@@ -173,6 +170,10 @@ CASCADE`) + repositório Drizzle + tela protegida
     corrigir a data); `revertInstallmentPayment` (domínio) só permite
     reverter uma parcela que já está paga.
 
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
+
 ## Backlog (próximas fatias, em ordem)
 
 1. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
@@ -214,13 +215,20 @@ CASCADE`) + repositório Drizzle + tela protegida
    armazenamento no Neon) — definir se há retenção/expurgo; se o log
    guardar nome de doador/valor vinculado a uma ação, entra na mesma
    categoria de dado sensível da seção LGPD do `CLAUDE.md`.
-9. Revisão de usabilidade mobile em todo o app: a maior parte do uso real
-   deve ser pelo celular, então vale um passe geral em telas já existentes
-   por alvos de toque maiores/mais espaçados (evitar links de texto
-   pequenos colados — foi o caso do modal de "Dar baixa", já corrigido),
-   mais uso de ícones e textos maiores para leitura rápida. Escopo maior
-   que uma correção pontual — decidir com o usuário quais telas entram
-   primeiro antes de começar.
+9. Revisão de usabilidade/poluição visual em **todas as telas existentes
+   do app** — não é uma correção pontual de uma tela específica, é um
+   passe geral obrigatório em toda a aplicação. Pontos a considerar em
+   cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
+   lista não podem competir todos no mesmo peso/tamanho), separação
+   visual entre seções (linha divisória ou agrupamento em vez de só
+   espaço em branco — hoje várias telas empilham seções num único bloco
+   contínuo), uso consistente de cor com significado (ex.: verde/âmbar
+   para pago/pendente nos dois lados, não só num), ícones para escaneio
+   rápido sem precisar ler todo o texto, e alvos de toque maiores/mais
+   espaçados no geral (não só em modais — foi o caso do modal de "Dar
+   baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
+   das telas antes de começar, mas o item em si cobre o app inteiro, não
+   uma tela isolada.
 
 ## Como usar este arquivo
 
