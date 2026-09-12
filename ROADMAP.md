@@ -112,36 +112,39 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Editar e arquivar campanha e categoria de lançamento** — PR #25: hoje
+  só existia cadastro (criação) das duas — sem edição nem exclusão. A
+  razão de entrar antes de "Registro de lançamentos financeiros genéricos"
+  ficou mais forte porque carnês/parcelas/doações avulsas (ver
+  `Concluído`) já referenciam `campaigns` por FK: excluir uma
+  campanha/categoria arriscaria apagar dado financeiro real junto (a FK de
+  `transaction_categories` já é `ON DELETE CASCADE` em relação a
+  `campaigns` — ver `schema.ts`). Implementado como **exclusão lógica
+  (soft delete)**: coluna `active` em `campaigns`/`transaction_categories`
+  — arquivar marca a campanha/categoria como inativa (some das listas
+  ativas) sem apagar nada, e é reversível (opção "Reativar"). Casos de
+  uso `updateCampaign`, `archiveCampaign`/`restoreCampaign`,
+  `updateTransactionCategory`,
+  `archiveTransactionCategory`/`restoreTransactionCategory` (TDD
+  completo) + telas `/campaigns/[id]/edit`, `/campaigns/[id]/categories`
+  (lista de categorias, não existia antes) e
+  `/campaigns/[id]/categories/[categoryId]/edit`. Aguardando validação no
+  preview da Vercel antes do merge.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
-   cadastro (criação) das duas — sem edição nem exclusão. Entra **antes**
-   de "Registro de lançamentos financeiros genéricos" (item 2) de
-   propósito, e a razão ficou mais forte agora que carnês/parcelas/doações
-   avulsas (ver `Concluído`) já existem referenciando `campaigns` por FK:
-   excluir uma campanha/categoria arrisca apagar dado financeiro real
-   junto (a FK de `transaction_categories` já é `ON DELETE CASCADE` em
-   relação a `campaigns` — ver `schema.ts`). Regra de exclusão já
-   decidida: **exclusão lógica (soft delete)** — arquivar marca a
-   campanha/categoria como inativa (some das listas ativas e das opções
-   de novo lançamento/categoria/carnê) sem apagar nada, e é reversível.
-   Preview das telas (painel com "Editar"/"Arquivar", tela de editar
-   campanha, lista de categorias com editar/arquivar, tela de editar
-   categoria) já aprovado; falta implementar.
-2. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
+1. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
    fora do fluxo de carnê/doação avulsa) — revisar se ainda é necessário
    como fatia própria, ou se carnê + doação avulsa já cobre o caso de uso
    real.
-3. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
-4. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-5. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+4. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
 
