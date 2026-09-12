@@ -98,6 +98,23 @@ descobertas durante a validação em preview" no `ROADMAP.md`). Nesse caso,
 sim, implemente como parte da fatia atual. Na dúvida se algo bloqueia a
 continuidade ou é só um pedido novo, pergunte antes de decidir sozinho.
 
+## Questionar pedidos com impacto negativo
+
+Antes de implementar qualquer pedido — do usuário, de uma issue, do
+backlog — avalie se ele pode impactar negativamente a aplicação em
+qualquer frente: experiência do usuário (ex.: fluxo mais confuso, mais
+cliques, tela poluída), desempenho (ex.: query pesada, N+1, payload
+grande), uso de recursos (ex.: mais leituras/escritas no banco do que o
+necessário, processamento desnecessário no cliente), ou alguma limitação
+conhecida da hospedagem/banco (ex.: cold start e limites de conexão do
+Neon serverless, limites do plano da Vercel). Se identificar um impacto
+negativo relevante, **não implemente direto** — explique o trade-off para
+o usuário e, quando fizer sentido, ofereça alternativas (como já é feito
+para decisões de regra de negócio ambíguas) antes de prosseguir. Isso não
+é motivo para recusar ou travar o pedido: é para a decisão de aceitar o
+trade-off ser explícita do usuário, não implícita numa escolha de
+implementação.
+
 ## Skeletons de carregamento
 
 Toda tela que busca dado no servidor antes de renderizar (`page.tsx` com
