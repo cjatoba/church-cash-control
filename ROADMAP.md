@@ -89,9 +89,8 @@ CASCADE`) + repositório Drizzle + tela protegida
 ## Em andamento (PRs abertas)
 
 - **Controle de carnês, sub-fatia 1 (doador + tipo de carnê + carnê com
-  parcelas geradas automaticamente)** — implementada na branch
-  `claude/proxima-etapa-projeto-dlyjkx`, ainda sem PR aberta. Ver detalhes
-  no item 1 do backlog abaixo.
+  parcelas geradas automaticamente)** — PR #23. Ver detalhes no item 1 do
+  backlog abaixo.
 
 ## Backlog (próximas fatias, em ordem)
 
