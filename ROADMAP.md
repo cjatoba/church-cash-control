@@ -88,9 +88,9 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-- **Controle de carnês, sub-fatias 1 e 2 (doador + tipo de carnê + carnê
-  com parcelas geradas automaticamente; dar baixa em parcela)** — PR #23.
-  Ver detalhes no item 1 do backlog abaixo.
+- **Controle de carnês, sub-fatias 1 a 3 (doador + tipo de carnê + carnê
+  com parcelas geradas automaticamente; dar baixa em parcela; doação
+  avulsa)** — PR #23. Ver detalhes no item 1 do backlog abaixo.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -122,8 +122,9 @@ CASCADE`) + repositório Drizzle + tela protegida
       da própria parcela, sem pagamento parcial por enquanto) — tela
       `/campaigns/[id]/pledges/[pledgeId]` com uma linha por parcela.
       **Implementada, ver "Em andamento" acima.**
-   3. Doação avulsa (contribuição sem carnê, vinculada a um doador
-      cadastrado ou a um nome livre).
+   3. Doação avulsa (contribuição sem carnê): valor, data e nome do doador
+      em texto livre (opcional — em branco fica anônima), sem vínculo com
+      um cadastro de doador. **Implementada, ver "Em andamento" acima.**
    4. Painel mensal de acompanhamento de meta (meta mensal batida ou não,
       quem pagou/quem ainda não pagou no mês).
 

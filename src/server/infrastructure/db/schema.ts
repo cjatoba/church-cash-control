@@ -71,6 +71,17 @@ export const pledges = pgTable("pledges", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const oneOffDonations = pgTable("one_off_donations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  donorName: varchar("donor_name", { length: 255 }),
+  amountCents: integer("amount_cents").notNull(),
+  date: date("date", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const installments = pgTable("installments", {
   id: uuid("id").primaryKey().defaultRandom(),
   pledgeId: uuid("pledge_id")

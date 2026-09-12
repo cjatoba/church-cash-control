@@ -102,6 +102,12 @@ export default async function Home() {
                   >
                     Doadores
                   </Link>
+                  <Link
+                    href={`/campaigns/${campaign.id}/one-off-donations/new`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    + Doação avulsa
+                  </Link>
                 </div>
               </article>
             ))}
