@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { UserListRepository } from "@/server/application/list-users";
+import type { UserRole } from "@/server/domain/user-role";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
@@ -8,6 +9,8 @@ export interface UserRecord {
   email: string;
   passwordHash: string;
   mustChangePassword: boolean;
+  role: UserRole;
+  active: boolean;
 }
 
 export async function findUserByEmail(db: DbClient, email: string): Promise<UserRecord | null> {
@@ -17,6 +20,8 @@ export async function findUserByEmail(db: DbClient, email: string): Promise<User
       email: users.email,
       passwordHash: users.passwordHash,
       mustChangePassword: users.mustChangePassword,
+      role: users.role,
+      active: users.active,
     })
     .from(users)
     .where(eq(users.email, email))

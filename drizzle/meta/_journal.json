@@ -57,6 +57,20 @@
       "when": 1789220015213,
       "tag": "0007_nappy_mach_iv",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789228920330,
+      "tag": "0008_add-user-role-and-phone",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789231136518,
+      "tag": "0009_add-user-active",
+      "breakpoints": true
     }
   ]
 }
