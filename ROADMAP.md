@@ -169,9 +169,6 @@ CASCADE`) + repositório Drizzle + tela protegida
     passos (mais fricção de propósito, por ser mais consequente que só
     corrigir a data); `revertInstallmentPayment` (domínio) só permite
     reverter uma parcela que já está paga.
-
-## Em andamento (PRs abertas)
-
 - **Dinheiro em mãos** (rastreio de custódia) e forma de pagamento por
   doação — PR #27. Substitui a fatia genérica de "lançamentos financeiros
   de entrada/saída" cogitada antes: o caso de uso real era este. Hoje uma
@@ -202,14 +199,25 @@ CASCADE`) + repositório Drizzle + tela protegida
   - Decisão registrada: um fluxo de aprovação explícito (registro
     pendente até confirmação de quem recebeu de fato) ficou fora do
     escopo por ora — revisar quando existirem papéis de usuário
-    definidos (ver backlog abaixo). Categorias de lançamento
-    (`TransactionCategory`, já cadastráveis) continuam sem uso associado
-    até aparecer necessidade concreta de categorizar cada repasse/gasto
-    por tipo.
+    definidos (ver backlog abaixo, item 1 — subiu de prioridade
+    justamente por essa fatia depender de mais de um usuário real usando
+    o app). Categorias de lançamento (`TransactionCategory`, já
+    cadastráveis) continuam sem uso associado até aparecer necessidade
+    concreta de categorizar cada repasse/gasto por tipo.
+
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+1. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+   de novos usuários (hoje só existe `pnpm user:create` via linha de
+   comando) — subiu de prioridade: a fatia "Dinheiro em mãos" (ver
+   `Concluído`) só se torna útil de verdade com cada voluntário logando
+   com sua própria conta, e hoje isso depende de rodar um comando fora
+   do app a cada novo usuário.
+2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
    Inclui mostrar no card de cada campanha do painel inicial quanto já foi
@@ -219,13 +227,10 @@ CASCADE`) + repositório Drizzle + tela protegida
    as campanhas de uma vez — nunca uma query por campanha no loop da
    listagem, que degradaria com o número de campanhas e penaliza mais
    ainda por causa da latência de conexão do Neon serverless.
-2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-3. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
-   de novos usuários (hoje só existe `pnpm user:create` via linha de
-   comando).
 4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
 5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
@@ -239,7 +244,7 @@ CASCADE`) + repositório Drizzle + tela protegida
 7. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
-   antes de implementar: depende de papéis de usuário (item 3) para
+   antes de implementar: depende de papéis de usuário (item 1) para
    controlar quem pode consultar; log fica maior com o tempo (custo de
    armazenamento no Neon) — definir se há retenção/expurgo; se o log
    guardar nome de doador/valor vinculado a uma ação, entra na mesma
@@ -261,7 +266,7 @@ CASCADE`) + repositório Drizzle + tela protegida
 9. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
-   de desenho da fatia "Dinheiro em mãos", ver "Em andamento" acima) devem
+   de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
    combinado com o item 8 (revisão de usabilidade) por serem passes gerais
