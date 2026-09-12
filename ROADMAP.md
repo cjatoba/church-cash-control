@@ -142,6 +142,18 @@ CASCADE`) + repositório Drizzle + tela protegida
     parcela (padrão: hoje, editável para qualquer data passada);
     `payInstallment` (domínio) passa a rejeitar data de pagamento no
     futuro.
+  - A remoção automática de parcelas ao encurtar o período (item acima)
+    acontecia sem avisar o usuário. A tela de editar campanha agora
+    calcula no cliente (reaproveitando `selectInstallmentsOutsidePeriod`)
+    quantas parcelas pendentes seriam removidas e pede confirmação num
+    modal antes de salvar, caso alguma seria removida.
+  - Decisão registrada para o caso inverso (aumentar o período): carnês
+    existentes **não são estendidos automaticamente** — o doador que
+    aderiu a um período não deve ganhar meses extras sem concordar.
+    `updateCampaign` sinaliza quando o período foi estendido e a campanha
+    já tem parcelas; a página de edição redireciona para
+    `/?campaignExtended=1` e o painel mostra um aviso informativo (não
+    bloqueante) explicando que os carnês não mudaram.
 
 ## Backlog (próximas fatias, em ordem)
 

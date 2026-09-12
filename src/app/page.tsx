@@ -14,7 +14,9 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR");
 
-export default async function Home() {
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const resolvedSearchParams = await searchParams;
+  const campaignExtended = resolvedSearchParams.campaignExtended === "1";
   const session = await auth();
   const db = createDbClient();
   const repository = createCampaignRepository(db);
@@ -72,6 +74,19 @@ export default async function Home() {
       </header>
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
+        {campaignExtended ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+            <span>
+              Período da campanha estendido. Carnês já existentes não foram alterados
+              automaticamente — as parcelas continuam cobrindo só o período combinado originalmente
+              com os doadores.
+            </span>
+            <Link href="/" className="whitespace-nowrap font-medium underline">
+              Ok, entendi
+            </Link>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Campanhas</h1>
           <Link

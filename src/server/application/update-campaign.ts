@@ -22,11 +22,17 @@ export interface UpdateCampaignDependencies {
   installmentsRemover: InstallmentsRemover;
 }
 
+export interface UpdateCampaignOutcome {
+  removedInstallmentsCount: number;
+  periodExtended: boolean;
+}
+
 export async function updateCampaign(
   dependencies: UpdateCampaignDependencies,
   id: string,
   input: unknown,
-): Promise<void> {
+  previousEndDate: Date,
+): Promise<UpdateCampaignOutcome> {
   const campaign = parseCampaign(input);
   await dependencies.campaignRepository.update(id, campaign);
 
@@ -35,4 +41,9 @@ export async function updateCampaign(
   if (idsToRemove.length > 0) {
     await dependencies.installmentsRemover.removeMany(idsToRemove);
   }
+
+  return {
+    removedInstallmentsCount: idsToRemove.length,
+    periodExtended: campaign.endDate > previousEndDate && installments.length > 0,
+  };
 }

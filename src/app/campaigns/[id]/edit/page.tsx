@@ -16,6 +16,10 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
     notFound();
   }
 
+  const installmentRepository = createInstallmentRepository(db);
+  const pendingInstallments = await installmentRepository.findInstallmentsByCampaign(campaignId);
+  const previousEndDate = campaign.endDate;
+
   async function update(
     _prevState: CreateCampaignState,
     formData: FormData,
@@ -29,11 +33,12 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
       endDate: formData.get("endDate"),
     };
 
+    let outcome;
     try {
       const db = createDbClient();
       const campaignRepository = createCampaignRepository(db);
       const installmentRepository = createInstallmentRepository(db);
-      await updateCampaign(
+      outcome = await updateCampaign(
         {
           campaignRepository,
           installmentsReader: installmentRepository,
@@ -41,12 +46,13 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
         },
         campaignId,
         input,
+        previousEndDate,
       );
     } catch {
       return { error: "Não foi possível salvar a campanha. Confira os dados informados." };
     }
 
-    redirect("/");
+    redirect(outcome.periodExtended ? "/?campaignExtended=1" : "/");
   }
 
   return (
@@ -62,6 +68,7 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
           startDate: campaign.startDate,
           endDate: campaign.endDate,
         }}
+        pendingInstallments={pendingInstallments}
       />
     </div>
   );

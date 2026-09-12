@@ -40,11 +40,12 @@ describe("updateCampaign", () => {
     startDate: "2026-01-01",
     endDate: "2026-12-31",
   };
+  const previousEndDate = new Date("2026-12-31");
 
   it("atualiza os dados da campanha existente", async () => {
     const dependencies = createDependencies();
 
-    await updateCampaign(dependencies, "campaign-1", validInput);
+    await updateCampaign(dependencies, "campaign-1", validInput, previousEndDate);
 
     expect(dependencies.updates).toHaveLength(1);
     expect(dependencies.updates[0]?.id).toBe("campaign-1");
@@ -56,7 +57,7 @@ describe("updateCampaign", () => {
     const dependencies = createDependencies();
 
     await expect(
-      updateCampaign(dependencies, "campaign-1", { ...validInput, name: "" }),
+      updateCampaign(dependencies, "campaign-1", { ...validInput, name: "" }, previousEndDate),
     ).rejects.toThrow();
     expect(dependencies.updates).toHaveLength(0);
     expect(dependencies.removedIds).toHaveLength(0);
@@ -68,9 +69,16 @@ describe("updateCampaign", () => {
       { id: "installment-2", dueDate: new Date("2027-01-01"), paidAt: null },
     ]);
 
-    await updateCampaign(dependencies, "campaign-1", { ...validInput, endDate: "2026-12-31" });
+    const outcome = await updateCampaign(
+      dependencies,
+      "campaign-1",
+      { ...validInput, endDate: "2026-12-31" },
+      new Date("2027-06-30"),
+    );
 
     expect(dependencies.removedIds).toEqual(["installment-2"]);
+    expect(outcome.removedInstallmentsCount).toBe(1);
+    expect(outcome.periodExtended).toBe(false);
   });
 
   it("nunca remove parcela já paga, mesmo fora do novo período", async () => {
@@ -78,8 +86,57 @@ describe("updateCampaign", () => {
       { id: "installment-1", dueDate: new Date("2027-01-01"), paidAt: new Date("2027-01-05") },
     ]);
 
-    await updateCampaign(dependencies, "campaign-1", { ...validInput, endDate: "2026-12-31" });
+    const outcome = await updateCampaign(
+      dependencies,
+      "campaign-1",
+      { ...validInput, endDate: "2026-12-31" },
+      new Date("2027-06-30"),
+    );
 
     expect(dependencies.removedIds).toEqual([]);
+    expect(outcome.removedInstallmentsCount).toBe(0);
+  });
+
+  it("sinaliza período estendido quando o novo fim é depois do antigo e já existem parcelas", async () => {
+    const dependencies = createDependencies([
+      { id: "installment-1", dueDate: new Date("2026-06-01"), paidAt: null },
+    ]);
+
+    const outcome = await updateCampaign(
+      dependencies,
+      "campaign-1",
+      { ...validInput, endDate: "2026-12-31" },
+      new Date("2026-06-30"),
+    );
+
+    expect(outcome.periodExtended).toBe(true);
+  });
+
+  it("não sinaliza período estendido quando não há nenhuma parcela na campanha", async () => {
+    const dependencies = createDependencies([]);
+
+    const outcome = await updateCampaign(
+      dependencies,
+      "campaign-1",
+      { ...validInput, endDate: "2026-12-31" },
+      new Date("2026-06-30"),
+    );
+
+    expect(outcome.periodExtended).toBe(false);
+  });
+
+  it("não sinaliza período estendido quando o novo fim não é depois do antigo", async () => {
+    const dependencies = createDependencies([
+      { id: "installment-1", dueDate: new Date("2026-06-01"), paidAt: null },
+    ]);
+
+    const outcome = await updateCampaign(
+      dependencies,
+      "campaign-1",
+      { ...validInput, endDate: "2026-12-31" },
+      new Date("2026-12-31"),
+    );
+
+    expect(outcome.periodExtended).toBe(false);
   });
 });
