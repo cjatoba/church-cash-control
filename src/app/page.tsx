@@ -83,12 +83,38 @@ export default async function Home() {
                     {currencyFormatter.format(campaign.goal.toCents() / 100)}
                   </span>
                 </p>
-                <Link
-                  href={`/campaigns/${campaign.id}/categories/new`}
-                  className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                >
-                  + Categoria
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={`/campaigns/${campaign.id}/categories/new`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    + Categoria
+                  </Link>
+                  <Link
+                    href={`/campaigns/${campaign.id}/pledge-types`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    Tipos de carnê
+                  </Link>
+                  <Link
+                    href={`/campaigns/${campaign.id}/donors`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    Doadores
+                  </Link>
+                  <Link
+                    href={`/campaigns/${campaign.id}/one-off-donations/new`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    + Doação avulsa
+                  </Link>
+                  <Link
+                    href={`/campaigns/${campaign.id}/monthly`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    Painel mensal
+                  </Link>
+                </div>
               </article>
             ))}
           </div>
