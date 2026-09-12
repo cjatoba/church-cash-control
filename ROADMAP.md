@@ -200,15 +200,12 @@ CASCADE`) + repositório Drizzle + tela protegida
   - Decisão registrada: um fluxo de aprovação explícito (registro
     pendente até confirmação de quem recebeu de fato) ficou fora do
     escopo por ora — revisar quando existirem papéis de usuário mais
-    granulares (ver "Em andamento" abaixo — a fatia de papéis de usuário
-    subiu de prioridade justamente por essa fatia depender de mais de um
+    granulares (ver entrada de papéis de usuário logo abaixo — essa
+    fatia subiu de prioridade justamente por essa depender de mais de um
     usuário real usando o app). Categorias de lançamento
     (`TransactionCategory`, já cadastráveis) continuam sem uso associado
     até aparecer necessidade concreta de categorizar cada repasse/gasto
     por tipo.
-
-## Em andamento (PRs abertas)
-
 - **Papéis de usuário (admin/responsável pela arrecadação) e convite de
   novos usuários** — PR #28: tabela `users` ganha `role` (enum
   admin/fundraiser — rótulo "Responsável pela arrecadação"; usuários
@@ -265,6 +262,10 @@ CASCADE`) + repositório Drizzle + tela protegida
     e pensada pro usuário final) e só cai no texto genérico para erro de
     validação do Zod ou qualquer exceção inesperada — evita vazar
     detalhe técnico sem esconder um erro que já é amigável.
+
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
