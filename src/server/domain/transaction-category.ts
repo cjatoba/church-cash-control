@@ -16,6 +16,11 @@ export interface TransactionCategory {
   type: TransactionCategoryType;
 }
 
+export interface TransactionCategorySummary extends TransactionCategory {
+  id: string;
+  active: boolean;
+}
+
 export function parseTransactionCategory(input: unknown): TransactionCategory {
   return transactionCategoryInputSchema.parse(input);
 }

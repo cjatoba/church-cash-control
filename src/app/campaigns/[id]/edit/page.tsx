@@ -1,0 +1,58 @@
+import { notFound, redirect } from "next/navigation";
+import { getCampaign } from "@/server/application/get-campaign";
+import { updateCampaign } from "@/server/application/update-campaign";
+import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
+import { createDbClient } from "@/server/infrastructure/db/client";
+import { CampaignForm, type CreateCampaignState } from "../../_components/campaign-form";
+
+export default async function EditCampaignPage({ params }: PageProps<"/campaigns/[id]/edit">) {
+  const { id: campaignId } = await params;
+  const db = createDbClient();
+  const repository = createCampaignRepository(db);
+  const campaign = await getCampaign(repository, campaignId);
+
+  if (!campaign) {
+    notFound();
+  }
+
+  async function update(
+    _prevState: CreateCampaignState,
+    formData: FormData,
+  ): Promise<CreateCampaignState> {
+    "use server";
+
+    const input = {
+      name: formData.get("name"),
+      goal: formData.get("goal"),
+      startDate: formData.get("startDate"),
+      endDate: formData.get("endDate"),
+    };
+
+    try {
+      const db = createDbClient();
+      const repository = createCampaignRepository(db);
+      await updateCampaign(repository, campaignId, input);
+    } catch {
+      return { error: "Não foi possível salvar a campanha. Confira os dados informados." };
+    }
+
+    redirect("/");
+  }
+
+  return (
+    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+      <CampaignForm
+        action={update}
+        heading="Editar campanha"
+        submitLabel="Salvar campanha"
+        pendingLabel="Salvando…"
+        defaultValues={{
+          name: campaign.name,
+          goal: campaign.goal.toCents() / 100,
+          startDate: campaign.startDate,
+          endDate: campaign.endDate,
+        }}
+      />
+    </div>
+  );
+}

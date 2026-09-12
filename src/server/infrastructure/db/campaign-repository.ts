@@ -3,13 +3,22 @@ import type { CampaignRepository } from "@/server/application/create-campaign";
 import type { CampaignListRepository } from "@/server/application/list-campaigns";
 import type { CampaignPeriodReader } from "@/server/application/create-pledge";
 import type { CampaignGoalPeriodReader } from "@/server/application/get-monthly-progress";
+import type { CampaignUpdateRepository } from "@/server/application/update-campaign";
+import type { CampaignArchiveRepository } from "@/server/application/archive-campaign";
+import type { CampaignDetailRepository } from "@/server/application/get-campaign";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
 import { campaigns } from "./schema";
 
 export function createCampaignRepository(
   db: DbClient,
-): CampaignRepository & CampaignListRepository & CampaignPeriodReader & CampaignGoalPeriodReader {
+): CampaignRepository &
+  CampaignListRepository &
+  CampaignPeriodReader &
+  CampaignGoalPeriodReader &
+  CampaignUpdateRepository &
+  CampaignArchiveRepository &
+  CampaignDetailRepository {
   return {
     async create(campaign) {
       const [row] = await db
@@ -36,6 +45,7 @@ export function createCampaignRepository(
         goal: Money.fromCents(row.goalCents),
         startDate: row.startDate,
         endDate: row.endDate,
+        active: row.active,
       }));
     },
 
@@ -56,10 +66,28 @@ export function createCampaignRepository(
         return null;
       }
       return {
+        name: row.name,
         goal: Money.fromCents(row.goalCents),
         startDate: row.startDate,
         endDate: row.endDate,
+        active: row.active,
       };
+    },
+
+    async update(id, campaign) {
+      await db
+        .update(campaigns)
+        .set({
+          name: campaign.name,
+          goalCents: campaign.goal.toCents(),
+          startDate: campaign.startDate,
+          endDate: campaign.endDate,
+        })
+        .where(eq(campaigns.id, id));
+    },
+
+    async setActive(id, active) {
+      await db.update(campaigns).set({ active }).where(eq(campaigns.id, id));
     },
   };
 }

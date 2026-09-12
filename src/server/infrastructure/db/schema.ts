@@ -23,6 +23,7 @@ export const campaigns = pgTable("campaigns", {
   goalCents: integer("goal_cents").notNull(),
   startDate: date("start_date", { mode: "date" }).notNull(),
   endDate: date("end_date", { mode: "date" }).notNull(),
+  active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -38,6 +39,7 @@ export const transactionCategories = pgTable("transaction_categories", {
     .references(() => campaigns.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
   type: transactionCategoryTypeEnum("type").notNull(),
+  active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

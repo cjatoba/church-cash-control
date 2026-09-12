@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { listCampaigns } from "@/server/application/list-campaigns";
+import { archiveCampaign, restoreCampaign } from "@/server/application/archive-campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { SubmitButton } from "@/app/_components/submit-button";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -15,11 +18,43 @@ export default async function Home() {
   const session = await auth();
   const db = createDbClient();
   const repository = createCampaignRepository(db);
-  const campaigns = await listCampaigns(repository);
+  const allCampaigns = await listCampaigns(repository);
+  const campaigns = allCampaigns.filter((campaign) => campaign.active);
+  const archivedCampaigns = allCampaigns.filter((campaign) => !campaign.active);
 
   async function logout(): Promise<void> {
     "use server";
     await signOut({ redirectTo: "/login" });
+  }
+
+  async function archive(formData: FormData): Promise<void> {
+    "use server";
+
+    const campaignId = formData.get("campaignId");
+    if (typeof campaignId !== "string") {
+      throw new Error("Campanha inválida");
+    }
+
+    const db = createDbClient();
+    const repository = createCampaignRepository(db);
+    await archiveCampaign(repository, campaignId);
+
+    redirect("/");
+  }
+
+  async function restore(formData: FormData): Promise<void> {
+    "use server";
+
+    const campaignId = formData.get("campaignId");
+    if (typeof campaignId !== "string") {
+      throw new Error("Campanha inválida");
+    }
+
+    const db = createDbClient();
+    const repository = createCampaignRepository(db);
+    await restoreCampaign(repository, campaignId);
+
+    redirect("/");
   }
 
   return (
@@ -85,10 +120,10 @@ export default async function Home() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Link
-                    href={`/campaigns/${campaign.id}/categories/new`}
+                    href={`/campaigns/${campaign.id}/categories`}
                     className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                   >
-                    + Categoria
+                    Categorias
                   </Link>
                   <Link
                     href={`/campaigns/${campaign.id}/pledge-types`}
@@ -114,11 +149,49 @@ export default async function Home() {
                   >
                     Painel mensal
                   </Link>
+                  <Link
+                    href={`/campaigns/${campaign.id}/edit`}
+                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                  >
+                    Editar
+                  </Link>
+                  <form action={archive}>
+                    <input type="hidden" name="campaignId" value={campaign.id} />
+                    <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
+                  </form>
                 </div>
               </article>
             ))}
           </div>
         )}
+
+        {archivedCampaigns.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+              Campanhas arquivadas
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {archivedCampaigns.map((campaign) => (
+                <article
+                  key={campaign.id}
+                  className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 text-zinc-500 dark:border-white/[.145] dark:bg-zinc-950 dark:text-zinc-400"
+                >
+                  <div>
+                    <h3 className="font-semibold">{campaign.name}</h3>
+                    <p className="text-xs">
+                      {dateFormatter.format(campaign.startDate)} –{" "}
+                      {dateFormatter.format(campaign.endDate)}
+                    </p>
+                  </div>
+                  <form action={restore}>
+                    <input type="hidden" name="campaignId" value={campaign.id} />
+                    <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
+                  </form>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </main>
     </div>
   );

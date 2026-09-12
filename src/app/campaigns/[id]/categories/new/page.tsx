@@ -1,7 +1,7 @@
 import { createTransactionCategory } from "@/server/application/create-transaction-category";
 import { createTransactionCategoryRepository } from "@/server/infrastructure/db/transaction-category-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { CategoryForm, type CreateCategoryState } from "./category-form";
+import { CategoryForm, type CreateCategoryState } from "../_components/category-form";
 
 export default async function NewTransactionCategoryPage({
   params,
@@ -33,7 +33,11 @@ export default async function NewTransactionCategoryPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
-      <CategoryForm action={create} />
+      <CategoryForm
+        action={create}
+        backHref={`/campaigns/${campaignId}/categories`}
+        backLabel="← Voltar para categorias"
+      />
     </div>
   );
 }

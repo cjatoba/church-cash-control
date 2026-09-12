@@ -8,10 +8,22 @@ export interface CreateCampaignState {
   error?: string;
 }
 
+function toDateInputValue(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 export function CampaignForm({
   action,
+  heading = "Nova campanha",
+  submitLabel = "Criar campanha",
+  pendingLabel = "Criando…",
+  defaultValues,
 }: {
   action: (prevState: CreateCampaignState, formData: FormData) => Promise<CreateCampaignState>;
+  heading?: string;
+  submitLabel?: string;
+  pendingLabel?: string;
+  defaultValues?: { name: string; goal: number; startDate: Date; endDate: Date };
 }) {
   const [state, formAction] = useActionState<CreateCampaignState, FormData>(action, {});
 
@@ -26,7 +38,7 @@ export function CampaignForm({
       >
         ← Voltar para o painel
       </Link>
-      <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Nova campanha</h1>
+      <h1 className="text-xl font-semibold text-black dark:text-zinc-50">{heading}</h1>
       {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
         Nome
@@ -34,6 +46,7 @@ export function CampaignForm({
           name="name"
           type="text"
           required
+          defaultValue={defaultValues?.name}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -45,6 +58,7 @@ export function CampaignForm({
           step="0.01"
           min="0.01"
           required
+          defaultValue={defaultValues?.goal}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -54,6 +68,7 @@ export function CampaignForm({
           name="startDate"
           type="date"
           required
+          defaultValue={defaultValues ? toDateInputValue(defaultValues.startDate) : undefined}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
@@ -63,10 +78,11 @@ export function CampaignForm({
           name="endDate"
           type="date"
           required
+          defaultValue={defaultValues ? toDateInputValue(defaultValues.endDate) : undefined}
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
-      <SubmitButton pendingLabel="Criando…">Criar campanha</SubmitButton>
+      <SubmitButton pendingLabel={pendingLabel}>{submitLabel}</SubmitButton>
     </form>
   );
 }

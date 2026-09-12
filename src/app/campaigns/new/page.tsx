@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createCampaign } from "@/server/application/create-campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { CampaignForm, type CreateCampaignState } from "./campaign-form";
+import { CampaignForm, type CreateCampaignState } from "../_components/campaign-form";
 
 export default function NewCampaignPage() {
   async function create(
