@@ -27,8 +27,9 @@ implementar.
 - **Login mínimo (Auth.js v5, usuários individuais)** — PR #3: tabela
   `users`, regras de validação de credenciais, hash de senha, proteção de
   rotas, página `/login`. Primeiro usuário é criado via
-  `pnpm user:create <email> <senha>` — não há tela de cadastro (fica para
-  quando papéis de usuário forem definidos, ver backlog).
+  `pnpm user:create <email> <senha>` — cadastro de novos usuários pela
+  própria aplicação ficou para a fatia de papéis de usuário (ver "Em
+  andamento").
 - **Troca de senha obrigatória no primeiro acesso** — PR #12: todo usuário
   nasce com `mustChangePassword = true`; o callback `authorized`
   (`src/auth.config.ts`) força redirecionamento para `/change-password`
@@ -198,26 +199,33 @@ CASCADE`) + repositório Drizzle + tela protegida
     rastreabilidade sem exigir fluxo de aprovação.
   - Decisão registrada: um fluxo de aprovação explícito (registro
     pendente até confirmação de quem recebeu de fato) ficou fora do
-    escopo por ora — revisar quando existirem papéis de usuário
-    definidos (ver backlog abaixo, item 1 — subiu de prioridade
-    justamente por essa fatia depender de mais de um usuário real usando
-    o app). Categorias de lançamento (`TransactionCategory`, já
-    cadastráveis) continuam sem uso associado até aparecer necessidade
-    concreta de categorizar cada repasse/gasto por tipo.
+    escopo por ora — revisar quando existirem papéis de usuário mais
+    granulares (ver "Em andamento" abaixo — a fatia de papéis de usuário
+    subiu de prioridade justamente por essa fatia depender de mais de um
+    usuário real usando o app). Categorias de lançamento
+    (`TransactionCategory`, já cadastráveis) continuam sem uso associado
+    até aparecer necessidade concreta de categorizar cada repasse/gasto
+    por tipo.
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Papéis de usuário (admin/tesoureiro) e convite de novos usuários** —
+  PR #28: tabela `users` ganha `role` (enum admin/tesoureiro, usuários
+  existentes migram como admin) e `phone` (opcional). Tela `/users` lista
+  usuários cadastrados; `/users/new` convida um novo usuário (e-mail,
+  celular opcional, papel) gerando senha temporária mostrada uma única
+  vez — reaproveita `mustChangePassword` já existente — com botão
+  opcional para abrir o WhatsApp já com a mensagem de convite pronta
+  quando o celular é informado (sem depender de provedor de e-mail);
+  `/users/[id]/reset-password` gera nova senha temporária para quem
+  ainda não trocou a original. Papel restringe, por ora, só o acesso à
+  própria tela de gerenciar usuários (`canManageUsers`) — decisão
+  registrada de não implementar um sistema de permissões granulares
+  (tabela de features por usuário) enquanto só existir esse único gate.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
-   de novos usuários (hoje só existe `pnpm user:create` via linha de
-   comando) — subiu de prioridade: a fatia "Dinheiro em mãos" (ver
-   `Concluído`) só se torna útil de verdade com cada voluntário logando
-   com sua própria conta, e hoje isso depende de rodar um comando fora
-   do app a cada novo usuário.
-2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+1. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
    Inclui mostrar no card de cada campanha do painel inicial quanto já foi
@@ -227,29 +235,32 @@ Nenhuma no momento.
    as campanhas de uma vez — nunca uma query por campanha no loop da
    listagem, que degradaria com o número de campanhas e penaliza mais
    ainda por causa da latência de conexão do Neon serverless.
-3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+3. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+4. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-6. Skeletons de carregamento em todas as telas que buscam dado no
+5. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
-   carregamento"; falta aplicar retroativamente nas telas existentes.
-7. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+   carregamento"; falta aplicar retroativamente nas telas existentes
+   (`/users` já nasceu com o próprio `loading.tsx`, ver "Em andamento").
+6. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
-   antes de implementar: depende de papéis de usuário (item 1) para
-   controlar quem pode consultar; log fica maior com o tempo (custo de
+   antes de implementar: hoje só existe o papel admin/tesoureiro para
+   restringir quem gerencia usuários (ver "Em andamento") — definir se
+   esse mesmo papel controla quem pode consultar o log, ou se log de
+   auditoria exige um papel próprio; log fica maior com o tempo (custo de
    armazenamento no Neon) — definir se há retenção/expurgo; se o log
    guardar nome de doador/valor vinculado a uma ação, entra na mesma
    categoria de dado sensível da seção LGPD do `CLAUDE.md`.
-8. Revisão de usabilidade/poluição visual em **todas as telas existentes
+7. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -263,13 +274,13 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-9. Revisão de nomenclatura simples em todas as telas existentes: nomes
+8. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 8 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 7 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
 
