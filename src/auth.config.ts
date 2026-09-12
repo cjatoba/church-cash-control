@@ -1,6 +1,7 @@
 import type { NextAuthConfig, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { canManageUsers } from "./server/domain/user-role";
 
 export const authConfig = {
   pages: {
@@ -27,6 +28,10 @@ export const authConfig = {
         return NextResponse.redirect(new URL("/", request.nextUrl));
       }
 
+      if (pathname.startsWith("/users") && !canManageUsers(auth.user.role)) {
+        return NextResponse.redirect(new URL("/", request.nextUrl));
+      }
+
       return true;
     },
     // Precisa viver aqui (não só em auth.ts): o proxy roda uma instância
@@ -43,6 +48,9 @@ export const authConfig = {
       if (typeof user?.mustChangePassword === "boolean") {
         token.mustChangePassword = user.mustChangePassword;
       }
+      if (typeof user?.role === "string") {
+        token.role = user.role;
+      }
       return token;
     },
     session({ session, token }) {
@@ -51,6 +59,9 @@ export const authConfig = {
       }
       if (typeof token.mustChangePassword === "boolean") {
         session.user.mustChangePassword = token.mustChangePassword;
+      }
+      if (token.role === "admin" || token.role === "treasurer") {
+        session.user.role = token.role;
       }
       return session;
     },
