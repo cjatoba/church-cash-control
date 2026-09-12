@@ -25,7 +25,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const db = createDbClient();
         const user = await findUserByEmail(db, credentials.email);
-        if (!user) {
+        if (!user?.active) {
           return null;
         }
 
@@ -34,7 +34,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        return { id: user.id, email: user.email, mustChangePassword: user.mustChangePassword };
+        return {
+          id: user.id,
+          email: user.email,
+          mustChangePassword: user.mustChangePassword,
+          role: user.role,
+        };
       },
     }),
   ],

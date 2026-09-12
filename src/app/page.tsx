@@ -64,6 +64,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       <header className="flex items-center justify-between gap-4 border-b border-black/[.08] px-6 py-4 dark:border-white/[.145]">
         <span className="font-semibold text-black dark:text-zinc-50">Controle de Caixa</span>
         <div className="flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+          {session?.user.role === "admin" ? (
+            <Link href="/users" className="hover:text-black dark:hover:text-zinc-50">
+              Usuários
+            </Link>
+          ) : null}
           {session?.user.email ? <span>{session.user.email}</span> : null}
           <form action={logout}>
             <button type="submit" className="hover:text-black dark:hover:text-zinc-50">

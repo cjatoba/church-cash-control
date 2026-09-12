@@ -27,8 +27,9 @@ implementar.
 - **Login mínimo (Auth.js v5, usuários individuais)** — PR #3: tabela
   `users`, regras de validação de credenciais, hash de senha, proteção de
   rotas, página `/login`. Primeiro usuário é criado via
-  `pnpm user:create <email> <senha>` — não há tela de cadastro (fica para
-  quando papéis de usuário forem definidos, ver backlog).
+  `pnpm user:create <email> <senha>` — cadastro de novos usuários pela
+  própria aplicação ficou para a fatia de papéis de usuário (ver "Em
+  andamento").
 - **Troca de senha obrigatória no primeiro acesso** — PR #12: todo usuário
   nasce com `mustChangePassword = true`; o callback `authorized`
   (`src/auth.config.ts`) força redirecionamento para `/change-password`
@@ -198,26 +199,76 @@ CASCADE`) + repositório Drizzle + tela protegida
     rastreabilidade sem exigir fluxo de aprovação.
   - Decisão registrada: um fluxo de aprovação explícito (registro
     pendente até confirmação de quem recebeu de fato) ficou fora do
-    escopo por ora — revisar quando existirem papéis de usuário
-    definidos (ver backlog abaixo, item 1 — subiu de prioridade
-    justamente por essa fatia depender de mais de um usuário real usando
-    o app). Categorias de lançamento (`TransactionCategory`, já
-    cadastráveis) continuam sem uso associado até aparecer necessidade
-    concreta de categorizar cada repasse/gasto por tipo.
+    escopo por ora — revisar quando existirem papéis de usuário mais
+    granulares (ver "Em andamento" abaixo — a fatia de papéis de usuário
+    subiu de prioridade justamente por essa fatia depender de mais de um
+    usuário real usando o app). Categorias de lançamento
+    (`TransactionCategory`, já cadastráveis) continuam sem uso associado
+    até aparecer necessidade concreta de categorizar cada repasse/gasto
+    por tipo.
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Papéis de usuário (admin/responsável pela arrecadação) e convite de
+  novos usuários** — PR #28: tabela `users` ganha `role` (enum
+  admin/fundraiser — rótulo "Responsável pela arrecadação"; usuários
+  existentes migram como admin), `phone` (opcional) e `active` (soft
+  delete). Tela `/users` lista usuários ativos e desativados, com opção
+  de desativar (bloqueia login; admin não pode desativar a própria
+  conta) e reativar; `/users/new` convida um novo usuário (e-mail,
+  celular opcional, papel) gerando senha temporária mostrada uma única
+  vez — reaproveita `mustChangePassword` já existente — com botão
+  opcional para abrir o WhatsApp já com a mensagem de convite pronta
+  (incluindo a URL de login do próprio ambiente — produção ou preview,
+  derivada do host da requisição) quando o celular é informado (sem
+  depender de provedor de e-mail); `/users/[id]/reset-password` gera
+  nova senha temporária para quem ainda não trocou a original;
+  `/users/[id]/edit` permite corrigir e-mail, celular e papel de um
+  usuário já cadastrado (papel fica travado — select desabilitado — ao
+  editar a própria conta, para ninguém se trancar fora da tela de
+  gerenciar usuários por engano; reforçado também no caso de uso, não só
+  na tela). Papel restringe, por ora, só o acesso à própria tela de
+  gerenciar usuários (`canManageUsers`) — decisão registrada de não
+  implementar um sistema de permissões granulares baseado em tabela de
+  features por usuário. Ver item 3 do backlog: a ideia inicial era um
+  único papel por usuário com `admin` como superusuário, mas apareceu um
+  caso real (voluntário que cadastra campanha mas não gerencia usuário
+  nem faz arrecadação) que não cabe nisso — a direção revista é cada
+  usuário acumular um ou mais papéis independentes (ex.: colunas
+  booleanas por capacidade: gerenciar usuários, gerenciar campanha,
+  receber arrecadação), não implementada ainda.
+  - Lição aprendida durante a validação em preview: a migration
+    `0008_add-user-role-and-phone.sql` foi editada in-place para trocar
+    o valor do enum de `treasurer` para `fundraiser` depois de já ter
+    sido aplicada no banco de preview num deploy anterior — o
+    `drizzle-kit migrate` não reaplica uma migration já registrada só
+    porque o conteúdo do arquivo mudou, então o banco de preview
+    continuou com o enum antigo (`treasurer`) mesmo com o código já
+    esperando `fundraiser`, quebrando o convite de usuário com esse
+    papel. Corrigido com uma migration nova
+    (`0010_rename_treasurer_to_fundraiser.sql`,
+    `ALTER TYPE ... RENAME VALUE`) em vez de editar a migration antiga de
+    novo. Regra prática: uma vez que uma migration foi commitada (e
+    principalmente depois de rodar em qualquer ambiente), sempre corrigir
+    com uma migration nova — nunca editar o arquivo de uma migration já
+    aplicada.
+  - Também corrigido nesta PR: formulários de convidar/editar usuário
+    limpavam os dados digitados quando a submissão dava erro, obrigando
+    redigitar tudo (ver item 10 do backlog para o mesmo problema nos
+    formulários mais antigos do app).
+  - Também corrigido: erro de e-mail já cadastrado (e qualquer outro erro
+    de regra de negócio do domínio/aplicação) aparecia como mensagem
+    genérica "Confira os dados informados", sem dizer qual era o
+    problema de verdade. `toFriendlyErrorMessage`
+    (`src/app/_lib/action-error-message.ts`) agora mostra a mensagem do
+    próprio erro lançado pelo domínio/aplicação (já escrita em português
+    e pensada pro usuário final) e só cai no texto genérico para erro de
+    validação do Zod ou qualquer exceção inesperada — evita vazar
+    detalhe técnico sem esconder um erro que já é amigável.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
-   de novos usuários (hoje só existe `pnpm user:create` via linha de
-   comando) — subiu de prioridade: a fatia "Dinheiro em mãos" (ver
-   `Concluído`) só se torna útil de verdade com cada voluntário logando
-   com sua própria conta, e hoje isso depende de rodar um comando fora
-   do app a cada novo usuário.
-2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+1. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
    Inclui mostrar no card de cada campanha do painel inicial quanto já foi
@@ -227,10 +278,25 @@ Nenhuma no momento.
    as campanhas de uma vez — nunca uma query por campanha no loop da
    listagem, que degradaria com o número de campanhas e penaliza mais
    ainda por causa da latência de conexão do Neon serverless.
-3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
+3. Mais papéis de usuário e permissões por tela — pedido concreto do
+   uso real do app (hoje só existe o gate de gerenciar usuários, ver "Em
+   andamento"): restringir quem cria/edita campanha, quem dá baixa em
+   parcela/doação avulsa (hoje qualquer usuário logado pode), e
+   adicionar um acesso de só visualização (ex.: pastor acompanhando o
+   que entra e o status geral, sem poder editar nada). Decisão de modelo
+   revisada (ver "Em andamento"): um único papel por usuário com `admin`
+   como superusuário não cobre o caso real de um voluntário que cadastra
+   campanha mas não gerencia usuário nem faz arrecadação — cada usuário
+   precisa poder acumular **mais de uma capacidade independente** (ex.:
+   colunas booleanas: gerenciar usuários, gerenciar campanha, receber
+   arrecadação), com o acesso de só visualização sendo a ausência de
+   todas elas em vez de mais uma capacidade. Escopo maior que o gate
+   único de hoje: precisa mapear, tela a tela, quais ações ficam
+   restritas a qual capacidade antes de implementar.
 4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
 5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
@@ -240,15 +306,19 @@ Nenhuma no momento.
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
-   carregamento"; falta aplicar retroativamente nas telas existentes.
+   carregamento"; falta aplicar retroativamente nas telas existentes
+   (`/users` já nasceu com o próprio `loading.tsx`, ver "Em andamento").
 7. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
-   antes de implementar: depende de papéis de usuário (item 1) para
-   controlar quem pode consultar; log fica maior com o tempo (custo de
-   armazenamento no Neon) — definir se há retenção/expurgo; se o log
-   guardar nome de doador/valor vinculado a uma ação, entra na mesma
-   categoria de dado sensível da seção LGPD do `CLAUDE.md`.
+   antes de implementar: hoje só existe o papel admin/responsável pela
+   arrecadação para restringir quem gerencia usuários (ver "Em
+   andamento") — definir se esse mesmo papel controla quem pode
+   consultar o log, ou se log de auditoria exige um papel próprio; log
+   fica maior com o tempo (custo de armazenamento no Neon) — definir se
+   há retenção/expurgo; se o log guardar nome de doador/valor vinculado a
+   uma ação, entra na mesma categoria de dado sensível da seção LGPD do
+   `CLAUDE.md`.
 8. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
@@ -272,6 +342,22 @@ Nenhuma no momento.
    combinado com o item 8 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
+10. Revisar todos os formulários existentes do app (campanha, categoria,
+    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
+    lacunas encontradas e corrigidas nos formulários de convidar/editar
+    usuário (ver "Em andamento"), que os formulários mais antigos
+    provavelmente também têm:
+    - Não preservar os dados digitados quando a submissão dá erro: o
+      React reseta os campos não controlados assim que a server action
+      termina, mesmo em caso de erro de validação, não só em sucesso; a
+      correção é a action devolver os valores enviados no estado de erro
+      e usá-los como `defaultValue`.
+    - Mostrar sempre uma mensagem genérica ("Confira os dados
+      informados") em vez da mensagem específica de um erro de regra de
+      negócio (ex.: "E-mail já cadastrado", "Nome da campanha já existe"
+      se aplicável) — usar `toFriendlyErrorMessage`
+      (`src/app/_lib/action-error-message.ts`) em vez de um `catch`
+      genérico.
 
 ## Como usar este arquivo
 
