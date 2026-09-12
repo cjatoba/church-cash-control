@@ -5,7 +5,7 @@ import { payInstallment } from "@/server/application/pay-installment";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { SubmitButton } from "@/app/_components/submit-button";
+import { PayInstallmentButton } from "../_components/pay-installment-button";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -99,19 +99,13 @@ export default async function PledgeDetailPage({
                   Pago em {dateFormatter.format(installment.paidAt)}
                 </span>
               ) : (
-                <form action={markInstallmentAsPaid} className="flex items-center gap-2">
-                  <input type="hidden" name="installmentId" value={installment.id} />
-                  <input
-                    type="date"
-                    name="paidAt"
-                    defaultValue={todayIso}
-                    max={todayIso}
-                    required
-                    aria-label="Data do pagamento"
-                    className="rounded border border-black/[.08] px-2 py-1 text-xs dark:border-white/[.145] dark:bg-black"
-                  />
-                  <SubmitButton pendingLabel="Registrando…">Dar baixa</SubmitButton>
-                </form>
+                <PayInstallmentButton
+                  installmentId={installment.id}
+                  monthLabel={formatMonthLabel(installment.dueDate)}
+                  amountLabel={currencyFormatter.format(installment.amount.toCents() / 100)}
+                  todayIso={todayIso}
+                  action={markInstallmentAsPaid}
+                />
               )}
             </li>
           ))}
