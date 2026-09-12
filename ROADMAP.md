@@ -88,9 +88,11 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-- **Controle de carnês, sub-fatias 1 a 3 (doador + tipo de carnê + carnê
-  com parcelas geradas automaticamente; dar baixa em parcela; doação
-  avulsa)** — PR #23. Ver detalhes no item 1 do backlog abaixo.
+- **Controle de carnês, completo (doador + tipo de carnê + carnê com
+  parcelas geradas automaticamente; dar baixa em parcela; doação avulsa;
+  painel mensal de meta)** — PR #23. Ver detalhes no item 1 do backlog
+  abaixo. Quando esta PR for mergeada, mover esta entrada para
+  "Concluído".
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -125,8 +127,12 @@ CASCADE`) + repositório Drizzle + tela protegida
    3. Doação avulsa (contribuição sem carnê): valor, data e nome do doador
       em texto livre (opcional — em branco fica anônima), sem vínculo com
       um cadastro de doador. **Implementada, ver "Em andamento" acima.**
-   4. Painel mensal de acompanhamento de meta (meta mensal batida ou não,
-      quem pagou/quem ainda não pagou no mês).
+   4. Painel mensal de acompanhamento de meta (`/campaigns/[id]/monthly`):
+      meta mensal = meta da campanha ÷ nº de meses do período; mês
+      selecionável (limitado ao período da campanha, padrão = mês atual);
+      lista quem pagou (parcela paga naquele mês + doações avulsas
+      daquele mês) e quem ainda tem parcela pendente naquele mês.
+      **Implementada, ver "Em andamento" acima.**
 
 2. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
    cadastro (criação) das duas — sem edição nem exclusão. A razão de vir

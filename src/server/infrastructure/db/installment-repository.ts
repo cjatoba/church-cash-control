@@ -1,15 +1,16 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type {
   InstallmentReader,
   InstallmentRepository,
 } from "@/server/application/pay-installment";
+import type { InstallmentsForMonthReader } from "@/server/application/get-monthly-progress";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
-import { installments } from "./schema";
+import { donors, installments, pledges } from "./schema";
 
 export function createInstallmentRepository(
   db: DbClient,
-): InstallmentReader & InstallmentRepository {
+): InstallmentReader & InstallmentRepository & InstallmentsForMonthReader {
   return {
     async findById(installmentId) {
       const [row] = await db
@@ -35,6 +36,27 @@ export function createInstallmentRepository(
           paidAmountCents: payment.paidAmount.toCents(),
         })
         .where(eq(installments.id, installmentId));
+    },
+
+    async findDueInMonth(campaignId, month) {
+      const rows = await db
+        .select({
+          donorName: donors.name,
+          amountCents: installments.amountCents,
+          paidAt: installments.paidAt,
+          paidAmountCents: installments.paidAmountCents,
+        })
+        .from(installments)
+        .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
+        .innerJoin(donors, eq(pledges.donorId, donors.id))
+        .where(and(eq(pledges.campaignId, campaignId), eq(installments.dueDate, month)));
+
+      return rows.map((row) => ({
+        donorName: row.donorName,
+        amount: Money.fromCents(row.amountCents),
+        paidAt: row.paidAt,
+        paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
+      }));
     },
   };
 }
