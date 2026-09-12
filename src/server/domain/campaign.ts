@@ -22,6 +22,7 @@ export interface Campaign {
 
 export interface CampaignSummary extends Campaign {
   id: string;
+  active: boolean;
 }
 
 export function parseCampaign(input: unknown): Campaign {

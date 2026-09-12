@@ -87,6 +87,47 @@ formulário). Concretamente:
   em seguida — nunca deixar o usuário num beco sem saída sem link de
   volta/continuação.
 
+## Escopo de uma fatia em andamento
+
+Se, durante a implementação de uma fatia, o usuário pedir algo novo que
+não faz parte do escopo dela, **adicione ao backlog do `ROADMAP.md` em
+vez de implementar na hora** — a menos que o pedido seja necessário para
+a fatia atual continuar (ex.: um bug/lacuna na própria funcionalidade que
+está sendo implementada, descoberto ao validar; ver exemplos de "lacunas
+descobertas durante a validação em preview" no `ROADMAP.md`). Nesse caso,
+sim, implemente como parte da fatia atual. Na dúvida se algo bloqueia a
+continuidade ou é só um pedido novo, pergunte antes de decidir sozinho.
+
+## Questionar pedidos com impacto negativo
+
+Antes de implementar qualquer pedido — do usuário, de uma issue, do
+backlog — avalie se ele pode impactar negativamente a aplicação em
+qualquer frente: experiência do usuário (ex.: fluxo mais confuso, mais
+cliques, tela poluída), desempenho (ex.: query pesada, N+1, payload
+grande), uso de recursos (ex.: mais leituras/escritas no banco do que o
+necessário, processamento desnecessário no cliente), ou alguma limitação
+conhecida da hospedagem/banco (ex.: cold start e limites de conexão do
+Neon serverless, limites do plano da Vercel). Se identificar um impacto
+negativo relevante, **não implemente direto** — explique o trade-off para
+o usuário e, quando fizer sentido, ofereça alternativas (como já é feito
+para decisões de regra de negócio ambíguas) antes de prosseguir. Isso não
+é motivo para recusar ou travar o pedido: é para a decisão de aceitar o
+trade-off ser explícita do usuário, não implícita numa escolha de
+implementação.
+
+## Skeletons de carregamento
+
+Toda tela que busca dado no servidor antes de renderizar (`page.tsx` com
+`await` numa query) precisa de um `loading.tsx` (mecanismo nativo do
+Next.js App Router) com um skeleton no lugar do conteúdo — nunca deixar a
+tela em branco enquanto a query roda, nem só durante a navegação inicial:
+também vale quando a mesma rota recarrega dados por causa de uma mudança
+de estado (ex.: trocar um filtro que navega para a rota com outra
+`searchParams`). Use o componente `Skeleton` compartilhado
+(`src/app/_components/skeleton.tsx`) em vez de duplicar `animate-pulse`
+em cada tela. Telas que só renderizam um formulário sem nenhuma leitura
+prévia do banco (ex.: `/campaigns/new`) não precisam de `loading.tsx`.
+
 ## TDD — obrigatório
 
 Todo código de `domain` e `application` é feito em ciclo RED → GREEN →
@@ -123,9 +164,14 @@ sem banco de dados.
   nunca faça merge/push direto. O CI (`.github/workflows/ci.yml`: lint,
   format check, typecheck, testes com cobertura, build) precisa estar verde
   antes da revisão.
-- **Nunca mergear a PR sem validação explícita do usuário.** Após abrir a
-  PR, o usuário valida a feature no ambiente de preview (deploy automático
-  da Vercel por PR) e só então confirma se o merge pode ser feito. CI verde
+- **Abrir a PR não exige autorização adicional do usuário** — pode (e deve)
+  ser feito assim que a fatia terminar de ser implementada, sem esperar
+  pedido explícito, justamente para já disponibilizar o preview automático
+  da Vercel para validação.
+- **Nunca mergear a PR sem validação explícita do usuário.** É o merge, não
+  a abertura da PR, que exige autorização explícita. Após abrir a PR, o
+  usuário valida a feature no ambiente de preview (deploy automático da
+  Vercel por PR) e só então confirma se o merge pode ser feito. CI verde
   é pré-requisito, não substituto dessa validação manual.
 - Branch protection na `main` (exigir PR + checks verdes antes de mergear)
   deve estar habilitada nas configurações do repositório no GitHub —

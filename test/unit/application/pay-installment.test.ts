@@ -25,15 +25,20 @@ function createDependencies(installment: InstallmentState | null) {
 }
 
 describe("payInstallment", () => {
-  it("marca a parcela como paga com a data e o valor da parcela", async () => {
+  it("marca a parcela como paga com a data informada e o valor da parcela", async () => {
     const dependencies = createDependencies({ amount: Money.fromReais(100), paidAt: null });
 
-    await payInstallment(dependencies, "installment-1", new Date("2026-03-10"));
+    await payInstallment(
+      dependencies,
+      "installment-1",
+      new Date("2026-03-01"),
+      new Date("2026-03-10"),
+    );
 
     expect(dependencies.paidPayments).toEqual([
       {
         installmentId: "installment-1",
-        paidAt: new Date("2026-03-10"),
+        paidAt: new Date("2026-03-01"),
         paidAmount: Money.fromReais(100),
       },
     ]);
@@ -43,7 +48,7 @@ describe("payInstallment", () => {
     const dependencies = createDependencies(null);
 
     await expect(
-      payInstallment(dependencies, "installment-1", new Date("2026-03-10")),
+      payInstallment(dependencies, "installment-1", new Date("2026-03-10"), new Date("2026-03-10")),
     ).rejects.toThrow();
     expect(dependencies.paidPayments).toHaveLength(0);
   });
@@ -55,7 +60,16 @@ describe("payInstallment", () => {
     });
 
     await expect(
-      payInstallment(dependencies, "installment-1", new Date("2026-03-10")),
+      payInstallment(dependencies, "installment-1", new Date("2026-03-10"), new Date("2026-03-10")),
+    ).rejects.toThrow();
+    expect(dependencies.paidPayments).toHaveLength(0);
+  });
+
+  it("rejeita data de pagamento no futuro", async () => {
+    const dependencies = createDependencies({ amount: Money.fromReais(100), paidAt: null });
+
+    await expect(
+      payInstallment(dependencies, "installment-1", new Date("2026-03-11"), new Date("2026-03-10")),
     ).rejects.toThrow();
     expect(dependencies.paidPayments).toHaveLength(0);
   });

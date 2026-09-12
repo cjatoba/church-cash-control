@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*
+ * O preflight do Tailwind zera margin em todo elemento (inclusive
+ * dialog), o que anula a centralização automática (margin: auto) que o
+ * navegador aplica nativamente a um <dialog> aberto com showModal().
+ * Repõe a centralização para todo modal do app.
+ */
+dialog {
+  margin: auto;
+}

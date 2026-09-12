@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
 import { payInstallment } from "@/server/application/pay-installment";
+import { correctInstallmentPaymentDate } from "@/server/application/correct-installment-payment-date";
+import { revertInstallmentPayment } from "@/server/application/revert-installment-payment";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { SubmitButton } from "@/app/_components/submit-button";
+import { PayInstallmentButton } from "../_components/pay-installment-button";
+import { EditPaymentDateButton } from "../_components/edit-payment-date-button";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -39,8 +42,9 @@ export default async function PledgeDetailPage({
     "use server";
 
     const installmentId = formData.get("installmentId");
-    if (typeof installmentId !== "string") {
-      throw new Error("Parcela inválida");
+    const paidAtValue = formData.get("paidAt");
+    if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
+      throw new Error("Dados inválidos para dar baixa na parcela");
     }
 
     const db = createDbClient();
@@ -48,10 +52,51 @@ export default async function PledgeDetailPage({
     await payInstallment(
       { installmentReader: installmentRepository, installmentRepository },
       installmentId,
+      new Date(paidAtValue),
     );
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
+
+  async function correctPaymentDate(formData: FormData): Promise<void> {
+    "use server";
+
+    const installmentId = formData.get("installmentId");
+    const paidAtValue = formData.get("paidAt");
+    if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
+      throw new Error("Dados inválidos para corrigir a data de pagamento");
+    }
+
+    const db = createDbClient();
+    const installmentRepository = createInstallmentRepository(db);
+    await correctInstallmentPaymentDate(
+      { installmentReader: installmentRepository, installmentRepository },
+      installmentId,
+      new Date(paidAtValue),
+    );
+
+    redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
+  }
+
+  async function revertPayment(formData: FormData): Promise<void> {
+    "use server";
+
+    const installmentId = formData.get("installmentId");
+    if (typeof installmentId !== "string") {
+      throw new Error("Parcela inválida");
+    }
+
+    const db = createDbClient();
+    const installmentRepository = createInstallmentRepository(db);
+    await revertInstallmentPayment(
+      { installmentReader: installmentRepository, installmentRepository },
+      installmentId,
+    );
+
+    redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
+  }
+
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   const paidCount = pledge.installments.filter((installment) => installment.paidAt).length;
   const totalCents = pledge.installments.length * pledge.installmentValue.toCents();
@@ -91,14 +136,26 @@ export default async function PledgeDetailPage({
                 {currencyFormatter.format(installment.amount.toCents() / 100)}
               </span>
               {installment.paidAt ? (
-                <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                  Pago em {dateFormatter.format(installment.paidAt)}
+                <span className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                    Pago em {dateFormatter.format(installment.paidAt)}
+                  </span>
+                  <EditPaymentDateButton
+                    installmentId={installment.id}
+                    currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
+                    todayIso={todayIso}
+                    correctAction={correctPaymentDate}
+                    revertAction={revertPayment}
+                  />
                 </span>
               ) : (
-                <form action={markInstallmentAsPaid}>
-                  <input type="hidden" name="installmentId" value={installment.id} />
-                  <SubmitButton pendingLabel="Registrando…">Dar baixa</SubmitButton>
-                </form>
+                <PayInstallmentButton
+                  installmentId={installment.id}
+                  monthLabel={formatMonthLabel(installment.dueDate)}
+                  amountLabel={currencyFormatter.format(installment.amount.toCents() / 100)}
+                  todayIso={todayIso}
+                  action={markInstallmentAsPaid}
+                />
               )}
             </li>
           ))}

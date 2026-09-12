@@ -10,9 +10,36 @@ export interface InstallmentPayment {
   paidAmount: Money;
 }
 
-export function payInstallment(installment: InstallmentState, now: Date): InstallmentPayment {
+export function payInstallment(
+  installment: InstallmentState,
+  paidAt: Date,
+  today: Date = new Date(),
+): InstallmentPayment {
   if (installment.paidAt) {
     throw new Error("Parcela já está paga");
   }
-  return { paidAt: now, paidAmount: installment.amount };
+  if (paidAt > today) {
+    throw new Error("Data de pagamento não pode ser no futuro");
+  }
+  return { paidAt, paidAmount: installment.amount };
+}
+
+export function correctInstallmentPaymentDate(
+  installment: InstallmentState,
+  paidAt: Date,
+  today: Date = new Date(),
+): InstallmentPayment {
+  if (!installment.paidAt) {
+    throw new Error("Parcela ainda não foi paga");
+  }
+  if (paidAt > today) {
+    throw new Error("Data de pagamento não pode ser no futuro");
+  }
+  return { paidAt, paidAmount: installment.amount };
+}
+
+export function revertInstallmentPayment(installment: InstallmentState): void {
+  if (!installment.paidAt) {
+    throw new Error("Parcela ainda não foi paga");
+  }
 }

@@ -112,38 +112,115 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Editar e arquivar campanha e categoria de lançamento** — PR #25: hoje
+  só existia cadastro (criação) das duas — sem edição nem exclusão. A
+  razão de entrar antes de "Registro de lançamentos financeiros genéricos"
+  ficou mais forte porque carnês/parcelas/doações avulsas (ver
+  `Concluído`) já referenciam `campaigns` por FK: excluir uma
+  campanha/categoria arriscaria apagar dado financeiro real junto (a FK de
+  `transaction_categories` já é `ON DELETE CASCADE` em relação a
+  `campaigns` — ver `schema.ts`). Implementado como **exclusão lógica
+  (soft delete)**: coluna `active` em `campaigns`/`transaction_categories`
+  — arquivar marca a campanha/categoria como inativa (some das listas
+  ativas) sem apagar nada, e é reversível (opção "Reativar"). Casos de
+  uso `updateCampaign`, `archiveCampaign`/`restoreCampaign`,
+  `updateTransactionCategory`,
+  `archiveTransactionCategory`/`restoreTransactionCategory` (TDD
+  completo) + telas `/campaigns/[id]/edit`, `/campaigns/[id]/categories`
+  (lista de categorias, não existia antes) e
+  `/campaigns/[id]/categories/[categoryId]/edit`. Aguardando validação no
+  preview da Vercel antes do merge. A mesma PR também cobriu lacunas
+  descobertas durante essa validação, fora do escopo original da fatia:
+  - Editar uma campanha para encurtar o período não atualizava as
+    parcelas de carnês já geradas. `updateCampaign` agora remove as
+    parcelas ainda não pagas cujo vencimento ficou fora do novo período
+    (`selectInstallmentsOutsidePeriod` em `domain/pledge.ts`); parcelas já
+    pagas nunca são removidas, pois são histórico financeiro.
+  - "Dar baixa" numa parcela sempre registrava o pagamento com a data
+    atual, sem opção de informar uma data anterior. A tela de carnê
+    (`/campaigns/[id]/pledges/[pledgeId]`) ganhou um campo de data por
+    parcela (padrão: hoje, editável para qualquer data passada);
+    `payInstallment` (domínio) passa a rejeitar data de pagamento no
+    futuro.
+  - A remoção automática de parcelas ao encurtar o período (item acima)
+    acontecia sem avisar o usuário. A tela de editar campanha agora
+    calcula no cliente (reaproveitando `selectInstallmentsOutsidePeriod`)
+    quantas parcelas pendentes seriam removidas e pede confirmação num
+    modal antes de salvar, caso alguma seria removida.
+  - Decisão registrada para o caso inverso (aumentar o período): carnês
+    existentes **não são estendidos automaticamente** — o doador que
+    aderiu a um período não deve ganhar meses extras sem concordar.
+    `updateCampaign` sinaliza quando o período foi estendido e a campanha
+    já tem parcelas; a página de edição redireciona para
+    `/?campaignExtended=1` e o painel mostra um aviso informativo (não
+    bloqueante) explicando que os carnês não mudaram.
+  - Depois de "dar baixa" numa parcela, não havia como corrigir a data se
+    fosse informada errada por engano. Parcela paga ganhou um link
+    "Editar" que abre um modal para corrigir só a data (o valor
+    registrado não muda); `correctInstallmentPaymentDate` (domínio)
+    exige que a parcela já esteja paga e rejeita data futura, espelhando
+    `payInstallment`.
+  - No modal de "Dar baixa", as opções "Escolher outra data"/"Cancelar"
+    eram dois links de texto pequenos colados um no outro — risco real de
+    toque errado no celular. Viraram botões com alvo de toque maior
+    (pill, `py-2.5`) e mais espaçados; o mesmo padrão foi aplicado nos
+    outros modais desta PR (editar campanha, corrigir data de pagamento)
+    por consistência.
+  - Corrigir a data não resolvia o caso de dar baixa por engano numa
+    parcela que nem deveria estar paga. O modal "Editar" ganhou uma
+    segunda seção ("Reverter para pendente") com confirmação em dois
+    passos (mais fricção de propósito, por ser mais consequente que só
+    corrigir a data); `revertInstallmentPayment` (domínio) só permite
+    reverter uma parcela que já está paga.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Editar e excluir campanha e categoria de lançamento.** Hoje só existe
-   cadastro (criação) das duas — sem edição nem exclusão. Entra **antes**
-   de "Registro de lançamentos financeiros genéricos" (item 2) de
-   propósito, e a razão ficou mais forte agora que carnês/parcelas/doações
-   avulsas (ver `Concluído`) já existem referenciando `campaigns` por FK:
-   excluir uma campanha/categoria arrisca apagar dado financeiro real
-   junto (a FK de `transaction_categories` já é `ON DELETE CASCADE` em
-   relação a `campaigns` — ver `schema.ts`). Regra de exclusão já
-   decidida: **exclusão lógica (soft delete)** — arquivar marca a
-   campanha/categoria como inativa (some das listas ativas e das opções
-   de novo lançamento/categoria/carnê) sem apagar nada, e é reversível.
-   Preview das telas (painel com "Editar"/"Arquivar", tela de editar
-   campanha, lista de categorias com editar/arquivar, tela de editar
-   categoria) já aprovado; falta implementar.
-2. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
+1. Registro de lançamentos financeiros genéricos (entradas/saídas de caixa
    fora do fluxo de carnê/doação avulsa) — revisar se ainda é necessário
    como fatia própria, ou se carnê + doação avulsa já cobre o caso de uso
    real.
-3. Relatórios / acompanhamento de progresso de arrecadação por campanha —
+2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
-4. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+   Inclui mostrar no card de cada campanha do painel inicial quanto já foi
+   arrecadado (não só a meta), pra dar visão geral sem precisar entrar na
+   campanha. Cuidado de implementação: calcular isso com uma (ou duas)
+   query agregada (`SUM ... GROUP BY campanha`) trazendo o total de todas
+   as campanhas de uma vez — nunca uma query por campanha no loop da
+   listagem, que degradaria com o número de campanhas e penaliza mais
+   ainda por causa da latência de conexão do Neon serverless.
+3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-5. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
+4. Papéis de usuário (ex.: admin/tesoureiro) e fluxo de convite/cadastro
    de novos usuários (hoje só existe `pnpm user:create` via linha de
    comando).
+5. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+   sair?") antes de encerrar a sessão, em vez de sair direto no clique.
+6. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+   sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
+   botão de submit separado.
+7. Skeletons de carregamento em todas as telas que buscam dado no
+   servidor (painel inicial, listas de categorias/tipos de
+   carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
+   ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
+   carregamento"; falta aplicar retroativamente nas telas existentes.
+8. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+   baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
+   fez e quando, consultável numa tela da aplicação. Pontos a decidir
+   antes de implementar: depende de papéis de usuário (item 4) para
+   controlar quem pode consultar; log fica maior com o tempo (custo de
+   armazenamento no Neon) — definir se há retenção/expurgo; se o log
+   guardar nome de doador/valor vinculado a uma ação, entra na mesma
+   categoria de dado sensível da seção LGPD do `CLAUDE.md`.
+9. Revisão de usabilidade mobile em todo o app: a maior parte do uso real
+   deve ser pelo celular, então vale um passe geral em telas já existentes
+   por alvos de toque maiores/mais espaçados (evitar links de texto
+   pequenos colados — foi o caso do modal de "Dar baixa", já corrigido),
+   mais uso de ícones e textos maiores para leitura rápida. Escopo maior
+   que uma correção pontual — decidir com o usuário quais telas entram
+   primeiro antes de começar.
 
 ## Como usar este arquivo
 
