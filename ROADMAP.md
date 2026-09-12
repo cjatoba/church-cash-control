@@ -182,6 +182,13 @@ CASCADE`) + repositório Drizzle + tela protegida
 2. Relatórios / acompanhamento de progresso de arrecadação por campanha —
    parte disso (meta mensal) já é coberta pelo painel mensal de carnês
    (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
+   Inclui mostrar no card de cada campanha do painel inicial quanto já foi
+   arrecadado (não só a meta), pra dar visão geral sem precisar entrar na
+   campanha. Cuidado de implementação: calcular isso com uma (ou duas)
+   query agregada (`SUM ... GROUP BY campanha`) trazendo o total de todas
+   as campanhas de uma vez — nunca uma query por campanha no loop da
+   listagem, que degradaria com o número de campanhas e penaliza mais
+   ainda por causa da latência de conexão do Neon serverless.
 3. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
