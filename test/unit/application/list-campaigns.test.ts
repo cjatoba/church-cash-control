@@ -22,6 +22,7 @@ describe("listCampaigns", () => {
       startDate: new Date("2026-01-01"),
       endDate: new Date("2026-12-31"),
       active: true,
+      raisedTotal: Money.fromReais(1500),
     };
     const repository = createInMemoryCampaignListRepository([campaign]);
 

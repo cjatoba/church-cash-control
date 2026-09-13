@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseCampaign } from "@/server/domain/campaign";
+import { calculateCampaignProgressPercentage, parseCampaign } from "@/server/domain/campaign";
+import { Money } from "@/server/domain/money";
 
 describe("parseCampaign", () => {
   const validInput = {
@@ -38,5 +39,43 @@ describe("parseCampaign", () => {
     expect(() =>
       parseCampaign({ ...validInput, startDate: "2026-06-01", endDate: "2026-01-01" }),
     ).toThrow();
+  });
+});
+
+describe("calculateCampaignProgressPercentage", () => {
+  it("retorna 0% quando nada foi arrecadado", () => {
+    const percentage = calculateCampaignProgressPercentage(
+      Money.fromCents(0),
+      Money.fromReais(1000),
+    );
+
+    expect(percentage).toBe(0);
+  });
+
+  it("retorna a porcentagem arredondada de quanto da meta já foi arrecadado", () => {
+    const percentage = calculateCampaignProgressPercentage(
+      Money.fromReais(333),
+      Money.fromReais(1000),
+    );
+
+    expect(percentage).toBe(33);
+  });
+
+  it("retorna 100% quando a meta foi atingida", () => {
+    const percentage = calculateCampaignProgressPercentage(
+      Money.fromReais(1000),
+      Money.fromReais(1000),
+    );
+
+    expect(percentage).toBe(100);
+  });
+
+  it("limita em 100% quando o arrecadado ultrapassa a meta", () => {
+    const percentage = calculateCampaignProgressPercentage(
+      Money.fromReais(1500),
+      Money.fromReais(1000),
+    );
+
+    expect(percentage).toBe(100);
   });
 });

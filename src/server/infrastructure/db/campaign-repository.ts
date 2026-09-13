@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, isNotNull, sql } from "drizzle-orm";
 import type { CampaignRepository } from "@/server/application/create-campaign";
 import type { CampaignListRepository } from "@/server/application/list-campaigns";
 import type { CampaignPeriodReader } from "@/server/application/create-pledge";
@@ -8,7 +8,33 @@ import type { CampaignArchiveRepository } from "@/server/application/archive-cam
 import type { CampaignDetailRepository } from "@/server/application/get-campaign";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
-import { campaigns } from "./schema";
+import { campaigns, installments, oneOffDonations, pledges } from "./schema";
+
+async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
+  const installmentRows = await db
+    .select({
+      campaignId: pledges.campaignId,
+      totalCents: sql<number>`coalesce(sum(${installments.paidAmountCents}), 0)::int`,
+    })
+    .from(installments)
+    .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
+    .where(isNotNull(installments.paidAt))
+    .groupBy(pledges.campaignId);
+
+  const donationRows = await db
+    .select({
+      campaignId: oneOffDonations.campaignId,
+      totalCents: sql<number>`coalesce(sum(${oneOffDonations.amountCents}), 0)::int`,
+    })
+    .from(oneOffDonations)
+    .groupBy(oneOffDonations.campaignId);
+
+  const totals = new Map<string, number>();
+  for (const row of [...installmentRows, ...donationRows]) {
+    totals.set(row.campaignId, (totals.get(row.campaignId) ?? 0) + row.totalCents);
+  }
+  return totals;
+}
 
 export function createCampaignRepository(
   db: DbClient,
@@ -38,7 +64,10 @@ export function createCampaignRepository(
     },
 
     async findAll() {
-      const rows = await db.select().from(campaigns);
+      const [rows, raisedByCampaign] = await Promise.all([
+        db.select().from(campaigns),
+        sumRaisedByCampaign(db),
+      ]);
       return rows.map((row) => ({
         id: row.id,
         name: row.name,
@@ -46,6 +75,7 @@ export function createCampaignRepository(
         startDate: row.startDate,
         endDate: row.endDate,
         active: row.active,
+        raisedTotal: Money.fromCents(raisedByCampaign.get(row.id) ?? 0),
       }));
     },
 

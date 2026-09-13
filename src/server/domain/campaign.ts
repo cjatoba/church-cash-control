@@ -23,6 +23,11 @@ export interface Campaign {
 export interface CampaignSummary extends Campaign {
   id: string;
   active: boolean;
+  raisedTotal: Money;
+}
+
+export function calculateCampaignProgressPercentage(raisedTotal: Money, goal: Money): number {
+  return Math.min(100, Math.round((raisedTotal.toCents() / goal.toCents()) * 100));
 }
 
 export function parseCampaign(input: unknown): Campaign {
