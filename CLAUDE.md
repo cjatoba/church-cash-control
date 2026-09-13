@@ -169,6 +169,15 @@ sem banco de dados.
 
 - **Nunca commitar diretamente na `main`.** Toda mudança acontece em uma
   branch própria (`feat/...`, `fix/...`, `chore/...`).
+- **Única exceção**: ao começar a implementar uma fatia, o commit que move
+  a entrada correspondente do backlog do `ROADMAP.md` para "Em andamento"
+  pode ir direto para a `main`, sem branch/PR e sem pedir autorização —
+  desde que seja _só_ essa atualização de documentação, sem nenhuma
+  mudança de código junto. Serve para deixar o estado real do trabalho
+  visível assim que ele começa, não só quando termina. Não vale para
+  marcar uma fatia como "Concluído" (isso continua entrando via PR normal,
+  já que acompanha ou segue o merge da feature) nem para qualquer outra
+  mudança em `CLAUDE.md`/`ROADMAP.md` além desse único commit inicial.
 - Commits seguem [Conventional Commits](https://www.conventionalcommits.org/)
   (`commitlint` valida via hook `commit-msg`). O hook `pre-commit` roda
   `lint-staged` (ESLint + Prettier nos arquivos alterados). O tipo do commit
@@ -187,6 +196,13 @@ sem banco de dados.
   usuário valida a feature no ambiente de preview (deploy automático da
   Vercel por PR) e só então confirma se o merge pode ser feito. CI verde
   é pré-requisito, não substituto dessa validação manual.
+- **Exceção**: a PR que só marca uma fatia como "Concluído" no
+  `ROADMAP.md` (aberta depois que a PR da feature já foi mergeada, citando
+  o número dela) pode ser mergeada sem pedir autorização, desde que
+  contenha _só_ essa atualização de documentação, sem nenhuma mudança de
+  código junto, e o CI esteja verde. Não se aplica a nenhuma outra PR,
+  nem mesmo outra PR de documentação (ex.: mudança de regra no próprio
+  `CLAUDE.md`).
 - Branch protection na `main` (exigir PR + checks verdes antes de mergear)
   deve estar habilitada nas configurações do repositório no GitHub —
   configuração manual, fora do alcance de comandos git.
