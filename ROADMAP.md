@@ -316,8 +316,18 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 - **Investigar por que `drizzle-kit migrate` finge sucesso sem aplicar
   migrations de verdade** no deploy da Vercel (ver lição aprendida da PR
-  #32 e item 1 do backlog anterior) — branch `claude/proxima-tarefa-htpv35`,
-  PR ainda não aberta.
+  #32 e item 1 do backlog anterior) — PR #35. Validando no preview, o novo
+  `db:verify-migrations` (adicionado nesta PR) já pegou uma inconsistência
+  real: a branch "preview" do Neon tinha um hash desatualizado para a
+  migration `0008_add-user-role-and-phone` — ela foi aplicada lá **antes**
+  da edição in-place que trocou `treasurer` por `fundraiser` no arquivo
+  (o mesmo problema já documentado na PR #28/#32), então o hash gravado
+  não batia com o conteúdo atual do arquivo. O schema em si estava correto
+  (a migration `0010` já tinha corrigido o enum via `ALTER TYPE`); só a
+  linha de rastreio ficou com o hash antigo. Corrigido com um `UPDATE` de
+  uma linha só na tabela `drizzle.__drizzle_migrations` da branch preview
+  (mesmo padrão de remediação manual já usado em produção na PR #32) —
+  nenhum arquivo de migration foi editado.
 
 ## Backlog (próximas fatias, em ordem)
 
