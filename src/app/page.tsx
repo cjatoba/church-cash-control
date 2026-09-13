@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { listCampaigns } from "@/server/application/list-campaigns";
 import { archiveCampaign, restoreCampaign } from "@/server/application/archive-campaign";
+import { calculateCampaignProgressPercentage } from "@/server/domain/campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
@@ -120,74 +121,106 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {campaigns.map((campaign) => (
-              <article
-                key={campaign.id}
-                className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.145] dark:bg-zinc-950"
-              >
-                <div>
-                  <h3 className="font-semibold text-black dark:text-zinc-50">{campaign.name}</h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {dateFormatter.format(campaign.startDate)} –{" "}
-                    {dateFormatter.format(campaign.endDate)}
-                  </p>
-                </div>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                  Meta:{" "}
-                  <span className="font-semibold">
-                    {currencyFormatter.format(campaign.goal.toCents() / 100)}
-                  </span>
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    href={`/campaigns/${campaign.id}/categories`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    Categorias
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaign.id}/pledge-types`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    Tipos de carnê
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaign.id}/donors`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    Doadores
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaign.id}/one-off-donations/new`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    + Doação avulsa
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaign.id}/monthly`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    Painel mensal
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaign.id}/money-in-hand`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    Dinheiro em mãos
-                  </Link>
-                  <Link
-                    href={`/campaigns/${campaign.id}/edit`}
-                    className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                  >
-                    Editar
-                  </Link>
-                  <form action={archive}>
-                    <input type="hidden" name="campaignId" value={campaign.id} />
-                    <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
-                  </form>
-                </div>
-              </article>
-            ))}
+            {campaigns.map((campaign) => {
+              const progressPercentage = calculateCampaignProgressPercentage(
+                campaign.raisedTotal,
+                campaign.goal,
+              );
+
+              return (
+                <article
+                  key={campaign.id}
+                  className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.145] dark:bg-zinc-950"
+                >
+                  <div>
+                    <h3 className="font-semibold text-black dark:text-zinc-50">{campaign.name}</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {dateFormatter.format(campaign.startDate)} –{" "}
+                      {dateFormatter.format(campaign.endDate)}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-0.5 text-sm text-zinc-700 dark:text-zinc-300">
+                      <span>
+                        Arrecadado:{" "}
+                        <span className="font-semibold">
+                          {currencyFormatter.format(campaign.raisedTotal.toCents() / 100)}
+                        </span>
+                      </span>
+                      <span>
+                        Meta:{" "}
+                        <span className="font-semibold">
+                          {currencyFormatter.format(campaign.goal.toCents() / 100)}
+                        </span>
+                      </span>
+                    </div>
+                    <div
+                      role="progressbar"
+                      aria-valuenow={progressPercentage}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      className="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
+                    >
+                      <div
+                        className="h-full rounded-full bg-emerald-500"
+                        style={{ width: `${progressPercentage.toString()}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {progressPercentage}% da meta
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/campaigns/${campaign.id}/categories`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Categorias
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/pledge-types`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Tipos de carnê
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/donors`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Doadores
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/one-off-donations/new`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      + Doação avulsa
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/monthly`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Painel mensal
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/money-in-hand`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Dinheiro em mãos
+                    </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/edit`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Editar
+                    </Link>
+                    <form action={archive}>
+                      <input type="hidden" name="campaignId" value={campaign.id} />
+                      <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
+                    </form>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
