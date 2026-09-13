@@ -311,23 +311,59 @@ CASCADE`) + repositório Drizzle + tela protegida
     reaplicá-las. A causa raiz de por que `drizzle-kit migrate` finge
     sucesso sem aplicar nada continua sem explicação — ver item 1 do
     backlog.
+- **Driver `pg` + conexão direta no `drizzle-kit` e verificação
+  pós-migrate** — PR #35, investigação do item 1 do backlog acima.
+  Levantamento: o log real de build da Vercel mostrou que o
+  `drizzle-kit migrate` usava o driver `@neondatabase/serverless`
+  (websocket) — único driver Postgres resolvível no projeto — e a própria
+  Neon recomenda não usar a connection string _pooled_ para rodar
+  migrations via `drizzle-kit` ("using a pooled connection string for
+  migrations can lead to errors"); o `vercel-build` reaproveitava o
+  mesmo `DATABASE_URL` pooled tanto para a aplicação quanto para o
+  migrate, indo contra essa recomendação. Um segundo problema,
+  independente, foi encontrado ao auditar `drizzle/meta/_journal.json`:
+  o timestamp da migration `0010_rename_treasurer_to_fundraiser` é maior
+  que o de `0011`/`0012` (geradas depois dela, mas com timestamp menor)
+  — como o algoritmo de migrate do `drizzle-orm` decide o que aplicar
+  comparando cada timestamp só contra o maior `created_at` já gravado
+  (não contra hash por arquivo), essa inversão faria `0011`/`0012`
+  ficarem invisíveis para sempre num `migrate()` futuro rodado depois de
+  `0010` já registrada — hoje inofensivo (a correção manual da PR #32 já
+  inseriu as três linhas), mas evidencia a fragilidade do mecanismo. Não
+  foi possível reproduzir de ponta a ponta contra uma branch Neon real a
+  partir da sessão que investigou (rede do sandbox bloqueava conexão
+  direta a hosts `*.neon.tech`), então a correção se apoiou na
+  documentação oficial e na leitura do código-fonte do
+  `drizzle-kit`/`drizzle-orm`. Implementado: `drizzle.config.ts` passa a
+  usar `DATABASE_URL_UNPOOLED` (conexão direta) com fallback para
+  `DATABASE_URL` quando a primeira não estiver configurada (evita
+  quebrar ambientes que ainda não a definiram); `pg`/`@types/pg` entram
+  como devDependency — como o `drizzle-kit` prioriza `pg` sobre
+  `@neondatabase/serverless` quando ambos são resolvíveis,
+  generate/migrate/studio passam a usar TCP direto em vez de websocket
+  (a aplicação em si continua em `neon-http`/pooled, sem mudança); novo
+  passo `pnpm db:verify-migrations` (`scripts/verify-migrations.ts`),
+  encadeado no `vercel-build` logo após o `db:migrate`, compara o hash
+  sha256 de cada migration commitada com o que está gravado em
+  `drizzle.__drizzle_migrations` e falha o build (em vez de seguir para
+  o `next build` e deployar) se alguma não tiver sido aplicada de fato —
+  cobre a lacuna real mesmo que outra causa ainda desconhecida volte a
+  causar uma falha silenciosa.
+  - **Achado real já na validação desta PR**: o novo
+    `db:verify-migrations` pegou, de fato, uma inconsistência na branch
+    "preview" do Neon — hash desatualizado da migration `0008` (aplicada
+    lá **antes** da edição in-place que trocou `treasurer` por
+    `fundraiser` no arquivo, o mesmo problema já documentado na PR
+    #28/#32). O schema em si estava correto (a migration `0010` já tinha
+    corrigido o enum via `ALTER TYPE`); só a linha de rastreio ficou com
+    o hash antigo. Corrigido com um `UPDATE` de uma linha só na tabela
+    `drizzle.__drizzle_migrations` da branch preview (mesmo padrão de
+    remediação manual já usado em produção na PR #32) — nenhum arquivo
+    de migration foi editado.
 
 ## Em andamento (PRs abertas)
 
-- **Investigar por que `drizzle-kit migrate` finge sucesso sem aplicar
-  migrations de verdade** no deploy da Vercel (ver lição aprendida da PR
-  #32 e item 1 do backlog anterior) — PR #35. Validando no preview, o novo
-  `db:verify-migrations` (adicionado nesta PR) já pegou uma inconsistência
-  real: a branch "preview" do Neon tinha um hash desatualizado para a
-  migration `0008_add-user-role-and-phone` — ela foi aplicada lá **antes**
-  da edição in-place que trocou `treasurer` por `fundraiser` no arquivo
-  (o mesmo problema já documentado na PR #28/#32), então o hash gravado
-  não batia com o conteúdo atual do arquivo. O schema em si estava correto
-  (a migration `0010` já tinha corrigido o enum via `ALTER TYPE`); só a
-  linha de rastreio ficou com o hash antigo. Corrigido com um `UPDATE` de
-  uma linha só na tabela `drizzle.__drizzle_migrations` da branch preview
-  (mesmo padrão de remediação manual já usado em produção na PR #32) —
-  nenhum arquivo de migration foi editado.
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
