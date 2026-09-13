@@ -228,8 +228,8 @@ CASCADE`) + repositório Drizzle + tela protegida
   gerenciar usuários (`canManageUsers`) — decisão registrada de não
   implementar um sistema de permissões granulares baseado em tabela de
   features por usuário. Ver fatia de capacidades por usuário (PR #32,
-  "Em andamento"): a ideia inicial era um
-  único papel por usuário com `admin` como superusuário, mas apareceu um
+  logo abaixo): a ideia inicial era um único papel por usuário com
+  `admin` como superusuário, mas apareceu um
   caso real (voluntário que cadastra campanha mas não gerencia usuário
   nem faz arrecadação) que não cabe nisso — a direção revista é cada
   usuário acumular um ou mais papéis independentes (ex.: colunas
@@ -252,7 +252,7 @@ CASCADE`) + repositório Drizzle + tela protegida
     aplicada.
   - Também corrigido nesta PR: formulários de convidar/editar usuário
     limpavam os dados digitados quando a submissão dava erro, obrigando
-    redigitar tudo (ver item 8 do backlog para o mesmo problema nos
+    redigitar tudo (ver item 9 do backlog para o mesmo problema nos
     formulários mais antigos do app).
   - Também corrigido: erro de e-mail já cadastrado (e qualquer outro erro
     de regra de negócio do domínio/aplicação) aparecia como mensagem
@@ -275,9 +275,6 @@ CASCADE`) + repositório Drizzle + tela protegida
   restante do relatório de progresso (além do que já é coberto pelo
   painel mensal de carnês e por esta fatia) fica para revisão futura, se
   aparecer necessidade concreta.
-
-## Em andamento (PRs abertas)
-
 - **Mais papéis de usuário e permissões por tela** — PR #32: substitui o
   enum `role` (admin/responsável pela arrecadação) por três capacidades
   booleanas independentes por usuário (`canManageUsers`,
@@ -295,25 +292,61 @@ CASCADE`) + repositório Drizzle + tela protegida
   usuários existentes (admin → as três capacidades; responsável pela
   arrecadação → só `canReceiveFunds`). `pnpm user:create` (primeiro
   usuário do sistema) passa a conceder as três capacidades.
+  - **Lição aprendida durante a validação em preview**: o mecanismo de
+    "migrations aplicadas automaticamente no deploy da Vercel" (script
+    `vercel-build`) estava silenciosamente quebrado — o log de build
+    mostrava `[✓] migrations applied successfully!`, mas
+    `drizzle-kit migrate` não aplicava nada de fato nem gravava linha em
+    `drizzle.__drizzle_migrations`. Isso passou despercebido por várias
+    PRs anteriores: o banco de **produção** estava parado desde a
+    migration `0007` (sem `role`/`phone`/`active` das PRs #25/#28), ou
+    seja, o login em produção já estava quebrado antes desta fatia, só
+    que nunca tinha sido notado porque a validação de cada PR sempre
+    aconteceu no ambiente de preview. Corrigido aplicando manualmente,
+    via SQL direto, as migrations pendentes nos dois bancos (`0011`/`0012`
+    no preview; `0008` a `0012` em produção) e inserindo as linhas
+    correspondentes em `drizzle.__drizzle_migrations` com o hash correto
+    (`sha256` do conteúdo de cada arquivo, mesmo algoritmo do
+    `drizzle-orm/migrator`) para o próximo deploy automático não tentar
+    reaplicá-las. A causa raiz de por que `drizzle-kit migrate` finge
+    sucesso sem aplicar nada continua sem explicação — ver item 1 do
+    backlog.
+
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+1. **Investigar por que `drizzle-kit migrate` finge sucesso sem aplicar
+   migrations de verdade** no deploy da Vercel (ver lição aprendida da PR
+   #32 acima) — bug de infraestrutura sério: pode voltar a deixar
+   produção com schema desatualizado a qualquer nova migration, de forma
+   silenciosa (o log de build não denuncia o problema). Suspeita
+   registrada: o aviso do `drizzle-kit` nesse mesmo log dizendo que o
+   driver `@neondatabase/serverless` só consegue conectar via websocket
+   pode estar relacionado — o driver HTTP (sem websocket) pode não
+   suportar de verdade o lock/transação que
+   `drizzle-kit migrate` precisa. Até isso ser corrigido, depois de toda
+   migration nova, conferir manualmente (ex.: via Neon MCP/console) se o
+   schema de produção e preview realmente mudou, em vez de confiar só no
+   log do deploy.
+2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-2. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+3. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-3. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+4. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-4. Skeletons de carregamento em todas as telas que buscam dado no
+5. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes
    (`/users` já nasceu com o próprio `loading.tsx`, ver `Concluído`, PR #28).
-5. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+6. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
    antes de implementar: definir se `canManageUsers` também controla quem
@@ -322,7 +355,7 @@ CASCADE`) + repositório Drizzle + tela protegida
    definir se há retenção/expurgo; se o log guardar nome de doador/valor
    vinculado a uma ação, entra na mesma categoria de dado sensível da
    seção LGPD do `CLAUDE.md`.
-6. Revisão de usabilidade/poluição visual em **todas as telas existentes
+7. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -336,16 +369,16 @@ CASCADE`) + repositório Drizzle + tela protegida
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-7. Revisão de nomenclatura simples em todas as telas existentes: nomes
+8. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 6 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 7 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
-8. Revisar todos os formulários existentes do app (campanha, categoria,
+9. Revisar todos os formulários existentes do app (campanha, categoria,
    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
    lacunas encontradas e corrigidas nos formulários de convidar/editar
    usuário (ver `Concluído`, PR #28), que os formulários mais antigos
