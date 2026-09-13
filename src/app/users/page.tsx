@@ -2,17 +2,22 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { deactivateUser, reactivateUser } from "@/server/application/deactivate-user";
-import { listManagedUsers } from "@/server/application/list-managed-users";
-import { canManageUsers } from "@/server/domain/user-role";
+import { listManagedUsers, type ManagedUser } from "@/server/application/list-managed-users";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
 
-const roleLabels = { admin: "Administrador", fundraiser: "Responsável pela arrecadação" } as const;
+function capabilityLabels(user: ManagedUser): string[] {
+  const labels: string[] = [];
+  if (user.canManageUsers) labels.push("Gerencia usuários");
+  if (user.canManageCampaigns) labels.push("Gerencia campanhas");
+  if (user.canReceiveFunds) labels.push("Recebe arrecadação");
+  return labels.length > 0 ? labels : ["Só visualização"];
+}
 
 export default async function UsersPage() {
   const session = await auth();
-  if (!session || !canManageUsers(session.user.role)) {
+  if (!session?.user.canManageUsers) {
     redirect("/");
   }
   const currentUserId = session.user.id;
@@ -27,7 +32,7 @@ export default async function UsersPage() {
     "use server";
 
     const session = await auth();
-    if (!session || !canManageUsers(session.user.role)) {
+    if (!session?.user.canManageUsers) {
       redirect("/");
     }
 
@@ -47,7 +52,7 @@ export default async function UsersPage() {
     "use server";
 
     const session = await auth();
-    if (!session || !canManageUsers(session.user.role)) {
+    if (!session?.user.canManageUsers) {
       redirect("/");
     }
 
@@ -108,9 +113,14 @@ export default async function UsersPage() {
                     </Link>
                   </>
                 ) : null}
-                <span className="rounded-full border border-black/[.14] px-3 py-1 text-xs font-medium text-zinc-700 dark:border-white/[.22] dark:text-zinc-300">
-                  {roleLabels[user.role]}
-                </span>
+                {capabilityLabels(user).map((label) => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-black/[.14] px-3 py-1 text-xs font-medium text-zinc-700 dark:border-white/[.22] dark:text-zinc-300"
+                  >
+                    {label}
+                  </span>
+                ))}
                 <Link
                   href={`/users/${user.id}/edit`}
                   className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"

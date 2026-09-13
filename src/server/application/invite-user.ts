@@ -1,15 +1,16 @@
 import { buildTemporaryPasswordWhatsAppLink } from "../domain/invite-message";
 import { parseInvite } from "../domain/user-invite";
-import type { UserRole } from "../domain/user-role";
+import type { UserCapabilities } from "../domain/user-capabilities";
 
 export interface InviteUserRepository {
   emailInUse(email: string): Promise<boolean>;
-  create(input: {
-    email: string;
-    phone?: string;
-    role: UserRole;
-    passwordHash: string;
-  }): Promise<{ id: string }>;
+  create(
+    input: {
+      email: string;
+      phone?: string;
+      passwordHash: string;
+    } & UserCapabilities,
+  ): Promise<{ id: string }>;
 }
 
 export interface InviteUserDependencies {
@@ -18,11 +19,10 @@ export interface InviteUserDependencies {
   loginUrl: string;
 }
 
-export interface InvitedUser {
+export interface InvitedUser extends UserCapabilities {
   id: string;
   email: string;
   phone?: string;
-  role: UserRole;
   temporaryPassword: string;
   whatsappLink?: string;
 }
@@ -46,7 +46,9 @@ export async function inviteUser(
     id,
     email: invite.email,
     phone: invite.phone,
-    role: invite.role,
+    canManageUsers: invite.canManageUsers,
+    canManageCampaigns: invite.canManageCampaigns,
+    canReceiveFunds: invite.canReceiveFunds,
     temporaryPassword,
     whatsappLink: invite.phone
       ? buildTemporaryPasswordWhatsAppLink(

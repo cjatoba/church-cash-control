@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { listPledges } from "@/server/application/list-pledges";
 import { isPledgeClosed } from "@/server/domain/pledge";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 
 export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/donors">) {
+  const session = await auth();
   const { id: campaignId } = await params;
   const db = createDbClient();
   const repository = createPledgeRepository(db);
@@ -21,12 +23,14 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
         </Link>
         <div className="flex items-baseline justify-between gap-2">
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Doadores</h1>
-          <Link
-            href={`/campaigns/${campaignId}/donors/new`}
-            className="rounded-full bg-foreground px-4 py-1.5 text-xs text-background"
-          >
-            + Doador
-          </Link>
+          {session?.user.canReceiveFunds ? (
+            <Link
+              href={`/campaigns/${campaignId}/donors/new`}
+              className="rounded-full bg-foreground px-4 py-1.5 text-xs text-background"
+            >
+              + Doador
+            </Link>
+          ) : null}
         </div>
 
         {pledges.length === 0 ? (

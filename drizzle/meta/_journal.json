@@ -78,6 +78,20 @@
       "when": 1789318861000,
       "tag": "0010_rename_treasurer_to_fundraiser",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789296314770,
+      "tag": "0011_add_user_capabilities",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789296337319,
+      "tag": "0012_drop_user_role",
+      "breakpoints": true
     }
   ]
 }

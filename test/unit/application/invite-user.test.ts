@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { inviteUser, type InviteUserRepository } from "@/server/application/invite-user";
 
 function createInMemoryRepository(existingEmails: string[] = []): InviteUserRepository & {
-  created: { email: string; phone?: string; role: string; passwordHash: string }[];
+  created: { email: string; phone?: string; passwordHash: string }[];
 } {
-  const created: { email: string; phone?: string; role: string; passwordHash: string }[] = [];
+  const created: { email: string; phone?: string; passwordHash: string }[] = [];
   return {
     created,
     emailInUse(email) {
@@ -30,14 +30,18 @@ describe("inviteUser", () => {
     const result = await inviteUser(repository, dependencies, {
       email: "Voluntario@Igreja.Exemplo",
       phone: "(11) 91234-5678",
-      role: "fundraiser",
+      canManageUsers: undefined,
+      canManageCampaigns: undefined,
+      canReceiveFunds: "on",
     });
 
     expect(repository.created).toEqual([
       {
         email: "voluntario@igreja.exemplo",
         phone: "11912345678",
-        role: "fundraiser",
+        canManageUsers: false,
+        canManageCampaigns: false,
+        canReceiveFunds: true,
         passwordHash: "hashed:k7Rt9mQx",
       },
     ]);
@@ -51,10 +55,27 @@ describe("inviteUser", () => {
 
     const result = await inviteUser(repository, dependencies, {
       email: "voluntario@igreja.exemplo",
-      role: "admin",
+      canManageUsers: "on",
+      canManageCampaigns: undefined,
+      canReceiveFunds: undefined,
     });
 
     expect(result.whatsappLink).toBeUndefined();
+  });
+
+  it("aceita convite sem nenhuma capacidade marcada (acesso de só visualização)", async () => {
+    const repository = createInMemoryRepository();
+
+    const result = await inviteUser(repository, dependencies, {
+      email: "voluntario@igreja.exemplo",
+      canManageUsers: undefined,
+      canManageCampaigns: undefined,
+      canReceiveFunds: undefined,
+    });
+
+    expect(result.canManageUsers).toBe(false);
+    expect(result.canManageCampaigns).toBe(false);
+    expect(result.canReceiveFunds).toBe(false);
   });
 
   it("rejeita convite para e-mail já cadastrado sem criar nada", async () => {
@@ -63,7 +84,9 @@ describe("inviteUser", () => {
     await expect(
       inviteUser(repository, dependencies, {
         email: "voluntario@igreja.exemplo",
-        role: "admin",
+        canManageUsers: "on",
+        canManageCampaigns: undefined,
+        canReceiveFunds: undefined,
       }),
     ).rejects.toThrow();
     expect(repository.created).toHaveLength(0);

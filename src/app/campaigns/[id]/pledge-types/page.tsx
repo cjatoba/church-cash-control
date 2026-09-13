@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { createPledgeType } from "@/server/application/create-pledge-type";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
@@ -13,6 +15,9 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 export default async function PledgeTypesPage({
   params,
 }: PageProps<"/campaigns/[id]/pledge-types">) {
+  const session = await auth();
+  const canManageCampaigns = Boolean(session?.user.canManageCampaigns);
+
   const { id: campaignId } = await params;
   const db = createDbClient();
   const repository = createPledgeTypeRepository(db);
@@ -23,6 +28,11 @@ export default async function PledgeTypesPage({
     formData: FormData,
   ): Promise<CreatePledgeTypeState> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canManageCampaigns) {
+      redirect("/");
+    }
 
     const input = {
       campaignId,
@@ -73,7 +83,7 @@ export default async function PledgeTypesPage({
           </ul>
         )}
 
-        <PledgeTypeForm action={create} />
+        {canManageCampaigns ? <PledgeTypeForm action={create} /> : null}
       </div>
     </div>
   );

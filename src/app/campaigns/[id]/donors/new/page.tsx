@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { createDonor } from "@/server/application/create-donor";
 import { createPledge } from "@/server/application/create-pledge";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
@@ -16,6 +17,11 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 });
 
 export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id]/donors/new">) {
+  const session = await auth();
+  if (!session?.user.canReceiveFunds) {
+    redirect("/");
+  }
+
   const { id: campaignId } = await params;
   const db = createDbClient();
   const pledgeTypeRepository = createPledgeTypeRepository(db);
@@ -26,6 +32,11 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
     formData: FormData,
   ): Promise<CreateDonorState> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canReceiveFunds) {
+      redirect("/");
+    }
 
     try {
       const db = createDbClient();

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { regenerateTemporaryPassword } from "@/server/application/regenerate-temporary-password";
-import { canManageUsers } from "@/server/domain/user-role";
 import { canRegenerateTemporaryPassword } from "@/server/domain/temporary-password-reset";
 import { hashPassword } from "@/server/infrastructure/auth/password";
 import { generateTemporaryPassword } from "@/server/infrastructure/auth/temporary-password";
@@ -16,7 +15,7 @@ export default async function ResetPasswordPage({
   params,
 }: PageProps<"/users/[id]/reset-password">) {
   const session = await auth();
-  if (!session || !canManageUsers(session.user.role)) {
+  if (!session?.user.canManageUsers) {
     redirect("/");
   }
 
@@ -33,7 +32,7 @@ export default async function ResetPasswordPage({
     "use server";
 
     const actionSession = await auth();
-    if (!actionSession || !canManageUsers(actionSession.user.role)) {
+    if (!actionSession?.user.canManageUsers) {
       redirect("/");
     }
 

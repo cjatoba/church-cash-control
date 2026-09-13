@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { getTransactionCategory } from "@/server/application/get-transaction-category";
 import { updateTransactionCategory } from "@/server/application/update-transaction-category";
 import { createTransactionCategoryRepository } from "@/server/infrastructure/db/transaction-category-repository";
@@ -8,6 +9,11 @@ import { CategoryForm, type CreateCategoryState } from "../../_components/catego
 export default async function EditTransactionCategoryPage({
   params,
 }: PageProps<"/campaigns/[id]/categories/[categoryId]/edit">) {
+  const session = await auth();
+  if (!session?.user.canManageCampaigns) {
+    redirect("/");
+  }
+
   const { id: campaignId, categoryId } = await params;
   const db = createDbClient();
   const repository = createTransactionCategoryRepository(db);
@@ -22,6 +28,11 @@ export default async function EditTransactionCategoryPage({
     formData: FormData,
   ): Promise<CreateCategoryState> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canManageCampaigns) {
+      redirect("/");
+    }
 
     const input = {
       campaignId,

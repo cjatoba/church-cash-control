@@ -15,6 +15,9 @@ export default async function NewOneOffDonationPage({
   if (!session) {
     redirect("/login");
   }
+  if (!session.user.canReceiveFunds) {
+    redirect("/");
+  }
 
   const db = createDbClient();
   const userListRepository = createUserListRepository(db);
@@ -26,10 +29,11 @@ export default async function NewOneOffDonationPage({
   ): Promise<CreateOneOffDonationState> {
     "use server";
 
-    const registeredByUserId = (await auth())?.user.id;
-    if (!registeredByUserId) {
-      throw new Error("Não autenticado");
+    const actionSession = await auth();
+    if (!actionSession?.user.canReceiveFunds) {
+      redirect("/");
     }
+    const registeredByUserId = actionSession.user.id;
 
     const input = {
       campaignId,

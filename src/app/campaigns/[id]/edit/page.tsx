@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { getCampaign } from "@/server/application/get-campaign";
 import { updateCampaign } from "@/server/application/update-campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
@@ -7,6 +8,11 @@ import { createDbClient } from "@/server/infrastructure/db/client";
 import { CampaignForm, type CreateCampaignState } from "../../_components/campaign-form";
 
 export default async function EditCampaignPage({ params }: PageProps<"/campaigns/[id]/edit">) {
+  const session = await auth();
+  if (!session?.user.canManageCampaigns) {
+    redirect("/");
+  }
+
   const { id: campaignId } = await params;
   const db = createDbClient();
   const repository = createCampaignRepository(db);
@@ -25,6 +31,11 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
     formData: FormData,
   ): Promise<CreateCampaignState> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canManageCampaigns) {
+      redirect("/");
+    }
 
     const input = {
       name: formData.get("name"),
