@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { listTransactionCategories } from "@/server/application/list-transaction-categories";
 import {
   archiveTransactionCategory,
@@ -14,6 +15,9 @@ const typeLabels = { income: "Entrada", expense: "Saída" } as const;
 export default async function TransactionCategoriesPage({
   params,
 }: PageProps<"/campaigns/[id]/categories">) {
+  const session = await auth();
+  const canManageCampaigns = Boolean(session?.user.canManageCampaigns);
+
   const { id: campaignId } = await params;
   const db = createDbClient();
   const repository = createTransactionCategoryRepository(db);
@@ -23,6 +27,11 @@ export default async function TransactionCategoriesPage({
 
   async function archive(formData: FormData): Promise<void> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canManageCampaigns) {
+      redirect("/");
+    }
 
     const categoryId = formData.get("categoryId");
     if (typeof categoryId !== "string") {
@@ -38,6 +47,11 @@ export default async function TransactionCategoriesPage({
 
   async function restore(formData: FormData): Promise<void> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canManageCampaigns) {
+      redirect("/");
+    }
 
     const categoryId = formData.get("categoryId");
     if (typeof categoryId !== "string") {
@@ -62,12 +76,14 @@ export default async function TransactionCategoriesPage({
         </Link>
         <div className="flex items-baseline justify-between gap-4">
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Categorias</h1>
-          <Link
-            href={`/campaigns/${campaignId}/categories/new`}
-            className="text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
-          >
-            + Nova categoria
-          </Link>
+          {canManageCampaigns ? (
+            <Link
+              href={`/campaigns/${campaignId}/categories/new`}
+              className="text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
+            >
+              + Nova categoria
+            </Link>
+          ) : null}
         </div>
 
         {activeCategories.length === 0 ? (
@@ -87,18 +103,20 @@ export default async function TransactionCategoriesPage({
                     · {typeLabels[category.type]}
                   </span>
                 </span>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href={`/campaigns/${campaignId}/categories/${category.id}/edit`}
-                    className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-                  >
-                    Editar
-                  </Link>
-                  <form action={archive}>
-                    <input type="hidden" name="categoryId" value={category.id} />
-                    <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
-                  </form>
-                </div>
+                {canManageCampaigns ? (
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/campaigns/${campaignId}/categories/${category.id}/edit`}
+                      className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                    >
+                      Editar
+                    </Link>
+                    <form action={archive}>
+                      <input type="hidden" name="categoryId" value={category.id} />
+                      <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
+                    </form>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -118,10 +136,12 @@ export default async function TransactionCategoriesPage({
                   <span>
                     {category.name} <span className="text-xs">· {typeLabels[category.type]}</span>
                   </span>
-                  <form action={restore}>
-                    <input type="hidden" name="categoryId" value={category.id} />
-                    <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
-                  </form>
+                  {canManageCampaigns ? (
+                    <form action={restore}>
+                      <input type="hidden" name="categoryId" value={category.id} />
+                      <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
+                    </form>
+                  ) : null}
                 </li>
               ))}
             </ul>

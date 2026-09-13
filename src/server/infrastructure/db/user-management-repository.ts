@@ -30,7 +30,9 @@ export function createUserManagementRepository(
         .values({
           email: input.email,
           phone: input.phone,
-          role: input.role,
+          canManageUsers: input.canManageUsers,
+          canManageCampaigns: input.canManageCampaigns,
+          canReceiveFunds: input.canReceiveFunds,
           passwordHash: input.passwordHash,
         })
         .returning({ id: users.id });
@@ -47,7 +49,9 @@ export function createUserManagementRepository(
           id: users.id,
           email: users.email,
           phone: users.phone,
-          role: users.role,
+          canManageUsers: users.canManageUsers,
+          canManageCampaigns: users.canManageCampaigns,
+          canReceiveFunds: users.canReceiveFunds,
           mustChangePassword: users.mustChangePassword,
           active: users.active,
         })
@@ -83,7 +87,9 @@ export function createUserManagementRepository(
           id: users.id,
           email: users.email,
           phone: users.phone,
-          role: users.role,
+          canManageUsers: users.canManageUsers,
+          canManageCampaigns: users.canManageCampaigns,
+          canReceiveFunds: users.canReceiveFunds,
         })
         .from(users)
         .where(eq(users.id, userId))
@@ -104,7 +110,13 @@ export function createUserManagementRepository(
     async update(userId, input) {
       await db
         .update(users)
-        .set({ email: input.email, phone: input.phone ?? null, role: input.role })
+        .set({
+          email: input.email,
+          phone: input.phone ?? null,
+          canManageUsers: input.canManageUsers,
+          canManageCampaigns: input.canManageCampaigns,
+          canReceiveFunds: input.canReceiveFunds,
+        })
         .where(eq(users.id, userId));
     },
   };

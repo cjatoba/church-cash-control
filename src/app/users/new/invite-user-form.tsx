@@ -5,14 +5,32 @@ import { useActionState, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { TemporaryPasswordReveal } from "../_components/temporary-password-reveal";
 
-const roleLabels = { admin: "Administrador", fundraiser: "Responsável pela arrecadação" } as const;
+function grantedCapabilityLabels(capabilities: {
+  canManageUsers: boolean;
+  canManageCampaigns: boolean;
+  canReceiveFunds: boolean;
+}): string {
+  const labels: string[] = [];
+  if (capabilities.canManageUsers) labels.push("gerenciar usuários");
+  if (capabilities.canManageCampaigns) labels.push("gerenciar campanhas");
+  if (capabilities.canReceiveFunds) labels.push("receber arrecadação");
+  return labels.length > 0 ? labels.join(", ") : "só visualização";
+}
 
 export interface InviteUserState {
   error?: string;
-  values?: { email: string; phone: string; role: string };
+  values?: {
+    email: string;
+    phone: string;
+    canManageUsers: boolean;
+    canManageCampaigns: boolean;
+    canReceiveFunds: boolean;
+  };
   result?: {
     email: string;
-    role: "admin" | "fundraiser";
+    canManageUsers: boolean;
+    canManageCampaigns: boolean;
+    canReceiveFunds: boolean;
     temporaryPassword: string;
     whatsappLink?: string;
   };
@@ -47,7 +65,7 @@ function InviteUserFormFields({
     return (
       <TemporaryPasswordReveal
         title="Usuário convidado"
-        message={`${state.result.email} foi cadastrado como ${roleLabels[state.result.role]}.`}
+        message={`${state.result.email} foi cadastrado com acesso de ${grantedCapabilityLabels(state.result)}.`}
         temporaryPassword={state.result.temporaryPassword}
         whatsappLink={state.result.whatsappLink}
         backHref="/users"
@@ -93,21 +111,36 @@ function InviteUserFormFields({
           className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        Papel
-        <select
-          name="role"
-          required
-          defaultValue={state.values?.role ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
-        >
-          <option value="" disabled>
-            Selecione
-          </option>
-          <option value="admin">Administrador</option>
-          <option value="fundraiser">Responsável pela arrecadação</option>
-        </select>
-      </label>
+      <div className="flex flex-col gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+        <span>O que essa pessoa pode fazer?</span>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="canManageUsers"
+            defaultChecked={state.values?.canManageUsers ?? false}
+          />
+          Gerenciar usuários
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="canManageCampaigns"
+            defaultChecked={state.values?.canManageCampaigns ?? false}
+          />
+          Gerenciar campanhas (criar/editar/arquivar campanha, categoria, tipo de carnê)
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="canReceiveFunds"
+            defaultChecked={state.values?.canReceiveFunds ?? false}
+          />
+          Receber arrecadação (cadastrar doador, dar baixa em parcela, registrar doação/repasse)
+        </label>
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          Sem marcar nenhuma opção, a pessoa só consegue visualizar as informações do app.
+        </span>
+      </div>
       <SubmitButton pendingLabel="Convidando…">Convidar</SubmitButton>
     </form>
   );

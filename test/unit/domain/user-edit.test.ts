@@ -6,27 +6,56 @@ describe("parseUserEdit", () => {
     const edit = parseUserEdit({
       email: "Voluntario@Igreja.Exemplo",
       phone: "(11) 91234-5678",
-      role: "fundraiser",
+      canManageUsers: undefined,
+      canManageCampaigns: "on",
+      canReceiveFunds: "on",
     });
 
     expect(edit).toEqual({
       email: "voluntario@igreja.exemplo",
       phone: "11912345678",
-      role: "fundraiser",
+      canManageUsers: false,
+      canManageCampaigns: true,
+      canReceiveFunds: true,
     });
   });
 
   it("aceita edição sem telefone (remove o telefone cadastrado)", () => {
-    const edit = parseUserEdit({ email: "voluntario@igreja.exemplo", role: "admin" });
+    const edit = parseUserEdit({
+      email: "voluntario@igreja.exemplo",
+      canManageUsers: "on",
+      canManageCampaigns: undefined,
+      canReceiveFunds: undefined,
+    });
 
     expect(edit.phone).toBeUndefined();
   });
 
-  it("rejeita e-mail inválido", () => {
-    expect(() => parseUserEdit({ email: "não-é-email", role: "admin" })).toThrow();
+  it("aceita edição sem nenhuma capacidade marcada (acesso de só visualização)", () => {
+    const edit = parseUserEdit({
+      email: "voluntario@igreja.exemplo",
+      canManageUsers: undefined,
+      canManageCampaigns: undefined,
+      canReceiveFunds: undefined,
+    });
+
+    expect(edit).toEqual({
+      email: "voluntario@igreja.exemplo",
+      phone: undefined,
+      canManageUsers: false,
+      canManageCampaigns: false,
+      canReceiveFunds: false,
+    });
   });
 
-  it("rejeita papel desconhecido", () => {
-    expect(() => parseUserEdit({ email: "voluntario@igreja.exemplo", role: "outro" })).toThrow();
+  it("rejeita e-mail inválido", () => {
+    expect(() =>
+      parseUserEdit({
+        email: "não-é-email",
+        canManageUsers: undefined,
+        canManageCampaigns: undefined,
+        canReceiveFunds: undefined,
+      }),
+    ).toThrow();
   });
 });

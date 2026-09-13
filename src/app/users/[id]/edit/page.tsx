@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { updateUser } from "@/server/application/update-user";
-import { canManageUsers } from "@/server/domain/user-role";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
@@ -13,7 +12,7 @@ function toStringValue(value: FormDataEntryValue | null): string {
 
 export default async function EditUserPage({ params }: PageProps<"/users/[id]/edit">) {
   const session = await auth();
-  if (!session || !canManageUsers(session.user.role)) {
+  if (!session?.user.canManageUsers) {
     redirect("/");
   }
 
@@ -30,14 +29,16 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
     "use server";
 
     const actionSession = await auth();
-    if (!actionSession || !canManageUsers(actionSession.user.role)) {
+    if (!actionSession?.user.canManageUsers) {
       redirect("/");
     }
 
     const input = {
       email: formData.get("email"),
       phone: formData.get("phone"),
-      role: formData.get("role"),
+      canManageUsers: formData.get("canManageUsers"),
+      canManageCampaigns: formData.get("canManageCampaigns"),
+      canReceiveFunds: formData.get("canReceiveFunds"),
     };
 
     try {
@@ -53,7 +54,9 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
         values: {
           email: toStringValue(input.email),
           phone: toStringValue(input.phone),
-          role: toStringValue(input.role),
+          canManageUsers: Boolean(input.canManageUsers),
+          canManageCampaigns: Boolean(input.canManageCampaigns),
+          canReceiveFunds: Boolean(input.canReceiveFunds),
         },
       };
     }
@@ -65,7 +68,13 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
     <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
       <UserEditForm
         action={update}
-        defaultValues={{ email: user.email, phone: user.phone, role: user.role }}
+        defaultValues={{
+          email: user.email,
+          phone: user.phone,
+          canManageUsers: user.canManageUsers,
+          canManageCampaigns: user.canManageCampaigns,
+          canReceiveFunds: user.canReceiveFunds,
+        }}
         isSelf={userId === session.user.id}
       />
     </div>

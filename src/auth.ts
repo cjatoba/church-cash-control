@@ -38,7 +38,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           mustChangePassword: user.mustChangePassword,
-          role: user.role,
+          canManageUsers: user.canManageUsers,
+          canManageCampaigns: user.canManageCampaigns,
+          canReceiveFunds: user.canReceiveFunds,
         };
       },
     }),

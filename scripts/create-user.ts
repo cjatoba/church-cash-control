@@ -18,7 +18,13 @@ async function main(): Promise<void> {
   const passwordHash = await hashPassword(password);
 
   const db = createDbClient();
-  await db.insert(users).values({ email, passwordHash });
+  await db.insert(users).values({
+    email,
+    passwordHash,
+    canManageUsers: true,
+    canManageCampaigns: true,
+    canReceiveFunds: true,
+  });
 
   console.log(`Usuário ${email} criado.`);
 }

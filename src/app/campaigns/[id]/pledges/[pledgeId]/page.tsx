@@ -59,10 +59,11 @@ export default async function PledgeDetailPage({
   async function markInstallmentAsPaid(formData: FormData): Promise<void> {
     "use server";
 
-    const registeredByUserId = (await auth())?.user.id;
-    if (!registeredByUserId) {
-      throw new Error("Não autenticado");
+    const actionSession = await auth();
+    if (!actionSession?.user.canReceiveFunds) {
+      redirect("/");
     }
+    const registeredByUserId = actionSession.user.id;
 
     const installmentId = formData.get("installmentId");
     const paidAtValue = formData.get("paidAt");
@@ -93,6 +94,11 @@ export default async function PledgeDetailPage({
   async function correctPaymentDate(formData: FormData): Promise<void> {
     "use server";
 
+    const actionSession = await auth();
+    if (!actionSession?.user.canReceiveFunds) {
+      redirect("/");
+    }
+
     const installmentId = formData.get("installmentId");
     const paidAtValue = formData.get("paidAt");
     if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
@@ -112,6 +118,11 @@ export default async function PledgeDetailPage({
 
   async function revertPayment(formData: FormData): Promise<void> {
     "use server";
+
+    const actionSession = await auth();
+    if (!actionSession?.user.canReceiveFunds) {
+      redirect("/");
+    }
 
     const installmentId = formData.get("installmentId");
     if (typeof installmentId !== "string") {
@@ -179,13 +190,15 @@ export default async function PledgeDetailPage({
                         ? ` · Recebido por ${installment.receivedByLabel}`
                         : ""}
                     </span>
-                    <EditPaymentDateButton
-                      installmentId={installment.id}
-                      currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
-                      todayIso={todayIso}
-                      correctAction={correctPaymentDate}
-                      revertAction={revertPayment}
-                    />
+                    {session.user.canReceiveFunds ? (
+                      <EditPaymentDateButton
+                        installmentId={installment.id}
+                        currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
+                        todayIso={todayIso}
+                        correctAction={correctPaymentDate}
+                        revertAction={revertPayment}
+                      />
+                    ) : null}
                   </span>
                   {installment.registeredByLabel &&
                   installment.registeredByLabel !== installment.receivedByLabel ? (
@@ -194,7 +207,7 @@ export default async function PledgeDetailPage({
                     </span>
                   ) : null}
                 </span>
-              ) : (
+              ) : session.user.canReceiveFunds ? (
                 <PayInstallmentButton
                   installmentId={installment.id}
                   monthLabel={formatMonthLabel(installment.dueDate)}
@@ -204,6 +217,10 @@ export default async function PledgeDetailPage({
                   currentUserId={session.user.id}
                   action={markInstallmentAsPaid}
                 />
+              ) : (
+                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                  Pendente
+                </span>
               )}
             </li>
           ))}

@@ -39,10 +39,11 @@ export default async function MoneyInHandPage({
   async function transfer(formData: FormData): Promise<void> {
     "use server";
 
-    const registeredByUserId = (await auth())?.user.id;
-    if (!registeredByUserId) {
-      throw new Error("Não autenticado");
+    const actionSession = await auth();
+    if (!actionSession?.user.canReceiveFunds) {
+      redirect("/");
     }
+    const registeredByUserId = actionSession.user.id;
 
     const input = {
       campaignId,
@@ -98,16 +99,18 @@ export default async function MoneyInHandPage({
           ))}
         </ul>
 
-        <TransferButton
-          balances={balances.map((balance) => ({
-            userId: balance.userId,
-            userLabel: balance.userLabel,
-            balanceCents: balance.balance.toCents(),
-          }))}
-          currentUserId={session.user.id}
-          todayIso={todayIso}
-          action={transfer}
-        />
+        {session.user.canReceiveFunds ? (
+          <TransferButton
+            balances={balances.map((balance) => ({
+              userId: balance.userId,
+              userLabel: balance.userLabel,
+              balanceCents: balance.balance.toCents(),
+            }))}
+            currentUserId={session.user.id}
+            todayIso={todayIso}
+            action={transfer}
+          />
+        ) : null}
 
         <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
           <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">

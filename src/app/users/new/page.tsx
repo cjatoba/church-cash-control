@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { inviteUser } from "@/server/application/invite-user";
-import { canManageUsers } from "@/server/domain/user-role";
 import { hashPassword } from "@/server/infrastructure/auth/password";
 import { generateTemporaryPassword } from "@/server/infrastructure/auth/temporary-password";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
@@ -16,7 +15,7 @@ function toStringValue(value: FormDataEntryValue | null): string {
 
 export default async function NewUserPage() {
   const session = await auth();
-  if (!session || !canManageUsers(session.user.role)) {
+  if (!session?.user.canManageUsers) {
     redirect("/");
   }
 
@@ -24,14 +23,16 @@ export default async function NewUserPage() {
     "use server";
 
     const actionSession = await auth();
-    if (!actionSession || !canManageUsers(actionSession.user.role)) {
+    if (!actionSession?.user.canManageUsers) {
       redirect("/");
     }
 
     const input = {
       email: formData.get("email"),
       phone: formData.get("phone"),
-      role: formData.get("role"),
+      canManageUsers: formData.get("canManageUsers"),
+      canManageCampaigns: formData.get("canManageCampaigns"),
+      canReceiveFunds: formData.get("canReceiveFunds"),
     };
 
     try {
@@ -47,7 +48,9 @@ export default async function NewUserPage() {
       return {
         result: {
           email: result.email,
-          role: result.role,
+          canManageUsers: result.canManageUsers,
+          canManageCampaigns: result.canManageCampaigns,
+          canReceiveFunds: result.canReceiveFunds,
           temporaryPassword: result.temporaryPassword,
           whatsappLink: result.whatsappLink,
         },
@@ -61,7 +64,9 @@ export default async function NewUserPage() {
         values: {
           email: toStringValue(input.email),
           phone: toStringValue(input.phone),
-          role: toStringValue(input.role),
+          canManageUsers: Boolean(input.canManageUsers),
+          canManageCampaigns: Boolean(input.canManageCampaigns),
+          canReceiveFunds: Boolean(input.canReceiveFunds),
         },
       };
     }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { userRoleSchema } from "./user-role";
+import { userCapabilitiesSchema } from "./user-capabilities";
 
 export const phoneSchema = z.preprocess(
   (value) => {
@@ -18,11 +18,12 @@ export const phoneSchema = z.preprocess(
     .optional(),
 );
 
-const userInviteSchema = z.object({
-  email: z.email().transform((email) => email.toLowerCase()),
-  phone: phoneSchema,
-  role: userRoleSchema,
-});
+const userInviteSchema = z
+  .object({
+    email: z.email().transform((email) => email.toLowerCase()),
+    phone: phoneSchema,
+  })
+  .and(userCapabilitiesSchema);
 
 export type UserInvite = z.infer<typeof userInviteSchema>;
 

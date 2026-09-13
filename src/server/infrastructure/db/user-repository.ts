@@ -1,15 +1,14 @@
 import { eq } from "drizzle-orm";
 import type { UserListRepository } from "@/server/application/list-users";
-import type { UserRole } from "@/server/domain/user-role";
+import type { UserCapabilities } from "@/server/domain/user-capabilities";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
-export interface UserRecord {
+export interface UserRecord extends UserCapabilities {
   id: string;
   email: string;
   passwordHash: string;
   mustChangePassword: boolean;
-  role: UserRole;
   active: boolean;
 }
 
@@ -20,7 +19,9 @@ export async function findUserByEmail(db: DbClient, email: string): Promise<User
       email: users.email,
       passwordHash: users.passwordHash,
       mustChangePassword: users.mustChangePassword,
-      role: users.role,
+      canManageUsers: users.canManageUsers,
+      canManageCampaigns: users.canManageCampaigns,
+      canReceiveFunds: users.canReceiveFunds,
       active: users.active,
     })
     .from(users)

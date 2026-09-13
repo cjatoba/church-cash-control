@@ -1,7 +1,6 @@
 import type { NextAuthConfig, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-import { canManageUsers } from "./server/domain/user-role";
 
 export const authConfig = {
   pages: {
@@ -28,7 +27,7 @@ export const authConfig = {
         return NextResponse.redirect(new URL("/", request.nextUrl));
       }
 
-      if (pathname.startsWith("/users") && !canManageUsers(auth.user.role)) {
+      if (pathname.startsWith("/users") && !auth.user.canManageUsers) {
         return NextResponse.redirect(new URL("/", request.nextUrl));
       }
 
@@ -48,8 +47,14 @@ export const authConfig = {
       if (typeof user?.mustChangePassword === "boolean") {
         token.mustChangePassword = user.mustChangePassword;
       }
-      if (typeof user?.role === "string") {
-        token.role = user.role;
+      if (typeof user?.canManageUsers === "boolean") {
+        token.canManageUsers = user.canManageUsers;
+      }
+      if (typeof user?.canManageCampaigns === "boolean") {
+        token.canManageCampaigns = user.canManageCampaigns;
+      }
+      if (typeof user?.canReceiveFunds === "boolean") {
+        token.canReceiveFunds = user.canReceiveFunds;
       }
       return token;
     },
@@ -60,8 +65,14 @@ export const authConfig = {
       if (typeof token.mustChangePassword === "boolean") {
         session.user.mustChangePassword = token.mustChangePassword;
       }
-      if (token.role === "admin" || token.role === "fundraiser") {
-        session.user.role = token.role;
+      if (typeof token.canManageUsers === "boolean") {
+        session.user.canManageUsers = token.canManageUsers;
+      }
+      if (typeof token.canManageCampaigns === "boolean") {
+        session.user.canManageCampaigns = token.canManageCampaigns;
+      }
+      if (typeof token.canReceiveFunds === "boolean") {
+        session.user.canReceiveFunds = token.canReceiveFunds;
       }
       return session;
     },

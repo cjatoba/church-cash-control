@@ -9,14 +9,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const userRoleEnum = pgEnum("user_role", ["admin", "fundraiser"]);
-
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   mustChangePassword: boolean("must_change_password").notNull().default(true),
-  role: userRoleEnum("role").notNull().default("admin"),
+  canManageUsers: boolean("can_manage_users").notNull().default(false),
+  canManageCampaigns: boolean("can_manage_campaigns").notNull().default(false),
+  canReceiveFunds: boolean("can_receive_funds").notNull().default(false),
   phone: varchar("phone", { length: 20 }),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

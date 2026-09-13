@@ -1,16 +1,21 @@
 import { parseUserEdit } from "../domain/user-edit";
-import { resolveRoleForUpdate } from "../domain/user-role-lock";
-import type { UserRole } from "../domain/user-role";
+import { resolveCapabilitiesForUpdate } from "../domain/user-capabilities";
+import type { UserCapabilities } from "../domain/user-capabilities";
 
 export interface UpdateUserRepository {
-  findUserForEdit(userId: string): Promise<{
-    id: string;
-    email: string;
-    phone: string | null;
-    role: UserRole;
-  } | null>;
+  findUserForEdit(userId: string): Promise<
+    | ({
+        id: string;
+        email: string;
+        phone: string | null;
+      } & UserCapabilities)
+    | null
+  >;
   emailInUseByAnotherUser(email: string, userId: string): Promise<boolean>;
-  update(userId: string, input: { email: string; phone?: string; role: UserRole }): Promise<void>;
+  update(
+    userId: string,
+    input: { email: string; phone?: string } & UserCapabilities,
+  ): Promise<void>;
 }
 
 export async function updateUser(
@@ -33,7 +38,7 @@ export async function updateUser(
     throw new Error("E-mail já cadastrado");
   }
 
-  const role = resolveRoleForUpdate(actingUserId, targetUserId, current.role, edit.role);
+  const capabilities = resolveCapabilitiesForUpdate(actingUserId, targetUserId, current, edit);
 
-  await repository.update(targetUserId, { email: edit.email, phone: edit.phone, role });
+  await repository.update(targetUserId, { email: edit.email, phone: edit.phone, ...capabilities });
 }
