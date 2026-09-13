@@ -262,9 +262,6 @@ CASCADE`) + repositório Drizzle + tela protegida
     e pensada pro usuário final) e só cai no texto genérico para erro de
     validação do Zod ou qualquer exceção inesperada — evita vazar
     detalhe técnico sem esconder um erro que já é amigável.
-
-## Em andamento (PRs abertas)
-
 - **Relatórios / acompanhamento de progresso de arrecadação por
   campanha** — PR #30: card de cada campanha no painel inicial passa a
   mostrar quanto já foi arrecadado (parcelas pagas + doações avulsas),
@@ -277,6 +274,10 @@ CASCADE`) + repositório Drizzle + tela protegida
   restante do relatório de progresso (além do que já é coberto pelo
   painel mensal de carnês e por esta fatia) fica para revisão futura, se
   aparecer necessidade concreta.
+
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
