@@ -227,7 +227,7 @@ CASCADE`) + repositório Drizzle + tela protegida
   na tela). Papel restringe, por ora, só o acesso à própria tela de
   gerenciar usuários (`canManageUsers`) — decisão registrada de não
   implementar um sistema de permissões granulares baseado em tabela de
-  features por usuário. Ver item 3 do backlog: a ideia inicial era um
+  features por usuário. Ver item 2 do backlog: a ideia inicial era um
   único papel por usuário com `admin` como superusuário, mas apareceu um
   caso real (voluntário que cadastra campanha mas não gerencia usuário
   nem faz arrecadação) que não cabe nisso — a direção revista é cada
@@ -251,7 +251,7 @@ CASCADE`) + repositório Drizzle + tela protegida
     aplicada.
   - Também corrigido nesta PR: formulários de convidar/editar usuário
     limpavam os dados digitados quando a submissão dava erro, obrigando
-    redigitar tudo (ver item 10 do backlog para o mesmo problema nos
+    redigitar tudo (ver item 9 do backlog para o mesmo problema nos
     formulários mais antigos do app).
   - Também corrigido: erro de e-mail já cadastrado (e qualquer outro erro
     de regra de negócio do domínio/aplicação) aparecia como mensagem
@@ -265,25 +265,26 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Relatórios / acompanhamento de progresso de arrecadação por
+  campanha** — PR #30: card de cada campanha no painel inicial passa a
+  mostrar quanto já foi arrecadado (parcelas pagas + doações avulsas),
+  além da meta, com uma barra de progresso — antes só a meta aparecia,
+  exigindo entrar na campanha (painel mensal) para ter essa visão.
+  `CampaignSummary` ganha `raisedTotal`; o cálculo usa duas queries
+  agregadas (`SUM ... GROUP BY campanha`) trazendo o total de todas as
+  campanhas de uma vez, em vez de uma query por campanha no loop da
+  listagem (mesmo padrão já usado em `custody-repository.ts`). Escopo
+  restante do relatório de progresso (além do que já é coberto pelo
+  painel mensal de carnês e por esta fatia) fica para revisão futura, se
+  aparecer necessidade concreta.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Relatórios / acompanhamento de progresso de arrecadação por campanha —
-   parte disso (meta mensal) já é coberta pelo painel mensal de carnês
-   (ver `Concluído`); revisar o que sobra como fatia própria depois dele.
-   Inclui mostrar no card de cada campanha do painel inicial quanto já foi
-   arrecadado (não só a meta), pra dar visão geral sem precisar entrar na
-   campanha. Cuidado de implementação: calcular isso com uma (ou duas)
-   query agregada (`SUM ... GROUP BY campanha`) trazendo o total de todas
-   as campanhas de uma vez — nunca uma query por campanha no loop da
-   listagem, que degradaria com o número de campanhas e penaliza mais
-   ainda por causa da latência de conexão do Neon serverless.
-2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+1. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-3. Mais papéis de usuário e permissões por tela — pedido concreto do
+2. Mais papéis de usuário e permissões por tela — pedido concreto do
    uso real do app (hoje só existe o gate de gerenciar usuários, ver "Em
    andamento"): restringir quem cria/edita campanha, quem dá baixa em
    parcela/doação avulsa (hoje qualquer usuário logado pode), e
@@ -298,18 +299,18 @@ Nenhuma no momento.
    todas elas em vez de mais uma capacidade. Escopo maior que o gate
    único de hoje: precisa mapear, tela a tela, quais ações ficam
    restritas a qual capacidade antes de implementar.
-4. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+3. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-5. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+4. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-6. Skeletons de carregamento em todas as telas que buscam dado no
+5. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes
    (`/users` já nasceu com o próprio `loading.tsx`, ver "Em andamento").
-7. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+6. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
    antes de implementar: hoje só existe o papel admin/responsável pela
@@ -320,7 +321,7 @@ Nenhuma no momento.
    há retenção/expurgo; se o log guardar nome de doador/valor vinculado a
    uma ação, entra na mesma categoria de dado sensível da seção LGPD do
    `CLAUDE.md`.
-8. Revisão de usabilidade/poluição visual em **todas as telas existentes
+7. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -334,31 +335,31 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-9. Revisão de nomenclatura simples em todas as telas existentes: nomes
+8. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 8 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 7 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
-10. Revisar todos os formulários existentes do app (campanha, categoria,
-    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
-    lacunas encontradas e corrigidas nos formulários de convidar/editar
-    usuário (ver "Em andamento"), que os formulários mais antigos
-    provavelmente também têm:
-    - Não preservar os dados digitados quando a submissão dá erro: o
-      React reseta os campos não controlados assim que a server action
-      termina, mesmo em caso de erro de validação, não só em sucesso; a
-      correção é a action devolver os valores enviados no estado de erro
-      e usá-los como `defaultValue`.
-    - Mostrar sempre uma mensagem genérica ("Confira os dados
-      informados") em vez da mensagem específica de um erro de regra de
-      negócio (ex.: "E-mail já cadastrado", "Nome da campanha já existe"
-      se aplicável) — usar `toFriendlyErrorMessage`
-      (`src/app/_lib/action-error-message.ts`) em vez de um `catch`
-      genérico.
+9. Revisar todos os formulários existentes do app (campanha, categoria,
+   doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
+   lacunas encontradas e corrigidas nos formulários de convidar/editar
+   usuário (ver "Em andamento"), que os formulários mais antigos
+   provavelmente também têm:
+   - Não preservar os dados digitados quando a submissão dá erro: o
+     React reseta os campos não controlados assim que a server action
+     termina, mesmo em caso de erro de validação, não só em sucesso; a
+     correção é a action devolver os valores enviados no estado de erro
+     e usá-los como `defaultValue`.
+   - Mostrar sempre uma mensagem genérica ("Confira os dados
+     informados") em vez da mensagem específica de um erro de regra de
+     negócio (ex.: "E-mail já cadastrado", "Nome da campanha já existe"
+     se aplicável) — usar `toFriendlyErrorMessage`
+     (`src/app/_lib/action-error-message.ts`) em vez de um `catch`
+     genérico.
 
 ## Como usar este arquivo
 
