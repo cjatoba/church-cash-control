@@ -316,8 +316,7 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 - **Investigar por que `drizzle-kit migrate` finge sucesso sem aplicar
   migrations de verdade** no deploy da Vercel (ver lição aprendida da PR
-  #32 e item 1 do backlog anterior) — branch `claude/proxima-tarefa-htpv35`,
-  PR ainda não aberta.
+  #32 e item 1 do backlog anterior) — PR #35.
 
 ## Backlog (próximas fatias, em ordem)
 
