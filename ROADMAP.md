@@ -314,39 +314,29 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Investigar por que `drizzle-kit migrate` finge sucesso sem aplicar
+  migrations de verdade** no deploy da Vercel (ver lição aprendida da PR
+  #32 e item 1 do backlog anterior) — branch `claude/proxima-tarefa-htpv35`,
+  PR ainda não aberta.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Investigar por que `drizzle-kit migrate` finge sucesso sem aplicar
-   migrations de verdade** no deploy da Vercel (ver lição aprendida da PR
-   #32 acima) — bug de infraestrutura sério: pode voltar a deixar
-   produção com schema desatualizado a qualquer nova migration, de forma
-   silenciosa (o log de build não denuncia o problema). Suspeita
-   registrada: o aviso do `drizzle-kit` nesse mesmo log dizendo que o
-   driver `@neondatabase/serverless` só consegue conectar via websocket
-   pode estar relacionado — o driver HTTP (sem websocket) pode não
-   suportar de verdade o lock/transação que
-   `drizzle-kit migrate` precisa. Até isso ser corrigido, depois de toda
-   migration nova, conferir manualmente (ex.: via Neon MCP/console) se o
-   schema de produção e preview realmente mudou, em vez de confiar só no
-   log do deploy.
-2. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
+1. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
    `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
    necessário, e prever os mecanismos de acesso, correção e
    exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-3. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+2. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-4. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+3. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-5. Skeletons de carregamento em todas as telas que buscam dado no
+4. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes
    (`/users` já nasceu com o próprio `loading.tsx`, ver `Concluído`, PR #28).
-6. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+5. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
    antes de implementar: definir se `canManageUsers` também controla quem
@@ -355,7 +345,7 @@ Nenhuma no momento.
    definir se há retenção/expurgo; se o log guardar nome de doador/valor
    vinculado a uma ação, entra na mesma categoria de dado sensível da
    seção LGPD do `CLAUDE.md`.
-7. Revisão de usabilidade/poluição visual em **todas as telas existentes
+6. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -369,16 +359,16 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-8. Revisão de nomenclatura simples em todas as telas existentes: nomes
+7. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 7 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 6 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
-9. Revisar todos os formulários existentes do app (campanha, categoria,
+8. Revisar todos os formulários existentes do app (campanha, categoria,
    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
    lacunas encontradas e corrigidas nos formulários de convidar/editar
    usuário (ver `Concluído`, PR #28), que os formulários mais antigos
