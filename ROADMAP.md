@@ -370,9 +370,6 @@ CASCADE`) + repositório Drizzle + tela protegida
   Cancelar/Sair) em vez de encerrar a sessão direto no clique —
   reaproveita o mesmo padrão de `<dialog>` de confirmação já usado em
   outras ações do app.
-
-## Em andamento (PRs abertas)
-
 - **Painel mensal reativo** — PR #41: o `<select>` de mês
   (`/campaigns/[id]/monthly`) navega sozinho ao trocar (via `MonthSelector`,
   client component com `router.push`), sem precisar mais do botão "Ver".
@@ -381,6 +378,10 @@ CASCADE`) + repositório Drizzle + tela protegida
   enquanto a nova consulta rodava — a mesma PR já adiciona um `loading.tsx`
   (skeleton) a essa tela, adiantando parte do item de skeletons do
   backlog (ver abaixo); as demais telas continuam pendentes.
+
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
