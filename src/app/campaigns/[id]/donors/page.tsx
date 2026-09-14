@@ -42,10 +42,13 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
             {pledges.map((pledge) => {
               const closed = isPledgeClosed(pledge);
               return (
-                <li key={pledge.id}>
+                <li
+                  key={pledge.id}
+                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+                >
                   <Link
                     href={`/campaigns/${campaignId}/pledges/${pledge.id}`}
-                    className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:hover:border-white/[.22]"
+                    className="flex flex-1 items-center justify-between gap-2 transition-colors hover:text-black dark:hover:text-zinc-50"
                   >
                     <span>
                       <span className="block text-zinc-900 dark:text-zinc-100">
@@ -65,6 +68,12 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
                     >
                       {closed ? "Fechado" : "Em aberto"}
                     </span>
+                  </Link>
+                  <Link
+                    href={`/campaigns/${campaignId}/donors/${pledge.donorId}`}
+                    className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                  >
+                    Ver dados
                   </Link>
                 </li>
               );

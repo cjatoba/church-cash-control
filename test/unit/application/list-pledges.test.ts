@@ -15,6 +15,7 @@ describe("listPledges", () => {
   it("retorna os carnês cadastrados na campanha", async () => {
     const pledge: PledgeSummary = {
       id: "pledge-1",
+      donorId: "donor-1",
       donorName: "Maria Souza",
       pledgeTypeName: "Prata",
       installmentValue: Money.fromReais(100),
