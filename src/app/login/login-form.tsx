@@ -37,7 +37,7 @@ export function LoginForm({
           name="email"
           type="email"
           required
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -47,7 +47,7 @@ export function LoginForm({
           type="password"
           required
           minLength={8}
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <SubmitButton pendingLabel="Entrando…">Entrar</SubmitButton>

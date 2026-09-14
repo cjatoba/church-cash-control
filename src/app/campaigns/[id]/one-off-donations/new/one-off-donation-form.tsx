@@ -28,7 +28,7 @@ function ReceivedBySelect({
           onChange={(event) => {
             setReceivedByUserId(event.target.value);
           }}
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         >
           {users.map((user) => (
             <option key={user.id} value={user.id}>
@@ -95,7 +95,7 @@ export function OneOffDonationForm({
           name="donorName"
           type="text"
           placeholder="Nome (ou deixe em branco p/ anônimo)"
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -106,7 +106,7 @@ export function OneOffDonationForm({
           step="0.01"
           min="0.01"
           required
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -115,18 +115,25 @@ export function OneOffDonationForm({
           name="date"
           type="date"
           required
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
         Forma de pagamento
         <div className="flex gap-4 pt-1">
-          <label className="flex items-center gap-2">
-            <input type="radio" name="paymentMethod" value="pix" defaultChecked required />
+          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145]">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="pix"
+              defaultChecked
+              required
+              className="h-4 w-4"
+            />
             Pix
           </label>
-          <label className="flex items-center gap-2">
-            <input type="radio" name="paymentMethod" value="cash" />
+          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145]">
+            <input type="radio" name="paymentMethod" value="cash" className="h-4 w-4" />
             Dinheiro
           </label>
         </div>

@@ -81,7 +81,7 @@ export default async function UsersPage() {
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Usuários</h1>
           <Link
             href="/users/new"
-            className="text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
+            className="rounded px-2 py-1.5 text-sm font-medium text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
           >
             + Convidar usuário
           </Link>
@@ -91,10 +91,10 @@ export default async function UsersPage() {
           {activeUsers.map((user) => (
             <li
               key={user.id}
-              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
             >
               <div className="flex flex-col">
-                <span className="text-black dark:text-zinc-50">{user.email}</span>
+                <span className="font-medium text-black dark:text-zinc-50">{user.email}</span>
                 {user.phone ? (
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">{user.phone}</span>
                 ) : null}
@@ -107,7 +107,7 @@ export default async function UsersPage() {
                     </span>
                     <Link
                       href={`/users/${user.id}/reset-password`}
-                      className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                      className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
                     >
                       Gerar nova senha
                     </Link>
@@ -123,7 +123,7 @@ export default async function UsersPage() {
                 ))}
                 <Link
                   href={`/users/${user.id}/edit`}
-                  className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                  className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
                 >
                   Editar
                 </Link>
@@ -140,14 +140,14 @@ export default async function UsersPage() {
 
         {inactiveUsers.length > 0 ? (
           <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
-            <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
               Usuários desativados
             </h2>
             <ul className="flex flex-col gap-2">
               {inactiveUsers.map((user) => (
                 <li
                   key={user.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm text-zinc-500 dark:border-white/[.145] dark:text-zinc-400"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm text-zinc-500 dark:border-white/[.145] dark:text-zinc-400"
                 >
                   <span>{user.email}</span>
                   <form action={reactivate}>

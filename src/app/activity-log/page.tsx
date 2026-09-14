@@ -59,13 +59,20 @@ export default async function ActivityLogPage() {
             {entries.map((entry, index) => (
               <li
                 key={index}
-                className="flex flex-col gap-0.5 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+                className="flex flex-col gap-0.5 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
               >
                 <span className="text-zinc-900 dark:text-zinc-100">
-                  {entry.actorLabel} {actionLabels[entry.action]} {entry.subjectName}
-                  {entry.amount
-                    ? ` (${currencyFormatter.format(entry.amount.toCents() / 100)})`
-                    : ""}
+                  <span className="font-medium">{entry.actorLabel}</span>{" "}
+                  {actionLabels[entry.action]}{" "}
+                  <span className="font-medium">{entry.subjectName}</span>
+                  {entry.amount ? (
+                    <span className="font-semibold">
+                      {" "}
+                      ({currencyFormatter.format(entry.amount.toCents() / 100)})
+                    </span>
+                  ) : (
+                    ""
+                  )}
                 </span>
                 <span className="text-xs text-zinc-500 dark:text-zinc-400">
                   {dateTimeFormatter.format(entry.occurredAt)}

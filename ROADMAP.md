@@ -406,24 +406,26 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-- **Revisão de usabilidade + nomenclatura em todas as telas existentes**:
-  decisões tomadas com o usuário antes de começar — os dois passes
-  (usabilidade/poluição visual e nomenclatura simples) combinados numa
-  fatia só, cada tela revisada uma única vez; além do já previsto
+- **Revisão de usabilidade + nomenclatura em todas as telas existentes**
+  — PR #47: decisões tomadas com o usuário antes de começar — os dois
+  passes (usabilidade/poluição visual e nomenclatura simples) combinados
+  numa fatia só, cada tela revisada uma única vez; além do já previsto
   (hierarquia tipográfica, divisórias entre seções, cor com significado,
-  ícones, alvos de toque maiores), a revisão passa a exigir também que a
+  ícones, alvos de toque maiores), a revisão passou a exigir também que a
   versão mobile tenha cara de app (botões e números grandes, fácil de
-  tocar/ler — não só "site que encolheu"). Dividida em 4 lotes por PR,
-  numa ordem proposta e confirmada com o usuário (das telas mais usadas
-  no dia a dia às administrativas); os 4 lotes são implementados e só
-  depois avaliados juntos pelo usuário, em vez de aprovar cada PR
-  separadamente:
+  tocar/ler — não só "site que encolheu"; inputs de formulário também
+  ganharam `text-base` para não disparar zoom automático no Safari/iOS).
+  Dividida em 4 lotes, numa ordem proposta e confirmada com o usuário
+  (das telas mais usadas no dia a dia às administrativas); todos os 4
+  lotes foram implementados numa mesma PR e são avaliados juntos pelo
+  usuário, em vez de aprovar cada lote separadamente:
   - Lote 1 — painel inicial, detalhe de carnê, painel mensal, dinheiro em
     mãos.
   - Lote 2 — listas de cadastro (doadores, categorias, tipos de carnê).
-  - Lote 3 — formulários de cadastro/edição.
-  - Lote 4 — telas administrativas (usuários, registro de atividades,
-    trocar senha, login).
+  - Lote 3 — formulários de cadastro/edição (campanha, categoria, doador,
+    tipo de carnê, doação avulsa).
+  - Lote 4 — telas administrativas (usuários e seus formulários, registro
+    de atividades, trocar senha, login).
     Ícones novos usam SVG inline compartilhado
     (`src/app/_components/icons.tsx`), sem adicionar nenhuma biblioteca de
     ícones.

@@ -41,7 +41,7 @@ export function PledgeTypeForm({
           name="name"
           type="text"
           required
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -52,7 +52,7 @@ export function PledgeTypeForm({
           step="0.01"
           min="0.01"
           required
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <SubmitButton pendingLabel="Criando…">Criar tipo de carnê</SubmitButton>

@@ -87,7 +87,7 @@ export function CampaignForm({
             type="text"
             required
             defaultValue={defaultValues?.name}
-            className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -99,7 +99,7 @@ export function CampaignForm({
             min="0.01"
             required
             defaultValue={defaultValues?.goal}
-            className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -109,7 +109,7 @@ export function CampaignForm({
             type="date"
             required
             defaultValue={defaultValues ? toDateInputValue(defaultValues.startDate) : undefined}
-            className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -119,7 +119,7 @@ export function CampaignForm({
             type="date"
             required
             defaultValue={defaultValues ? toDateInputValue(defaultValues.endDate) : undefined}
-            className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
           />
         </label>
         <SubmitButton pendingLabel={pendingLabel}>{submitLabel}</SubmitButton>

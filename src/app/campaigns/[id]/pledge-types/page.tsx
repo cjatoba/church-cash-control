@@ -70,13 +70,13 @@ export default async function PledgeTypesPage({
             {pledgeTypes.map((pledgeType) => (
               <li
                 key={pledgeType.id}
-                className="flex items-center justify-between rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+                className="flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
               >
-                <span>
-                  {pledgeType.name}{" "}
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                    · {currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)}/mês
-                  </span>
+                <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                  {pledgeType.name}
+                </span>
+                <span className="text-sm font-semibold text-black dark:text-zinc-50">
+                  {currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)}/mês
                 </span>
               </li>
             ))}

@@ -98,7 +98,7 @@ function InviteUserFormFields({
           type="email"
           required
           defaultValue={state.values?.email ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -108,32 +108,35 @@ function InviteUserFormFields({
           type="tel"
           placeholder="(11) 91234-5678"
           defaultValue={state.values?.phone ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
         />
       </label>
       <div className="flex flex-col gap-2 text-sm text-zinc-700 dark:text-zinc-300">
         <span>O que essa pessoa pode fazer?</span>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145]">
           <input
             type="checkbox"
             name="canManageUsers"
             defaultChecked={state.values?.canManageUsers ?? false}
+            className="h-4 w-4"
           />
           Gerenciar usuários
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145]">
           <input
             type="checkbox"
             name="canManageCampaigns"
             defaultChecked={state.values?.canManageCampaigns ?? false}
+            className="h-4 w-4"
           />
           Gerenciar campanhas (criar/editar/arquivar campanha, categoria, tipo de carnê)
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145]">
           <input
             type="checkbox"
             name="canReceiveFunds"
             defaultChecked={state.values?.canReceiveFunds ?? false}
+            className="h-4 w-4"
           />
           Receber arrecadação (cadastrar doador, dar baixa em parcela, registrar doação/repasse)
         </label>
