@@ -5,6 +5,8 @@ import { SubmitButton } from "@/app/_components/submit-button";
 
 export function PayInstallmentButton({
   installmentId,
+  donorName,
+  amountCents,
   monthLabel,
   amountLabel,
   todayIso,
@@ -13,6 +15,8 @@ export function PayInstallmentButton({
   action,
 }: {
   installmentId: string;
+  donorName: string;
+  amountCents: number;
   monthLabel: string;
   amountLabel: string;
   todayIso: string;
@@ -45,6 +49,8 @@ export function PayInstallmentButton({
       >
         <form action={action} className="flex w-72 flex-col gap-4">
           <input type="hidden" name="installmentId" value={installmentId} />
+          <input type="hidden" name="donorName" value={donorName} />
+          <input type="hidden" name="amountCents" value={amountCents} />
           <div>
             <p className="font-semibold">Dar baixa — {monthLabel}</p>
             <p className="text-zinc-600 dark:text-zinc-400">{amountLabel}</p>

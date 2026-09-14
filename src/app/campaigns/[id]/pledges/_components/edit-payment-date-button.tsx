@@ -5,12 +5,16 @@ import { SubmitButton } from "@/app/_components/submit-button";
 
 export function EditPaymentDateButton({
   installmentId,
+  donorName,
+  amountCents,
   currentPaidAtIso,
   todayIso,
   correctAction,
   revertAction,
 }: {
   installmentId: string;
+  donorName: string;
+  amountCents: number;
   currentPaidAtIso: string;
   todayIso: string;
   correctAction: (formData: FormData) => Promise<void>;
@@ -39,6 +43,8 @@ export function EditPaymentDateButton({
       >
         <form action={correctAction} className="flex flex-col gap-4">
           <input type="hidden" name="installmentId" value={installmentId} />
+          <input type="hidden" name="donorName" value={donorName} />
+          <input type="hidden" name="amountCents" value={amountCents} />
           <p className="font-semibold">Corrigir pagamento</p>
           <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
             Data do pagamento
@@ -82,6 +88,8 @@ export function EditPaymentDateButton({
         ) : (
           <form action={revertAction} className="flex flex-col gap-3">
             <input type="hidden" name="installmentId" value={installmentId} />
+            <input type="hidden" name="donorName" value={donorName} />
+            <input type="hidden" name="amountCents" value={amountCents} />
             <p className="text-sm text-red-700 dark:text-red-400">
               Tem certeza? Isso vai apagar o registro de pagamento desta parcela.
             </p>

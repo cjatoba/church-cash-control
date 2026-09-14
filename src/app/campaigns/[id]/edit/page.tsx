@@ -2,8 +2,10 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getCampaign } from "@/server/application/get-campaign";
 import { updateCampaign } from "@/server/application/update-campaign";
+import { recordActivity } from "@/server/application/record-activity";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
+import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { CampaignForm, type CreateCampaignState } from "../../_components/campaign-form";
 
@@ -61,6 +63,17 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
       );
     } catch {
       return { error: "Não foi possível salvar a campanha. Confira os dados informados." };
+    }
+
+    if (typeof input.name === "string") {
+      const db = createDbClient();
+      const activityLogRepository = createActivityLogRepository(db);
+      await recordActivity(activityLogRepository, {
+        actorUserId: actionSession.user.id,
+        action: "campaign_updated",
+        subjectName: input.name,
+        amountCents: null,
+      });
     }
 
     redirect(outcome.periodExtended ? "/?campaignExtended=1" : "/");

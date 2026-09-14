@@ -6,7 +6,9 @@ import {
   archiveTransactionCategory,
   restoreTransactionCategory,
 } from "@/server/application/archive-transaction-category";
+import { recordActivity } from "@/server/application/record-activity";
 import { createTransactionCategoryRepository } from "@/server/infrastructure/db/transaction-category-repository";
+import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
 
@@ -34,13 +36,22 @@ export default async function TransactionCategoriesPage({
     }
 
     const categoryId = formData.get("categoryId");
-    if (typeof categoryId !== "string") {
+    const categoryName = formData.get("categoryName");
+    if (typeof categoryId !== "string" || typeof categoryName !== "string") {
       throw new Error("Categoria inválida");
     }
 
     const db = createDbClient();
     const repository = createTransactionCategoryRepository(db);
     await archiveTransactionCategory(repository, categoryId);
+
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: actionSession.user.id,
+      action: "transaction_category_archived",
+      subjectName: categoryName,
+      amountCents: null,
+    });
 
     redirect(`/campaigns/${campaignId}/categories`);
   }
@@ -54,13 +65,22 @@ export default async function TransactionCategoriesPage({
     }
 
     const categoryId = formData.get("categoryId");
-    if (typeof categoryId !== "string") {
+    const categoryName = formData.get("categoryName");
+    if (typeof categoryId !== "string" || typeof categoryName !== "string") {
       throw new Error("Categoria inválida");
     }
 
     const db = createDbClient();
     const repository = createTransactionCategoryRepository(db);
     await restoreTransactionCategory(repository, categoryId);
+
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: actionSession.user.id,
+      action: "transaction_category_restored",
+      subjectName: categoryName,
+      amountCents: null,
+    });
 
     redirect(`/campaigns/${campaignId}/categories`);
   }
@@ -113,6 +133,7 @@ export default async function TransactionCategoriesPage({
                     </Link>
                     <form action={archive}>
                       <input type="hidden" name="categoryId" value={category.id} />
+                      <input type="hidden" name="categoryName" value={category.name} />
                       <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
                     </form>
                   </div>
@@ -139,6 +160,7 @@ export default async function TransactionCategoriesPage({
                   {canManageCampaigns ? (
                     <form action={restore}>
                       <input type="hidden" name="categoryId" value={category.id} />
+                      <input type="hidden" name="categoryName" value={category.name} />
                       <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
                     </form>
                   ) : null}
