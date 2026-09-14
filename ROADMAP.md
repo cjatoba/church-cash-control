@@ -365,11 +365,15 @@ CASCADE`) + repositório Drizzle + tela protegida
   de nome e exclusão via anonimização (irreversível, mantendo histórico
   financeiro). Decisão registrada: `Donor` continua só com nome por ora —
   sem necessidade concreta de telefone/CPF/chave Pix ainda.
+- **Confirmação ao sair (logout)** — PR #39: o botão "Sair" abre um
+  modal de confirmação ("Deseja realmente sair?", opções
+  Cancelar/Sair) em vez de encerrar a sessão direto no clique —
+  reaproveita o mesmo padrão de `<dialog>` de confirmação já usado em
+  outras ações do app.
 
 ## Em andamento (PRs abertas)
 
-- **Confirmação ao sair (logout)**: pedir confirmação ("Deseja realmente
-  sair?") antes de encerrar a sessão, em vez de sair direto no clique.
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
