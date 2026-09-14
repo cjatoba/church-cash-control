@@ -428,7 +428,32 @@ CASCADE`) + repositório Drizzle + tela protegida
     de atividades, trocar senha, login).
     Ícones novos usam SVG inline compartilhado
     (`src/app/_components/icons.tsx`), sem adicionar nenhuma biblioteca de
-    ícones.
+    ícones. Lacunas encontradas na validação em preview e corrigidas na
+    mesma fatia:
+  - Botão "Editar" da parcela paga saía da tela no mobile quando o texto
+    de status (data/forma de pagamento/recebido por/registrado por) ficava
+    longo — a linha da parcela agora empilha verticalmente no mobile em
+    vez de forçar tudo numa única linha.
+  - Trocar o mês no painel mensal não mostrava nenhum feedback de
+    carregamento — gap conhecido do Next.js App Router (o `loading.tsx`
+    automático não dispara quando só o `searchParams` muda na mesma
+    página); corrigido com `useTransition` no `MonthSelector`, que exibe
+    um skeleton por cima do conteúdo anterior enquanto a nova consulta
+    carrega.
+  - Link "Voltar" em todas as telas trocado por um componente
+    compartilhado (`BackLink`): ícone de seta + rótulo "Voltar" abaixo,
+    maior e mais fácil de tocar (texto sozinho antes).
+  - Ícones adicionados para ações comuns (lixeira para excluir/reverter,
+    lápis para editar, olho para ver dados, pessoas para doadores) nas
+    telas onde já existiam como texto.
+  - Ícone e título do navegador ainda eram o padrão do `create-next-app`
+    (`favicon.ico`, "Create Next App") — trocados por um ícone próprio
+    (`src/app/icon.svg`) e o título "Controle de Caixa"; `lang` do HTML
+    corrigido de `en` para `pt-BR`.
+  - Contraste insuficiente no tema escuro: cabeçalho do painel inicial
+    ganhou fundo próprio (antes se confundia com o fundo preto da
+    página) e a opacidade da borda no tema escuro subiu de 14,5% para
+    16% em todo o app.
 
 ## Backlog (próximas fatias, em ordem)
 

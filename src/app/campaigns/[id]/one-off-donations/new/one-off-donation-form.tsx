@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { BackLink } from "@/app/_components/back-link";
 
 export interface CreateOneOffDonationState {
   error?: string;
@@ -28,7 +28,7 @@ function ReceivedBySelect({
           onChange={(event) => {
             setReceivedByUserId(event.target.value);
           }}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         >
           {users.map((user) => (
             <option key={user.id} value={user.id}>
@@ -71,14 +71,9 @@ export function OneOffDonationForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950"
+      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950"
     >
-      <Link
-        href="/"
-        className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← Voltar para o painel
-      </Link>
+      <BackLink href="/" />
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Doação avulsa</h1>
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
         Para quem contribui sem ter um carnê.
@@ -95,7 +90,7 @@ export function OneOffDonationForm({
           name="donorName"
           type="text"
           placeholder="Nome (ou deixe em branco p/ anônimo)"
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -106,7 +101,7 @@ export function OneOffDonationForm({
           step="0.01"
           min="0.01"
           required
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -115,13 +110,13 @@ export function OneOffDonationForm({
           name="date"
           type="date"
           required
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
         Forma de pagamento
         <div className="flex gap-4 pt-1">
-          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145]">
+          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16]">
             <input
               type="radio"
               name="paymentMethod"
@@ -132,7 +127,7 @@ export function OneOffDonationForm({
             />
             Pix
           </label>
-          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145]">
+          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16]">
             <input type="radio" name="paymentMethod" value="cash" className="h-4 w-4" />
             Dinheiro
           </label>

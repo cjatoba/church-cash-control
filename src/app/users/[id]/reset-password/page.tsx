@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/app/_components/back-link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { regenerateTemporaryPassword } from "@/server/application/regenerate-temporary-password";
@@ -63,13 +63,8 @@ export default async function ResetPasswordPage({
   if (!canRegenerateTemporaryPassword(user)) {
     return (
       <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
-        <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-          <Link
-            href="/users"
-            className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-          >
-            ← Voltar para usuários
-          </Link>
+        <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+          <BackLink href="/users" />
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
             Senha já foi trocada
           </h1>

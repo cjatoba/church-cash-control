@@ -4,7 +4,8 @@ import { listPledges } from "@/server/application/list-pledges";
 import { isPledgeClosed } from "@/server/domain/pledge";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { CheckCircleIcon, ClockIcon } from "@/app/_components/icons";
+import { CheckCircleIcon, ClockIcon, EyeIcon } from "@/app/_components/icons";
+import { BackLink } from "@/app/_components/back-link";
 
 export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/donors">) {
   const session = await auth();
@@ -15,13 +16,8 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-md flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-        <Link
-          href="/"
-          className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Voltar para o painel
-        </Link>
+      <div className="flex w-full max-w-md flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+        <BackLink href="/" />
         <div className="flex items-baseline justify-between gap-2">
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Doadores</h1>
           {session?.user.canReceiveFunds ? (
@@ -45,7 +41,7 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
               return (
                 <li
                   key={pledge.id}
-                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
+                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
                 >
                   <Link
                     href={`/campaigns/${campaignId}/pledges/${pledge.id}`}
@@ -77,8 +73,9 @@ export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/
                   </Link>
                   <Link
                     href={`/campaigns/${campaignId}/donors/${pledge.donorId}`}
-                    className="rounded px-2 py-1.5 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                    className="flex items-center gap-1 rounded px-2 py-1.5 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
                   >
+                    <EyeIcon className="h-3.5 w-3.5" />
                     Ver dados
                   </Link>
                 </li>

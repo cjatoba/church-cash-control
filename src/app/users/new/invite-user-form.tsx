@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { BackLink } from "@/app/_components/back-link";
 import { TemporaryPasswordReveal } from "../_components/temporary-password-reveal";
 
 function grantedCapabilityLabels(capabilities: {
@@ -77,14 +77,9 @@ function InviteUserFormFields({
   return (
     <form
       action={formAction}
-      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950"
+      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950"
     >
-      <Link
-        href="/users"
-        className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← Voltar para usuários
-      </Link>
+      <BackLink href="/users" />
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Convidar usuário</h1>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         Uma senha temporária será gerada. Se informar o celular, você também vai poder enviar o
@@ -98,7 +93,7 @@ function InviteUserFormFields({
           type="email"
           required
           defaultValue={state.values?.email ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -108,12 +103,12 @@ function InviteUserFormFields({
           type="tel"
           placeholder="(11) 91234-5678"
           defaultValue={state.values?.phone ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
       <div className="flex flex-col gap-2 text-sm text-zinc-700 dark:text-zinc-300">
         <span>O que essa pessoa pode fazer?</span>
-        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145]">
+        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.16]">
           <input
             type="checkbox"
             name="canManageUsers"
@@ -122,7 +117,7 @@ function InviteUserFormFields({
           />
           Gerenciar usuários
         </label>
-        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145]">
+        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.16]">
           <input
             type="checkbox"
             name="canManageCampaigns"
@@ -131,7 +126,7 @@ function InviteUserFormFields({
           />
           Gerenciar campanhas (criar/editar/arquivar campanha, categoria, tipo de carnê)
         </label>
-        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145]">
+        <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.16]">
           <input
             type="checkbox"
             name="canReceiveFunds"

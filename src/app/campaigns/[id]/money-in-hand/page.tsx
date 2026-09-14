@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/app/_components/back-link";
 import { auth } from "@/auth";
 import { getCampaign } from "@/server/application/get-campaign";
 import { getMoneyInHand } from "@/server/application/get-money-in-hand";
@@ -69,13 +69,8 @@ export default async function MoneyInHandPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-6 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-        <Link
-          href="/"
-          className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Voltar para o painel
-        </Link>
+      <div className="flex w-full max-w-sm flex-col gap-6 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+        <BackLink href="/" />
         <div>
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Dinheiro em mãos</h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400">{campaign.name}</p>
@@ -90,7 +85,7 @@ export default async function MoneyInHandPage({
                 className={
                   isCurrentUser
                     ? "flex items-center justify-between rounded border border-black/[.14] bg-zinc-50 px-3 py-3 text-sm dark:border-white/[.22] dark:bg-zinc-900"
-                    : "flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
+                    : "flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
                 }
               >
                 <span className={isCurrentUser ? "font-medium" : undefined}>
@@ -117,7 +112,7 @@ export default async function MoneyInHandPage({
           />
         ) : null}
 
-        <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
+        <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
           <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             Histórico de repasses
           </h2>
@@ -128,7 +123,7 @@ export default async function MoneyInHandPage({
               {transfers.map((transfer) => (
                 <li
                   key={transfer.id}
-                  className="flex flex-col gap-1 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
+                  className="flex flex-col gap-1 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
                 >
                   <div className="flex items-center justify-between">
                     <span>

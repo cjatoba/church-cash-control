@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { BackLink } from "@/app/_components/back-link";
 
 export interface CreateDonorState {
   error?: string;
@@ -22,14 +22,9 @@ export function DonorForm({
   return (
     <form
       action={formAction}
-      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950"
+      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950"
     >
-      <Link
-        href={`/campaigns/${campaignId}/donors`}
-        className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← Voltar para doadores
-      </Link>
+      <BackLink href={`/campaigns/${campaignId}/donors`} />
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Novo doador</h1>
       {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -38,7 +33,7 @@ export function DonorForm({
           name="name"
           type="text"
           required
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -47,7 +42,7 @@ export function DonorForm({
           name="pledgeTypeId"
           required
           defaultValue=""
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.145] dark:bg-black"
+          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         >
           <option value="" disabled>
             Selecione

@@ -45,7 +45,7 @@ export function PayInstallmentButton({
       </button>
       <dialog
         ref={dialogRef}
-        className="rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.145] dark:bg-zinc-950 dark:text-zinc-50"
+        className="rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-50"
       >
         <form action={action} className="flex w-72 flex-col gap-4">
           <input type="hidden" name="installmentId" value={installmentId} />
@@ -78,7 +78,7 @@ export function PayInstallmentButton({
               onChange={(event) => {
                 setReceivedByUserId(event.target.value);
               }}
-              className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.145] dark:bg-black"
+              className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -103,14 +103,14 @@ export function PayInstallmentButton({
                   onClick={() => {
                     setPickingDate(true);
                   }}
-                  className="flex-1 rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
+                  className="flex-1 rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
                 >
                   Escolher outra data
                 </button>
                 <button
                   type="button"
                   onClick={() => dialogRef.current?.close()}
-                  className="flex-1 rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
+                  className="flex-1 rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
                 >
                   Cancelar
                 </button>
@@ -127,14 +127,14 @@ export function PayInstallmentButton({
                   max={todayIso}
                   required
                   autoFocus
-                  className="rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.145] dark:bg-black"
+                  className="rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.16] dark:bg-black"
                 />
               </label>
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => dialogRef.current?.close()}
-                  className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
+                  className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
                 >
                   Cancelar
                 </button>

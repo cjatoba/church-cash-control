@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BackLink } from "@/app/_components/back-link";
 
 export function TemporaryPasswordReveal({
   title,
@@ -6,7 +6,6 @@ export function TemporaryPasswordReveal({
   temporaryPassword,
   whatsappLink,
   backHref,
-  backLabel = "← Voltar para usuários",
   secondaryAction,
 }: {
   title: string;
@@ -14,11 +13,10 @@ export function TemporaryPasswordReveal({
   temporaryPassword: string;
   whatsappLink?: string;
   backHref: string;
-  backLabel?: string;
   secondaryAction?: { onClick: () => void; label: string };
 }) {
   return (
-    <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
+    <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">{title}</h1>
       <p className="rounded bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/30 dark:text-green-400">
         {message}
@@ -51,7 +49,7 @@ export function TemporaryPasswordReveal({
         </p>
       )}
 
-      <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
+      <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
         {secondaryAction ? (
           <button
             type="button"
@@ -61,12 +59,7 @@ export function TemporaryPasswordReveal({
             {secondaryAction.label}
           </button>
         ) : null}
-        <Link
-          href={backHref}
-          className="text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          {backLabel}
-        </Link>
+        <BackLink href={backHref} />
       </div>
     </div>
   );

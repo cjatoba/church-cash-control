@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BackLink } from "@/app/_components/back-link";
 import { auth } from "@/auth";
 import { createPledgeType } from "@/server/application/create-pledge-type";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
@@ -52,13 +52,8 @@ export default async function PledgeTypesPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-        <Link
-          href="/"
-          className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Voltar para o painel
-        </Link>
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+        <BackLink href="/" />
         <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Tipos de carnê</h1>
 
         {pledgeTypes.length === 0 ? (
@@ -70,7 +65,7 @@ export default async function PledgeTypesPage({
             {pledgeTypes.map((pledgeType) => (
               <li
                 key={pledgeType.id}
-                className="flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
+                className="flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
               >
                 <span className="font-medium text-zinc-900 dark:text-zinc-100">
                   {pledgeType.name}

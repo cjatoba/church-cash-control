@@ -10,6 +10,7 @@ import { createActivityLogRepository } from "@/server/infrastructure/db/activity
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { LogoutButton } from "@/app/_components/logout-button";
+import { ArchiveBoxIcon, ArrowPathIcon, PencilIcon, UsersIcon } from "@/app/_components/icons";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -93,7 +94,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-black/[.08] px-4 py-4 sm:px-6 dark:border-white/[.145]">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-black/[.08] bg-white px-4 py-4 sm:px-6 dark:border-white/[.16] dark:bg-zinc-950">
         <span className="font-semibold text-black dark:text-zinc-50">Controle de Caixa</span>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400">
           {session?.user.canManageUsers ? (
@@ -140,7 +141,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
 
         {campaigns.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-black/[.08] bg-white p-12 text-center dark:border-white/[.145] dark:bg-zinc-950">
+          <div className="flex flex-col items-center gap-2 rounded-lg border border-black/[.08] bg-white p-12 text-center dark:border-white/[.16] dark:bg-zinc-950">
             <h2 className="font-semibold text-black dark:text-zinc-50">
               Nenhuma campanha cadastrada
             </h2>
@@ -170,7 +171,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               return (
                 <article
                   key={campaign.id}
-                  className="flex flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.145] dark:bg-zinc-950"
+                  className="flex flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.16] dark:bg-zinc-950"
                 >
                   <div>
                     <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
@@ -222,42 +223,43 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       {progressPercentage}% da meta
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-2 border-t border-black/[.08] pt-3 dark:border-white/[.145]">
+                  <div className="flex flex-wrap gap-2 border-t border-black/[.08] pt-3 dark:border-white/[.16]">
                     <Link
                       href={`/campaigns/${campaign.id}/categories`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Categorias
                     </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/pledge-types`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Tipos de carnê
                     </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/donors`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="flex items-center gap-1.5 self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
+                      <UsersIcon className="h-4 w-4" />
                       Doadores
                     </Link>
                     {session?.user.canReceiveFunds ? (
                       <Link
                         href={`/campaigns/${campaign.id}/one-off-donations/new`}
-                        className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                        className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                       >
                         + Doação avulsa
                       </Link>
                     ) : null}
                     <Link
                       href={`/campaigns/${campaign.id}/monthly`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Painel mensal
                     </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/money-in-hand`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Dinheiro em mãos
                     </Link>
@@ -265,14 +267,18 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       <>
                         <Link
                           href={`/campaigns/${campaign.id}/edit`}
-                          className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                          className="flex items-center gap-1.5 self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
                         >
+                          <PencilIcon className="h-4 w-4" />
                           Editar
                         </Link>
                         <form action={archive}>
                           <input type="hidden" name="campaignId" value={campaign.id} />
                           <input type="hidden" name="campaignName" value={campaign.name} />
-                          <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
+                          <SubmitButton pendingLabel="Arquivando…">
+                            <ArchiveBoxIcon className="h-4 w-4" />
+                            Arquivar
+                          </SubmitButton>
                         </form>
                       </>
                     ) : null}
@@ -285,14 +291,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
         {archivedCampaigns.length > 0 ? (
           <div className="flex flex-col gap-4">
-            <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
               Campanhas arquivadas
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {archivedCampaigns.map((campaign) => (
                 <article
                   key={campaign.id}
-                  className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 text-zinc-500 dark:border-white/[.145] dark:bg-zinc-950 dark:text-zinc-400"
+                  className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 text-zinc-500 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-400"
                 >
                   <div>
                     <h3 className="font-semibold">{campaign.name}</h3>
@@ -305,7 +311,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     <form action={restore}>
                       <input type="hidden" name="campaignId" value={campaign.id} />
                       <input type="hidden" name="campaignName" value={campaign.name} />
-                      <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
+                      <SubmitButton pendingLabel="Reativando…">
+                        <ArrowPathIcon className="h-4 w-4" />
+                        Reativar
+                      </SubmitButton>
                     </form>
                   ) : null}
                 </article>
