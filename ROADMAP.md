@@ -468,8 +468,6 @@ CASCADE`) + repositório Drizzle + tela protegida
     Arquivar/Reativar de categorias e Desativar/Reativar de usuários
     (mesmo padrão do link "Editar" vizinho em cada lista).
 
-## Em andamento (PRs abertas)
-
 - **Revisão dos formulários existentes (preservar dados em erro +
   mensagem específica)** — PR #49, item 1 do backlog: campanha (criar/editar),
   categoria (criar/editar), doador, tipo de carnê, doação avulsa, login e
@@ -505,6 +503,10 @@ CASCADE`) + repositório Drizzle + tela protegida
     reverter. A tela de carnê mostra essa mensagem no lugar de quebrar
     (revert passou a usar `useActionState`, antes era uma action sem
     tratamento de erro).
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
