@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMonthlyProgress } from "@/server/application/get-monthly-progress";
 import { isMonthlyGoalReached } from "@/server/domain/monthly-progress";
+import { MonthSelector } from "@/app/campaigns/[id]/monthly/_components/month-selector";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createOneOffDonationRepository } from "@/server/infrastructure/db/one-off-donation-repository";
@@ -107,25 +108,13 @@ export default async function MonthlyProgressPage({
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
             {monthLabel(month)}
           </h1>
-          <form className="flex items-center gap-2">
-            <select
-              name="month"
-              defaultValue={monthParamValue(month)}
-              className="rounded border border-black/[.08] px-2 py-1 text-sm dark:border-white/[.145] dark:bg-black"
-            >
-              {months.map((option) => (
-                <option key={monthParamValue(option)} value={monthParamValue(option)}>
-                  {monthLabel(option)}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
-            >
-              Ver
-            </button>
-          </form>
+          <MonthSelector
+            selectedValue={monthParamValue(month)}
+            options={months.map((option) => ({
+              value: monthParamValue(option),
+              label: monthLabel(option),
+            }))}
+          />
         </div>
 
         <div className="flex flex-col gap-1">
