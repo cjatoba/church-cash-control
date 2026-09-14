@@ -454,6 +454,11 @@ CASCADE`) + repositório Drizzle + tela protegida
     ganhou fundo próprio (antes se confundia com o fundo preto da
     página) e a opacidade da borda no tema escuro subiu de 14,5% para
     16% em todo o app.
+  - O skeleton do painel mensal (item acima) aparecia, mas o overlay não
+    tinha fundo próprio — o conteúdo do mês anterior (com opacidade
+    reduzida) continuava visível por trás dele durante o carregamento.
+    Corrigido dando ao overlay o mesmo fundo sólido do card que o
+    envolve.
 
 ## Backlog (próximas fatias, em ordem)
 
