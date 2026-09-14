@@ -373,18 +373,23 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-- Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
-  sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
-  botão de submit separado.
+- **Painel mensal reativo** — PR #41: o `<select>` de mês
+  (`/campaigns/[id]/monthly`) navega sozinho ao trocar (via `MonthSelector`,
+  client component com `router.push`), sem precisar mais do botão "Ver".
+  Lacuna descoberta na validação em preview: ao trocar de mês, os dados do
+  mês anterior ficavam na tela sem nenhum indicativo de carregamento
+  enquanto a nova consulta rodava — a mesma PR já adiciona um `loading.tsx`
+  (skeleton) a essa tela, adiantando parte do item de skeletons do
+  backlog (ver abaixo); as demais telas continuam pendentes.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Skeletons de carregamento em todas as telas que buscam dado no
+1. Skeletons de carregamento nas demais telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
-   carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
-   ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
-   carregamento"; falta aplicar retroativamente nas telas existentes
-   (`/users` já nasceu com o próprio `loading.tsx`, ver `Concluído`, PR #28).
+   carnê/doadores, detalhe de carnê, telas de editar) — ver regra já
+   registrada em `CLAUDE.md`, seção "Skeletons de carregamento"; falta
+   aplicar retroativamente (`/users` e `/campaigns/[id]/monthly` já têm
+   `loading.tsx` próprio, ver `Concluído`, PR #28, e esta mesma PR #41).
 2. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
