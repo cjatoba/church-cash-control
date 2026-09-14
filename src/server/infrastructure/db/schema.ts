@@ -110,6 +110,33 @@ export const installments = pgTable("installments", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const activityLogActionEnum = pgEnum("activity_log_action", [
+  "installment_paid",
+  "installment_payment_corrected",
+  "installment_payment_reverted",
+  "campaign_updated",
+  "campaign_archived",
+  "campaign_restored",
+  "transaction_category_archived",
+  "transaction_category_restored",
+]);
+
+// subjectName/amountCents são um retrato do momento da ação (não FK para
+// campanha/categoria/parcela): esses registros podem ser depois renomeados,
+// arquivados ou até removidos (ex.: encurtar o período de uma campanha
+// apaga parcelas pendentes), mas o log de auditoria precisa continuar
+// legível mesmo assim.
+export const activityLog = pgTable("activity_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  actorUserId: uuid("actor_user_id")
+    .notNull()
+    .references(() => users.id),
+  action: activityLogActionEnum("action").notNull(),
+  subjectName: varchar("subject_name", { length: 255 }).notNull(),
+  amountCents: integer("amount_cents"),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+});
+
 export const custodyTransfers = pgTable("custody_transfers", {
   id: uuid("id").primaryKey().defaultRandom(),
   campaignId: uuid("campaign_id")

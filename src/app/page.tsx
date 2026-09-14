@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { listCampaigns } from "@/server/application/list-campaigns";
 import { archiveCampaign, restoreCampaign } from "@/server/application/archive-campaign";
+import { recordActivity } from "@/server/application/record-activity";
 import { calculateCampaignProgressPercentage } from "@/server/domain/campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
+import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { LogoutButton } from "@/app/_components/logout-button";
@@ -40,13 +42,22 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     }
 
     const campaignId = formData.get("campaignId");
-    if (typeof campaignId !== "string") {
+    const campaignName = formData.get("campaignName");
+    if (typeof campaignId !== "string" || typeof campaignName !== "string") {
       throw new Error("Campanha inválida");
     }
 
     const db = createDbClient();
     const repository = createCampaignRepository(db);
     await archiveCampaign(repository, campaignId);
+
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: actionSession.user.id,
+      action: "campaign_archived",
+      subjectName: campaignName,
+      amountCents: null,
+    });
 
     redirect("/");
   }
@@ -60,13 +71,22 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     }
 
     const campaignId = formData.get("campaignId");
-    if (typeof campaignId !== "string") {
+    const campaignName = formData.get("campaignName");
+    if (typeof campaignId !== "string" || typeof campaignName !== "string") {
       throw new Error("Campanha inválida");
     }
 
     const db = createDbClient();
     const repository = createCampaignRepository(db);
     await restoreCampaign(repository, campaignId);
+
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: actionSession.user.id,
+      action: "campaign_restored",
+      subjectName: campaignName,
+      amountCents: null,
+    });
 
     redirect("/");
   }
@@ -79,6 +99,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           {session?.user.canManageUsers ? (
             <Link href="/users" className="hover:text-black dark:hover:text-zinc-50">
               Usuários
+            </Link>
+          ) : null}
+          {session?.user.canManageUsers ? (
+            <Link href="/activity-log" className="hover:text-black dark:hover:text-zinc-50">
+              Registro de atividades
             </Link>
           ) : null}
           {session?.user.email ? <span>{session.user.email}</span> : null}
@@ -230,6 +255,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                         </Link>
                         <form action={archive}>
                           <input type="hidden" name="campaignId" value={campaign.id} />
+                          <input type="hidden" name="campaignName" value={campaign.name} />
                           <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
                         </form>
                       </>
@@ -262,6 +288,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   {session?.user.canManageCampaigns ? (
                     <form action={restore}>
                       <input type="hidden" name="campaignId" value={campaign.id} />
+                      <input type="hidden" name="campaignName" value={campaign.name} />
                       <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
                     </form>
                   ) : null}

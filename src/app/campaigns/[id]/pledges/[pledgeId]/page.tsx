@@ -6,10 +6,12 @@ import { payInstallment } from "@/server/application/pay-installment";
 import { correctInstallmentPaymentDate } from "@/server/application/correct-installment-payment-date";
 import { revertInstallmentPayment } from "@/server/application/revert-installment-payment";
 import { listUsers } from "@/server/application/list-users";
+import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
+import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { PayInstallmentButton } from "../_components/pay-installment-button";
 import { EditPaymentDateButton } from "../_components/edit-payment-date-button";
@@ -66,11 +68,15 @@ export default async function PledgeDetailPage({
     const registeredByUserId = actionSession.user.id;
 
     const installmentId = formData.get("installmentId");
+    const donorName = formData.get("donorName");
+    const amountCentsValue = formData.get("amountCents");
     const paidAtValue = formData.get("paidAt");
     const paymentMethodValue = formData.get("paymentMethod");
     const receivedByUserId = formData.get("receivedByUserId");
     if (
       typeof installmentId !== "string" ||
+      typeof donorName !== "string" ||
+      typeof amountCentsValue !== "string" ||
       typeof paidAtValue !== "string" ||
       typeof receivedByUserId !== "string"
     ) {
@@ -88,6 +94,14 @@ export default async function PledgeDetailPage({
       registeredByUserId,
     );
 
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: registeredByUserId,
+      action: "installment_paid",
+      subjectName: donorName,
+      amountCents: Number(amountCentsValue),
+    });
+
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
 
@@ -100,8 +114,15 @@ export default async function PledgeDetailPage({
     }
 
     const installmentId = formData.get("installmentId");
+    const donorName = formData.get("donorName");
+    const amountCentsValue = formData.get("amountCents");
     const paidAtValue = formData.get("paidAt");
-    if (typeof installmentId !== "string" || typeof paidAtValue !== "string") {
+    if (
+      typeof installmentId !== "string" ||
+      typeof donorName !== "string" ||
+      typeof amountCentsValue !== "string" ||
+      typeof paidAtValue !== "string"
+    ) {
       throw new Error("Dados inválidos para corrigir a data de pagamento");
     }
 
@@ -112,6 +133,14 @@ export default async function PledgeDetailPage({
       installmentId,
       new Date(paidAtValue),
     );
+
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: actionSession.user.id,
+      action: "installment_payment_corrected",
+      subjectName: donorName,
+      amountCents: Number(amountCentsValue),
+    });
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
@@ -125,7 +154,13 @@ export default async function PledgeDetailPage({
     }
 
     const installmentId = formData.get("installmentId");
-    if (typeof installmentId !== "string") {
+    const donorName = formData.get("donorName");
+    const amountCentsValue = formData.get("amountCents");
+    if (
+      typeof installmentId !== "string" ||
+      typeof donorName !== "string" ||
+      typeof amountCentsValue !== "string"
+    ) {
       throw new Error("Parcela inválida");
     }
 
@@ -135,6 +170,14 @@ export default async function PledgeDetailPage({
       { installmentReader: installmentRepository, installmentRepository },
       installmentId,
     );
+
+    const activityLogRepository = createActivityLogRepository(db);
+    await recordActivity(activityLogRepository, {
+      actorUserId: actionSession.user.id,
+      action: "installment_payment_reverted",
+      subjectName: donorName,
+      amountCents: Number(amountCentsValue),
+    });
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
@@ -193,6 +236,8 @@ export default async function PledgeDetailPage({
                     {session.user.canReceiveFunds ? (
                       <EditPaymentDateButton
                         installmentId={installment.id}
+                        donorName={pledge.donorName}
+                        amountCents={(installment.paidAmount ?? installment.amount).toCents()}
                         currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
                         todayIso={todayIso}
                         correctAction={correctPaymentDate}
@@ -210,6 +255,8 @@ export default async function PledgeDetailPage({
               ) : session.user.canReceiveFunds ? (
                 <PayInstallmentButton
                   installmentId={installment.id}
+                  donorName={pledge.donorName}
+                  amountCents={installment.amount.toCents()}
                   monthLabel={formatMonthLabel(installment.dueDate)}
                   amountLabel={currencyFormatter.format(installment.amount.toCents() / 100)}
                   todayIso={todayIso}
