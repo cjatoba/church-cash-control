@@ -146,8 +146,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               Nenhuma campanha cadastrada
             </h2>
             <p className="max-w-sm text-sm text-zinc-600 dark:text-zinc-400">
-              Crie a primeira campanha de arrecadação para começar a organizar categorias de
-              lançamento e acompanhar a meta.
+              Crie a primeira campanha de arrecadação para começar a cadastrar doadores e acompanhar
+              a meta.
             </p>
             {session?.user.canManageCampaigns ? (
               <Link
@@ -224,12 +224,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2 border-t border-black/[.08] pt-3 dark:border-white/[.16]">
-                    <Link
-                      href={`/campaigns/${campaign.id}/categories`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
-                    >
-                      Categorias
-                    </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/pledge-types`}
                       className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"

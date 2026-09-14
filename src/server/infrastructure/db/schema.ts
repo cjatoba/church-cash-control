@@ -32,23 +32,7 @@ export const campaigns = pgTable("campaigns", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const transactionCategoryTypeEnum = pgEnum("transaction_category_type", [
-  "income",
-  "expense",
-]);
-
 export const paymentMethodEnum = pgEnum("payment_method", ["pix", "cash"]);
-
-export const transactionCategories = pgTable("transaction_categories", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 255 }).notNull(),
-  type: transactionCategoryTypeEnum("type").notNull(),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
 
 export const donors = pgTable("donors", {
   id: uuid("id").primaryKey().defaultRandom(),
