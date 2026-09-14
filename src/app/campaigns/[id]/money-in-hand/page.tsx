@@ -8,10 +8,15 @@ import { createCustodyTransfer } from "@/server/application/create-custody-trans
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createCustodyRepository } from "@/server/infrastructure/db/custody-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { TransferButton } from "./_components/transfer-button";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { TransferButton, type TransferState } from "./_components/transfer-button";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 export default async function MoneyInHandPage({
   params,
@@ -36,7 +41,7 @@ export default async function MoneyInHandPage({
     notFound();
   }
 
-  async function transfer(formData: FormData): Promise<void> {
+  async function transfer(_prevState: TransferState, formData: FormData): Promise<TransferState> {
     "use server";
 
     const actionSession = await auth();
@@ -54,13 +59,29 @@ export default async function MoneyInHandPage({
       description: formData.get("description"),
     };
 
-    const db = createDbClient();
-    const custodyRepository = createCustodyRepository(db);
-    await createCustodyTransfer(
-      { balanceReader: custodyRepository, repository: custodyRepository },
-      input,
-      registeredByUserId,
-    );
+    try {
+      const db = createDbClient();
+      const custodyRepository = createCustodyRepository(db);
+      await createCustodyTransfer(
+        { balanceReader: custodyRepository, repository: custodyRepository },
+        input,
+        registeredByUserId,
+      );
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível registrar o repasse. Confira os dados informados.",
+        ),
+        values: {
+          fromUserId: toStringValue(input.fromUserId),
+          amount: toStringValue(input.amount),
+          recipientName: toStringValue(input.recipientName),
+          transferDate: toStringValue(input.transferDate),
+          description: toStringValue(input.description),
+        },
+      };
+    }
 
     redirect(`/campaigns/${campaignId}/money-in-hand`);
   }

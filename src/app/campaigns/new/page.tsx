@@ -3,7 +3,12 @@ import { auth } from "@/auth";
 import { createCampaign } from "@/server/application/create-campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { CampaignForm, type CreateCampaignState } from "../_components/campaign-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 export default async function NewCampaignPage() {
   const session = await auth();
@@ -33,8 +38,19 @@ export default async function NewCampaignPage() {
       const db = createDbClient();
       const repository = createCampaignRepository(db);
       await createCampaign(repository, input);
-    } catch {
-      return { error: "Não foi possível criar a campanha. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível criar a campanha. Confira os dados informados.",
+        ),
+        values: {
+          name: toStringValue(input.name),
+          goal: toStringValue(input.goal),
+          startDate: toStringValue(input.startDate),
+          endDate: toStringValue(input.endDate),
+        },
+      };
     }
 
     redirect("/");

@@ -4,7 +4,12 @@ import { getTransactionCategory } from "@/server/application/get-transaction-cat
 import { updateTransactionCategory } from "@/server/application/update-transaction-category";
 import { createTransactionCategoryRepository } from "@/server/infrastructure/db/transaction-category-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { CategoryForm, type CreateCategoryState } from "../../_components/category-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 export default async function EditTransactionCategoryPage({
   params,
@@ -44,8 +49,17 @@ export default async function EditTransactionCategoryPage({
       const db = createDbClient();
       const repository = createTransactionCategoryRepository(db);
       await updateTransactionCategory(repository, categoryId, input);
-    } catch {
-      return { error: "Não foi possível salvar a categoria. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível salvar a categoria. Confira os dados informados.",
+        ),
+        values: {
+          name: toStringValue(input.name),
+          type: toStringValue(input.type),
+        },
+      };
     }
 
     redirect(`/campaigns/${campaignId}/categories`);

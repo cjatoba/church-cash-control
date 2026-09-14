@@ -5,6 +5,9 @@ import { SubmitButton } from "@/app/_components/submit-button";
 
 export interface LoginState {
   error?: string;
+  // Nunca inclui a senha aqui: só o e-mail é preservado em caso de erro,
+  // por boa prática de segurança (nunca repopular campo de senha).
+  values?: { email: string };
 }
 
 export function LoginForm({
@@ -37,6 +40,7 @@ export function LoginForm({
           name="email"
           type="email"
           required
+          defaultValue={state.values?.email ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>

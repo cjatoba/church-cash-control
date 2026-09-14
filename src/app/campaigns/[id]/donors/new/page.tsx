@@ -9,7 +9,12 @@ import { createDonorRepository } from "@/server/infrastructure/db/donor-reposito
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { DonorForm, type CreateDonorState } from "./donor-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -38,10 +43,15 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
       redirect("/");
     }
 
+    const input = {
+      name: formData.get("name"),
+      pledgeTypeId: formData.get("pledgeTypeId"),
+    };
+
     try {
       const db = createDbClient();
       const donorRepository = createDonorRepository(db);
-      const { id: donorId } = await createDonor(donorRepository, { name: formData.get("name") });
+      const { id: donorId } = await createDonor(donorRepository, { name: input.name });
 
       const pledgeTypeRepository = createPledgeTypeRepository(db);
       const campaignRepository = createCampaignRepository(db);
@@ -55,11 +65,20 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
         {
           campaignId,
           donorId,
-          pledgeTypeId: formData.get("pledgeTypeId"),
+          pledgeTypeId: input.pledgeTypeId,
         },
       );
-    } catch {
-      return { error: "Não foi possível cadastrar o doador. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível cadastrar o doador. Confira os dados informados.",
+        ),
+        values: {
+          name: toStringValue(input.name),
+          pledgeTypeId: toStringValue(input.pledgeTypeId),
+        },
+      };
     }
 
     redirect(`/campaigns/${campaignId}/donors`);

@@ -3,7 +3,12 @@ import { auth } from "@/auth";
 import { createTransactionCategory } from "@/server/application/create-transaction-category";
 import { createTransactionCategoryRepository } from "@/server/infrastructure/db/transaction-category-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { CategoryForm, type CreateCategoryState } from "../_components/category-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 export default async function NewTransactionCategoryPage({
   params,
@@ -36,8 +41,17 @@ export default async function NewTransactionCategoryPage({
       const db = createDbClient();
       const repository = createTransactionCategoryRepository(db);
       await createTransactionCategory(repository, input);
-    } catch {
-      return { error: "Não foi possível criar a categoria. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível criar a categoria. Confira os dados informados.",
+        ),
+        values: {
+          name: toStringValue(input.name),
+          type: toStringValue(input.type),
+        },
+      };
     }
 
     return { success: Date.now() };

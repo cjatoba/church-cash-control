@@ -470,26 +470,29 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Revisão dos formulários existentes (preservar dados em erro +
+  mensagem específica)** — item 1 do backlog: campanha (criar/editar),
+  categoria (criar/editar), doador, tipo de carnê, doação avulsa, login e
+  repasse passam a devolver os valores enviados no estado de erro
+  (usados como `defaultValue`, em vez de perder o que a pessoa digitou)
+  e a mostrar a mensagem específica do erro de regra de negócio via
+  `toFriendlyErrorMessage` em vez de um `catch` genérico com mensagem
+  fixa. Login preserva só o e-mail (nunca a senha, por segurança — nunca
+  repopular campo de senha). Trocar senha ficou de fora: os dois campos
+  são de senha, então não há o que preservar, e a mensagem de erro já
+  era específica o suficiente. Lacuna maior encontrada durante a revisão
+  (fora dos dois pontos originais, mas no mesmo formulário citado no
+  próprio item do backlog): o formulário de repasse
+  (`transfer-button.tsx`) nem tinha estado de erro — um repasse com
+  valor maior que o saldo disponível ou com data futura (erros já
+  existentes em `assertTransferWithinBalance`) não tinha nenhum
+  tratamento, quebrando sem feedback nenhum para quem preenchia. Corrigido
+  na mesma fatia, convertendo o formulário para `useActionState` com o
+  mesmo padrão dos demais.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Revisar todos os formulários existentes do app (campanha, categoria,
-   doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
-   lacunas encontradas e corrigidas nos formulários de convidar/editar
-   usuário (ver `Concluído`, PR #28), que os formulários mais antigos
-   provavelmente também têm:
-   - Não preservar os dados digitados quando a submissão dá erro: o
-     React reseta os campos não controlados assim que a server action
-     termina, mesmo em caso de erro de validação, não só em sucesso; a
-     correção é a action devolver os valores enviados no estado de erro
-     e usá-los como `defaultValue`.
-   - Mostrar sempre uma mensagem genérica ("Confira os dados
-     informados") em vez da mensagem específica de um erro de regra de
-     negócio (ex.: "E-mail já cadastrado", "Nome da campanha já existe"
-     se aplicável) — usar `toFriendlyErrorMessage`
-     (`src/app/_lib/action-error-message.ts`) em vez de um `catch`
-     genérico.
+Nenhuma fatia no backlog no momento.
 
 ## Como usar este arquivo
 

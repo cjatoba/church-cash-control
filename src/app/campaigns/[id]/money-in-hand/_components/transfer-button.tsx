@@ -1,11 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 
-export interface TransferButtonState {
+export interface TransferState {
   error?: string;
-  success?: boolean;
+  values?: {
+    fromUserId: string;
+    amount: string;
+    recipientName: string;
+    transferDate: string;
+    description: string;
+  };
 }
 
 export function TransferButton({
@@ -17,9 +23,10 @@ export function TransferButton({
   balances: { userId: string; userLabel: string; balanceCents: number }[];
   currentUserId: string;
   todayIso: string;
-  action: (formData: FormData) => Promise<void>;
+  action: (prevState: TransferState, formData: FormData) => Promise<TransferState>;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [state, formAction] = useActionState<TransferState, FormData>(action, {});
   const [fromUserId, setFromUserId] = useState(currentUserId);
 
   const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -43,8 +50,11 @@ export function TransferButton({
         ref={dialogRef}
         className="rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-50"
       >
-        <form action={action} className="flex w-72 flex-col gap-4">
+        <form action={formAction} className="flex w-72 flex-col gap-4">
           <p className="font-semibold">Repassar dinheiro</p>
+          {state.error ? (
+            <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+          ) : null}
 
           <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
             Quem está repassando
@@ -83,6 +93,7 @@ export function TransferButton({
               step="0.01"
               min="0.01"
               required
+              defaultValue={state.values?.amount ?? ""}
               className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
             />
           </label>
@@ -93,6 +104,7 @@ export function TransferButton({
               type="text"
               placeholder="Ex.: Responsável pela compra"
               required
+              defaultValue={state.values?.recipientName ?? ""}
               className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
             />
           </label>
@@ -101,7 +113,7 @@ export function TransferButton({
             <input
               name="transferDate"
               type="date"
-              defaultValue={todayIso}
+              defaultValue={state.values?.transferDate ?? todayIso}
               max={todayIso}
               required
               className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
@@ -112,6 +124,7 @@ export function TransferButton({
             <input
               name="description"
               type="text"
+              defaultValue={state.values?.description ?? ""}
               className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
             />
           </label>
