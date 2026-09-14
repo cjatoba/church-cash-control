@@ -250,15 +250,15 @@ export default async function PledgeDetailPage({
           {pledge.installments.map((installment) => (
             <li
               key={installment.id}
-              className="flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
+              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between dark:border-white/[.145]"
             >
               <span>
                 {formatMonthLabel(installment.dueDate)} ·{" "}
                 {currencyFormatter.format(installment.amount.toCents() / 100)}
               </span>
               {installment.paidAt ? (
-                <span className="flex flex-col items-end gap-1">
-                  <span className="flex items-center gap-2">
+                <div className="flex flex-col gap-1 sm:items-end">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
                       <CheckCircleIcon className="h-3.5 w-3.5 shrink-0" />
                       Pago em {dateFormatter.format(installment.paidAt)}
@@ -280,14 +280,14 @@ export default async function PledgeDetailPage({
                         revertAction={revertPayment}
                       />
                     ) : null}
-                  </span>
+                  </div>
                   {installment.registeredByLabel &&
                   installment.registeredByLabel !== installment.receivedByLabel ? (
                     <span className="text-xs text-amber-700 dark:text-amber-400">
                       ⚠ Registrado por {installment.registeredByLabel}
                     </span>
                   ) : null}
-                </span>
+                </div>
               ) : session.user.canReceiveFunds ? (
                 <PayInstallmentButton
                   installmentId={installment.id}
