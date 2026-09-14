@@ -82,21 +82,26 @@ export default async function MoneyInHandPage({
         </div>
 
         <ul className="flex flex-col gap-2">
-          {balances.map((balance) => (
-            <li
-              key={balance.userId}
-              className="flex items-center justify-between rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
-            >
-              <span>
-                {balance.userId === session.user.id
-                  ? `${balance.userLabel} (você)`
-                  : balance.userLabel}
-              </span>
-              <span className="font-medium">
-                {currencyFormatter.format(balance.balance.toCents() / 100)}
-              </span>
-            </li>
-          ))}
+          {balances.map((balance) => {
+            const isCurrentUser = balance.userId === session.user.id;
+            return (
+              <li
+                key={balance.userId}
+                className={
+                  isCurrentUser
+                    ? "flex items-center justify-between rounded border border-black/[.14] bg-zinc-50 px-3 py-3 text-sm dark:border-white/[.22] dark:bg-zinc-900"
+                    : "flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
+                }
+              >
+                <span className={isCurrentUser ? "font-medium" : undefined}>
+                  {isCurrentUser ? `${balance.userLabel} (você)` : balance.userLabel}
+                </span>
+                <span className="text-base font-semibold text-black dark:text-zinc-50">
+                  {currencyFormatter.format(balance.balance.toCents() / 100)}
+                </span>
+              </li>
+            );
+          })}
         </ul>
 
         {session.user.canReceiveFunds ? (
@@ -113,7 +118,7 @@ export default async function MoneyInHandPage({
         ) : null}
 
         <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
-          <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+          <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             Histórico de repasses
           </h2>
           {transfers.length === 0 ? (
@@ -123,14 +128,14 @@ export default async function MoneyInHandPage({
               {transfers.map((transfer) => (
                 <li
                   key={transfer.id}
-                  className="flex flex-col gap-1 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+                  className="flex flex-col gap-1 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
                 >
                   <div className="flex items-center justify-between">
                     <span>
                       {dateFormatter.format(transfer.transferDate)} · {transfer.fromUserLabel} →{" "}
                       {transfer.recipientName}
                     </span>
-                    <span className="font-medium">
+                    <span className="text-base font-semibold text-black dark:text-zinc-50">
                       {currencyFormatter.format(transfer.amount.toCents() / 100)}
                     </span>
                   </div>

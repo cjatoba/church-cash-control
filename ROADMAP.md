@@ -406,34 +406,31 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Revisão de usabilidade + nomenclatura em todas as telas existentes**:
+  decisões tomadas com o usuário antes de começar — os dois passes
+  (usabilidade/poluição visual e nomenclatura simples) combinados numa
+  fatia só, cada tela revisada uma única vez; além do já previsto
+  (hierarquia tipográfica, divisórias entre seções, cor com significado,
+  ícones, alvos de toque maiores), a revisão passa a exigir também que a
+  versão mobile tenha cara de app (botões e números grandes, fácil de
+  tocar/ler — não só "site que encolheu"). Dividida em 4 lotes por PR,
+  numa ordem proposta e confirmada com o usuário (das telas mais usadas
+  no dia a dia às administrativas); os 4 lotes são implementados e só
+  depois avaliados juntos pelo usuário, em vez de aprovar cada PR
+  separadamente:
+  - Lote 1 — painel inicial, detalhe de carnê, painel mensal, dinheiro em
+    mãos.
+  - Lote 2 — listas de cadastro (doadores, categorias, tipos de carnê).
+  - Lote 3 — formulários de cadastro/edição.
+  - Lote 4 — telas administrativas (usuários, registro de atividades,
+    trocar senha, login).
+    Ícones novos usam SVG inline compartilhado
+    (`src/app/_components/icons.tsx`), sem adicionar nenhuma biblioteca de
+    ícones.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Revisão de usabilidade/poluição visual em **todas as telas existentes
-   do app** — não é uma correção pontual de uma tela específica, é um
-   passe geral obrigatório em toda a aplicação. Pontos a considerar em
-   cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
-   lista não podem competir todos no mesmo peso/tamanho), separação
-   visual entre seções (linha divisória ou agrupamento em vez de só
-   espaço em branco — hoje várias telas empilham seções num único bloco
-   contínuo), uso consistente de cor com significado (ex.: verde/âmbar
-   para pago/pendente nos dois lados, não só num), ícones para escaneio
-   rápido sem precisar ler todo o texto, e alvos de toque maiores/mais
-   espaçados no geral (não só em modais — foi o caso do modal de "Dar
-   baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
-   das telas antes de começar, mas o item em si cobre o app inteiro, não
-   uma tela isolada.
-2. Revisão de nomenclatura simples em todas as telas existentes: nomes
-   técnicos/jargão em rótulos de campo, títulos de tela, botões e
-   mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
-   de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
-   ser revisados e simplificados retroativamente em toda a aplicação — ver
-   regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 1 (revisão de usabilidade) por serem passes gerais
-   parecidos — decidir com o usuário se entram juntos ou em momentos
-   separados.
-3. Revisar todos os formulários existentes do app (campanha, categoria,
+1. Revisar todos os formulários existentes do app (campanha, categoria,
    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
    lacunas encontradas e corrigidas nos formulários de convidar/editar
    usuário (ver `Concluído`, PR #28), que os formulários mais antigos

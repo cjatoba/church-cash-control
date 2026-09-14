@@ -93,9 +93,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      <header className="flex items-center justify-between gap-4 border-b border-black/[.08] px-6 py-4 dark:border-white/[.145]">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-black/[.08] px-4 py-4 sm:px-6 dark:border-white/[.145]">
         <span className="font-semibold text-black dark:text-zinc-50">Controle de Caixa</span>
-        <div className="flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400">
           {session?.user.canManageUsers ? (
             <Link href="/users" className="hover:text-black dark:hover:text-zinc-50">
               Usuários
@@ -106,12 +106,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               Registro de atividades
             </Link>
           ) : null}
-          {session?.user.email ? <span>{session.user.email}</span> : null}
+          {session?.user.email ? (
+            <span className="hidden sm:inline">{session.user.email}</span>
+          ) : null}
           <LogoutButton action={logout} />
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-10">
         {campaignExtended ? (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
             <span>
@@ -130,7 +132,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           {session?.user.canManageCampaigns ? (
             <Link
               href="/campaigns/new"
-              className="rounded-full bg-foreground px-5 py-2 text-sm text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+              className="rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
             >
               + Nova campanha
             </Link>
@@ -149,7 +151,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             {session?.user.canManageCampaigns ? (
               <Link
                 href="/campaigns/new"
-                className="mt-2 rounded-full bg-foreground px-5 py-2 text-sm text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+                className="mt-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
               >
                 + Nova campanha
               </Link>
@@ -163,29 +165,33 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                 campaign.goal,
               );
 
+              const goalReached = progressPercentage >= 100;
+
               return (
                 <article
                   key={campaign.id}
-                  className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.145] dark:bg-zinc-950"
+                  className="flex flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.145] dark:bg-zinc-950"
                 >
                   <div>
-                    <h3 className="font-semibold text-black dark:text-zinc-50">{campaign.name}</h3>
+                    <h3 className="text-lg font-semibold text-black dark:text-zinc-50">
+                      {campaign.name}
+                    </h3>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {dateFormatter.format(campaign.startDate)} –{" "}
                       {dateFormatter.format(campaign.endDate)}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-0.5 text-sm text-zinc-700 dark:text-zinc-300">
-                      <span>
-                        Arrecadado:{" "}
-                        <span className="font-semibold">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-wrap justify-between gap-x-4 gap-y-0.5 text-zinc-700 dark:text-zinc-300">
+                      <span className="text-sm">
+                        Arrecadado
+                        <span className="block text-base font-semibold text-black dark:text-zinc-50">
                           {currencyFormatter.format(campaign.raisedTotal.toCents() / 100)}
                         </span>
                       </span>
-                      <span>
-                        Meta:{" "}
-                        <span className="font-semibold">
+                      <span className="text-right text-sm">
+                        Meta
+                        <span className="block text-base font-semibold text-black dark:text-zinc-50">
                           {currencyFormatter.format(campaign.goal.toCents() / 100)}
                         </span>
                       </span>
@@ -195,53 +201,63 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       aria-valuenow={progressPercentage}
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      className="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
+                      className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
                     >
                       <div
-                        className="h-full rounded-full bg-emerald-500"
+                        className={
+                          goalReached
+                            ? "h-full rounded-full bg-green-600"
+                            : "h-full rounded-full bg-amber-500"
+                        }
                         style={{ width: `${progressPercentage.toString()}%` }}
                       />
                     </div>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <span
+                      className={
+                        goalReached
+                          ? "text-xs font-medium text-green-700 dark:text-green-400"
+                          : "text-xs text-zinc-500 dark:text-zinc-400"
+                      }
+                    >
                       {progressPercentage}% da meta
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 border-t border-black/[.08] pt-3 dark:border-white/[.145]">
                     <Link
                       href={`/campaigns/${campaign.id}/categories`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Categorias
                     </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/pledge-types`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Tipos de carnê
                     </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/donors`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Doadores
                     </Link>
                     {session?.user.canReceiveFunds ? (
                       <Link
                         href={`/campaigns/${campaign.id}/one-off-donations/new`}
-                        className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                        className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                       >
                         + Doação avulsa
                       </Link>
                     ) : null}
                     <Link
                       href={`/campaigns/${campaign.id}/monthly`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Painel mensal
                     </Link>
                     <Link
                       href={`/campaigns/${campaign.id}/money-in-hand`}
-                      className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                     >
                       Dinheiro em mãos
                     </Link>
@@ -249,7 +265,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       <>
                         <Link
                           href={`/campaigns/${campaign.id}/edit`}
-                          className="self-start rounded-full border border-black/[.08] px-3 py-1 text-xs text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                          className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:text-zinc-300 dark:hover:border-white/[.22]"
                         >
                           Editar
                         </Link>

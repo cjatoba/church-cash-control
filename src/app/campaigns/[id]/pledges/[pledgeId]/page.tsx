@@ -8,6 +8,7 @@ import { revertInstallmentPayment } from "@/server/application/revert-installmen
 import { listUsers } from "@/server/application/list-users";
 import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
+import { CheckCircleIcon, ClockIcon } from "@/app/_components/icons";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
@@ -190,6 +191,7 @@ export default async function PledgeDetailPage({
     (sum, installment) => sum + (installment.paidAmount?.toCents() ?? 0),
     0,
   );
+  const pledgeClosed = pledge.installments.length > 0 && paidCount === pledge.installments.length;
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
@@ -200,22 +202,55 @@ export default async function PledgeDetailPage({
         >
           ← Voltar para doadores
         </Link>
-        <div>
-          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">{pledge.donorName}</h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Carnê {pledge.pledgeTypeName} ·{" "}
-            {currencyFormatter.format(pledge.installmentValue.toCents() / 100)}
-            /mês · pago {currencyFormatter.format(paidCents / 100)} de{" "}
-            {currencyFormatter.format(totalCents / 100)} ({paidCount} de{" "}
-            {pledge.installments.length} parcelas)
-          </p>
+        <div className="flex flex-col gap-2">
+          <div>
+            <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
+              {pledge.donorName}
+            </h1>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Carnê {pledge.pledgeTypeName} ·{" "}
+              {currencyFormatter.format(pledge.installmentValue.toCents() / 100)}/mês
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-baseline justify-between text-sm">
+              <span className="text-zinc-600 dark:text-zinc-400">
+                Pago:{" "}
+                <span className="text-base font-semibold text-black dark:text-zinc-50">
+                  {currencyFormatter.format(paidCents / 100)}
+                </span>{" "}
+                de {currencyFormatter.format(totalCents / 100)}
+              </span>
+              <span
+                className={
+                  pledgeClosed
+                    ? "font-medium text-green-700 dark:text-green-400"
+                    : "text-zinc-500 dark:text-zinc-400"
+                }
+              >
+                {paidCount} de {pledge.installments.length}
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-black/[.08] dark:bg-white/[.12]">
+              <div
+                className={
+                  pledgeClosed
+                    ? "h-full rounded-full bg-green-600"
+                    : "h-full rounded-full bg-amber-500"
+                }
+                style={{
+                  width: `${String(Math.round((paidCount / pledge.installments.length) * 100))}%`,
+                }}
+              />
+            </div>
+          </div>
         </div>
 
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
           {pledge.installments.map((installment) => (
             <li
               key={installment.id}
-              className="flex items-center justify-between rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+              className="flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.145]"
             >
               <span>
                 {formatMonthLabel(installment.dueDate)} ·{" "}
@@ -224,7 +259,8 @@ export default async function PledgeDetailPage({
               {installment.paidAt ? (
                 <span className="flex flex-col items-end gap-1">
                   <span className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                    <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
+                      <CheckCircleIcon className="h-3.5 w-3.5 shrink-0" />
                       Pago em {dateFormatter.format(installment.paidAt)}
                       {installment.paymentMethod
                         ? ` · ${paymentMethodLabels[installment.paymentMethod] ?? installment.paymentMethod}`
@@ -265,7 +301,8 @@ export default async function PledgeDetailPage({
                   action={markInstallmentAsPaid}
                 />
               ) : (
-                <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                <span className="flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400">
+                  <ClockIcon className="h-3.5 w-3.5 shrink-0" />
                   Pendente
                 </span>
               )}

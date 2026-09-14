@@ -35,7 +35,7 @@ export function TransferButton({
       <button
         type="button"
         onClick={openDialog}
-        className="self-start rounded-full bg-foreground px-5 py-2 text-sm text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+        className="self-start rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
       >
         Repassar
       </button>
