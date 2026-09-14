@@ -363,26 +363,26 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Cadastro de doadores/titulares de dados pessoais** — PR #37: tela de
+  acesso a dados do doador (`/campaigns/[id]/donors/[donorId]`), correção
+  de nome e exclusão via anonimização (irreversível, mantendo histórico
+  financeiro). Decisão registrada: `Donor` continua só com nome por ora —
+  sem necessidade concreta de telefone/CPF/chave Pix ainda.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Cadastro de doadores/titulares de dados pessoais: evoluir a entidade
-   `Donor` (hoje só nome, ver `Concluído`) com os demais dados quando
-   necessário, e prever os mecanismos de acesso, correção e
-   exclusão/anonimização exigidos pela LGPD (ver `CLAUDE.md`).
-2. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
+1. Confirmação ao sair (logout): pedir confirmação ("Deseja realmente
    sair?") antes de encerrar a sessão, em vez de sair direto no clique.
-3. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+2. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
    sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
    botão de submit separado.
-4. Skeletons de carregamento em todas as telas que buscam dado no
+3. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes
    (`/users` já nasceu com o próprio `loading.tsx`, ver `Concluído`, PR #28).
-5. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+4. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
    antes de implementar: definir se `canManageUsers` também controla quem
@@ -391,7 +391,7 @@ Nenhuma no momento.
    definir se há retenção/expurgo; se o log guardar nome de doador/valor
    vinculado a uma ação, entra na mesma categoria de dado sensível da
    seção LGPD do `CLAUDE.md`.
-6. Revisão de usabilidade/poluição visual em **todas as telas existentes
+5. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -405,16 +405,16 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-7. Revisão de nomenclatura simples em todas as telas existentes: nomes
+6. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 6 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 5 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
-8. Revisar todos os formulários existentes do app (campanha, categoria,
+7. Revisar todos os formulários existentes do app (campanha, categoria,
    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
    lacunas encontradas e corrigidas nos formulários de convidar/editar
    usuário (ver `Concluído`, PR #28), que os formulários mais antigos

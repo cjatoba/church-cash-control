@@ -92,6 +92,13 @@
       "when": 1789296337319,
       "tag": "0012_drop_user_role",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789346598126,
+      "tag": "0013_add_donor_anonymized_at",
+      "breakpoints": true
     }
   ]
 }

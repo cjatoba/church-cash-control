@@ -58,6 +58,7 @@ export function generateInstallments(params: {
 
 export interface PledgeSummary {
   id: string;
+  donorId: string;
   donorName: string;
   pledgeTypeName: string;
   installmentValue: Money;

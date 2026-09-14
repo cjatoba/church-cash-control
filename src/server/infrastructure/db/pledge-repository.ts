@@ -3,10 +3,11 @@ import { alias } from "drizzle-orm/pg-core";
 import type { PledgeRepository } from "@/server/application/create-pledge";
 import type { PledgeListRepository } from "@/server/application/list-pledges";
 import type { PledgeDetailReader } from "@/server/application/get-pledge-detail";
+import type { DonorPledgeListRepository } from "@/server/application/list-donor-pledges";
 import { Money } from "@/server/domain/money";
 import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
-import { donors, installments, pledges, pledgeTypes, users } from "./schema";
+import { campaigns, donors, installments, pledges, pledgeTypes, users } from "./schema";
 
 function toPaymentMethod(value: string | null): PaymentMethod | null {
   return value === "pix" || value === "cash" ? value : null;
@@ -17,7 +18,7 @@ const registeredByUser = alias(users, "registered_by_user");
 
 export function createPledgeRepository(
   db: DbClient,
-): PledgeRepository & PledgeListRepository & PledgeDetailReader {
+): PledgeRepository & PledgeListRepository & PledgeDetailReader & DonorPledgeListRepository {
   return {
     async create(pledge) {
       const [row] = await db
@@ -48,6 +49,7 @@ export function createPledgeRepository(
       const pledgeRows = await db
         .select({
           id: pledges.id,
+          donorId: donors.id,
           donorName: donors.name,
           pledgeTypeName: pledgeTypes.name,
           installmentValueCents: pledgeTypes.installmentValueCents,
@@ -77,11 +79,61 @@ export function createPledgeRepository(
         const counts = countsByPledge.get(row.id) ?? { total: 0, paid: 0 };
         return {
           id: row.id,
+          donorId: row.donorId,
           donorName: row.donorName,
           pledgeTypeName: row.pledgeTypeName,
           installmentValue: Money.fromCents(row.installmentValueCents),
           totalInstallments: counts.total,
           paidInstallments: counts.paid,
+        };
+      });
+    },
+
+    async findAllByDonor(donorId) {
+      const pledgeRows = await db
+        .select({
+          id: pledges.id,
+          donorId: donors.id,
+          donorName: donors.name,
+          pledgeTypeName: pledgeTypes.name,
+          installmentValueCents: pledgeTypes.installmentValueCents,
+          campaignId: campaigns.id,
+          campaignName: campaigns.name,
+        })
+        .from(pledges)
+        .innerJoin(donors, eq(pledges.donorId, donors.id))
+        .innerJoin(pledgeTypes, eq(pledges.pledgeTypeId, pledgeTypes.id))
+        .innerJoin(campaigns, eq(pledges.campaignId, campaigns.id))
+        .where(eq(pledges.donorId, donorId));
+
+      const installmentRows = await db
+        .select({ pledgeId: installments.pledgeId, paidAt: installments.paidAt })
+        .from(installments)
+        .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
+        .where(eq(pledges.donorId, donorId));
+
+      const countsByPledge = new Map<string, { total: number; paid: number }>();
+      for (const row of installmentRows) {
+        const counts = countsByPledge.get(row.pledgeId) ?? { total: 0, paid: 0 };
+        counts.total += 1;
+        if (row.paidAt) {
+          counts.paid += 1;
+        }
+        countsByPledge.set(row.pledgeId, counts);
+      }
+
+      return pledgeRows.map((row) => {
+        const counts = countsByPledge.get(row.id) ?? { total: 0, paid: 0 };
+        return {
+          id: row.id,
+          donorId: row.donorId,
+          donorName: row.donorName,
+          pledgeTypeName: row.pledgeTypeName,
+          installmentValue: Money.fromCents(row.installmentValueCents),
+          totalInstallments: counts.total,
+          paidInstallments: counts.paid,
+          campaignId: row.campaignId,
+          campaignName: row.campaignName,
         };
       });
     },
