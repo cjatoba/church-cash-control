@@ -373,20 +373,19 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
+  sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
+  botão de submit separado.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Painel mensal reativo: trocar o mês no seletor deve atualizar a tela
-   sozinho, sem precisar clicar em "Ver" — hoje o `<select>` depende de um
-   botão de submit separado.
-2. Skeletons de carregamento em todas as telas que buscam dado no
+1. Skeletons de carregamento em todas as telas que buscam dado no
    servidor (painel inicial, listas de categorias/tipos de
    carnê/doadores, painel mensal, detalhe de carnê, telas de editar) —
    ver regra já registrada em `CLAUDE.md`, seção "Skeletons de
    carregamento"; falta aplicar retroativamente nas telas existentes
    (`/users` já nasceu com o próprio `loading.tsx`, ver `Concluído`, PR #28).
-3. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
+2. Log de atividades (auditoria): registrar ações relevantes (ex.: dar
    baixa/corrigir parcela, arquivar/reativar, editar campanha) com quem
    fez e quando, consultável numa tela da aplicação. Pontos a decidir
    antes de implementar: definir se `canManageUsers` também controla quem
@@ -395,7 +394,7 @@ Nenhuma no momento.
    definir se há retenção/expurgo; se o log guardar nome de doador/valor
    vinculado a uma ação, entra na mesma categoria de dado sensível da
    seção LGPD do `CLAUDE.md`.
-4. Revisão de usabilidade/poluição visual em **todas as telas existentes
+3. Revisão de usabilidade/poluição visual em **todas as telas existentes
    do app** — não é uma correção pontual de uma tela específica, é um
    passe geral obrigatório em toda a aplicação. Pontos a considerar em
    cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
@@ -409,16 +408,16 @@ Nenhuma no momento.
    baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
    das telas antes de começar, mas o item em si cobre o app inteiro, não
    uma tela isolada.
-5. Revisão de nomenclatura simples em todas as telas existentes: nomes
+4. Revisão de nomenclatura simples em todas as telas existentes: nomes
    técnicos/jargão em rótulos de campo, títulos de tela, botões e
    mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
    de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
    ser revisados e simplificados retroativamente em toda a aplicação — ver
    regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 4 (revisão de usabilidade) por serem passes gerais
+   combinado com o item 3 (revisão de usabilidade) por serem passes gerais
    parecidos — decidir com o usuário se entram juntos ou em momentos
    separados.
-6. Revisar todos os formulários existentes do app (campanha, categoria,
+5. Revisar todos os formulários existentes do app (campanha, categoria,
    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
    lacunas encontradas e corrigidas nos formulários de convidar/editar
    usuário (ver `Concluído`, PR #28), que os formulários mais antigos
