@@ -360,14 +360,15 @@ CASCADE`) + repositório Drizzle + tela protegida
     `drizzle.__drizzle_migrations` da branch preview (mesmo padrão de
     remediação manual já usado em produção na PR #32) — nenhum arquivo
     de migration foi editado.
-
-## Em andamento (PRs abertas)
-
 - **Cadastro de doadores/titulares de dados pessoais** — PR #37: tela de
   acesso a dados do doador (`/campaigns/[id]/donors/[donorId]`), correção
   de nome e exclusão via anonimização (irreversível, mantendo histórico
   financeiro). Decisão registrada: `Donor` continua só com nome por ora —
   sem necessidade concreta de telefone/CPF/chave Pix ainda.
+
+## Em andamento (PRs abertas)
+
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
