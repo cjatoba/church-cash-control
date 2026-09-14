@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { TrashIcon } from "@/app/_components/icons";
 
 export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -17,13 +18,14 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
       <button
         type="button"
         onClick={openDialog}
-        className="self-start rounded-full border border-red-300 px-4 py-2.5 text-sm text-red-700 hover:border-red-400 dark:border-red-900 dark:text-red-400 dark:hover:border-red-800"
+        className="flex items-center gap-1.5 self-start rounded-full border border-red-300 px-4 py-2.5 text-sm text-red-700 hover:border-red-400 dark:border-red-900 dark:text-red-400 dark:hover:border-red-800"
       >
+        <TrashIcon className="h-4 w-4" />
         Excluir dados do doador
       </button>
       <dialog
         ref={dialogRef}
-        className="w-72 rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.145] dark:bg-zinc-950 dark:text-zinc-50"
+        className="w-72 rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-50"
       >
         {!confirming ? (
           <div className="flex flex-col gap-4">
@@ -36,7 +38,7 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
               <button
                 type="button"
                 onClick={() => dialogRef.current?.close()}
-                className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
+                className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
               >
                 Cancelar
               </button>
@@ -62,11 +64,14 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
                 onClick={() => {
                   setConfirming(false);
                 }}
-                className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.145] dark:text-zinc-300"
+                className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
               >
                 Cancelar
               </button>
-              <SubmitButton pendingLabel="Excluindo…">Excluir definitivamente</SubmitButton>
+              <SubmitButton pendingLabel="Excluindo…">
+                <TrashIcon className="h-4 w-4" />
+                Excluir definitivamente
+              </SubmitButton>
             </div>
           </form>
         )}

@@ -45,11 +45,7 @@ export default async function NewTransactionCategoryPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
-      <CategoryForm
-        action={create}
-        backHref={`/campaigns/${campaignId}/categories`}
-        backLabel="← Voltar para categorias"
-      />
+      <CategoryForm action={create} backHref={`/campaigns/${campaignId}/categories`} />
     </div>
   );
 }

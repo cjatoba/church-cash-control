@@ -11,6 +11,8 @@ import { createTransactionCategoryRepository } from "@/server/infrastructure/db/
 import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { BackLink } from "@/app/_components/back-link";
+import { ArchiveBoxIcon, ArrowPathIcon, PencilIcon } from "@/app/_components/icons";
 
 const typeLabels = { income: "Entrada", expense: "Saída" } as const;
 
@@ -87,19 +89,14 @@ export default async function TransactionCategoriesPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-        <Link
-          href="/"
-          className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Voltar para o painel
-        </Link>
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+        <BackLink href="/" />
         <div className="flex items-baseline justify-between gap-4">
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Categorias</h1>
           {canManageCampaigns ? (
             <Link
               href={`/campaigns/${campaignId}/categories/new`}
-              className="text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
+              className="rounded px-2 py-1.5 text-sm font-medium text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
             >
               + Nova categoria
             </Link>
@@ -115,11 +112,11 @@ export default async function TransactionCategoriesPage({
             {activeCategories.map((category) => (
               <li
                 key={category.id}
-                className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+                className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
               >
-                <span>
+                <span className="font-medium text-zinc-900 dark:text-zinc-100">
                   {category.name}{" "}
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <span className="text-xs font-normal text-zinc-500 dark:text-zinc-400">
                     · {typeLabels[category.type]}
                   </span>
                 </span>
@@ -127,14 +124,18 @@ export default async function TransactionCategoriesPage({
                   <div className="flex items-center gap-3">
                     <Link
                       href={`/campaigns/${campaignId}/categories/${category.id}/edit`}
-                      className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                      className="flex items-center gap-1 rounded px-2 py-1.5 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
                     >
+                      <PencilIcon className="h-3.5 w-3.5" />
                       Editar
                     </Link>
                     <form action={archive}>
                       <input type="hidden" name="categoryId" value={category.id} />
                       <input type="hidden" name="categoryName" value={category.name} />
-                      <SubmitButton pendingLabel="Arquivando…">Arquivar</SubmitButton>
+                      <SubmitButton pendingLabel="Arquivando…" variant="text">
+                        <ArchiveBoxIcon className="h-3.5 w-3.5" />
+                        Arquivar
+                      </SubmitButton>
                     </form>
                   </div>
                 ) : null}
@@ -144,15 +145,15 @@ export default async function TransactionCategoriesPage({
         )}
 
         {archivedCategories.length > 0 ? (
-          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
-            <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
+            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
               Categorias arquivadas
             </h2>
             <ul className="flex flex-col gap-2">
               {archivedCategories.map((category) => (
                 <li
                   key={category.id}
-                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm text-zinc-500 dark:border-white/[.145] dark:text-zinc-400"
+                  className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm text-zinc-500 dark:border-white/[.16] dark:text-zinc-400"
                 >
                   <span>
                     {category.name} <span className="text-xs">· {typeLabels[category.type]}</span>
@@ -161,7 +162,10 @@ export default async function TransactionCategoriesPage({
                     <form action={restore}>
                       <input type="hidden" name="categoryId" value={category.id} />
                       <input type="hidden" name="categoryName" value={category.name} />
-                      <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
+                      <SubmitButton pendingLabel="Reativando…" variant="text">
+                        <ArrowPathIcon className="h-3.5 w-3.5" />
+                        Reativar
+                      </SubmitButton>
                     </form>
                   ) : null}
                 </li>

@@ -9,6 +9,7 @@ import { isPledgeClosed } from "@/server/domain/pledge";
 import { createDonorRepository } from "@/server/infrastructure/db/donor-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { BackLink } from "@/app/_components/back-link";
 import { AnonymizeDonorButton } from "./_components/anonymize-donor-button";
 import { EditDonorNameButton } from "./_components/edit-donor-name-button";
 
@@ -72,13 +73,8 @@ export default async function DonorDetailPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-        <Link
-          href={`/campaigns/${campaignId}/donors`}
-          className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Voltar para doadores
-        </Link>
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+        <BackLink href={`/campaigns/${campaignId}/donors`} />
         <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Dados do doador</h1>
 
         <div className="flex items-center justify-between gap-2">
@@ -89,7 +85,7 @@ export default async function DonorDetailPage({
         </div>
 
         <div className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+          <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             Carnês deste doador
           </h2>
           {donorPledges.length === 0 ? (
@@ -102,7 +98,7 @@ export default async function DonorDetailPage({
                   <li key={pledge.id}>
                     <Link
                       href={`/campaigns/${pledge.campaignId}/pledges/${pledge.id}`}
-                      className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.145] dark:hover:border-white/[.22]"
+                      className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:hover:border-white/[.22]"
                     >
                       <span>
                         <span className="block text-zinc-900 dark:text-zinc-100">
@@ -130,8 +126,8 @@ export default async function DonorDetailPage({
         </div>
 
         {session.user.canReceiveFunds && !donor.anonymizedAt ? (
-          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
-            <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
+            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
               Excluir dados deste doador
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">

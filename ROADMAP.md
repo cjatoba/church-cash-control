@@ -406,34 +406,74 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma no momento.
+- **Revisão de usabilidade + nomenclatura em todas as telas existentes**
+  — PR #47: decisões tomadas com o usuário antes de começar — os dois
+  passes (usabilidade/poluição visual e nomenclatura simples) combinados
+  numa fatia só, cada tela revisada uma única vez; além do já previsto
+  (hierarquia tipográfica, divisórias entre seções, cor com significado,
+  ícones, alvos de toque maiores), a revisão passou a exigir também que a
+  versão mobile tenha cara de app (botões e números grandes, fácil de
+  tocar/ler — não só "site que encolheu"; inputs de formulário também
+  ganharam `text-base` para não disparar zoom automático no Safari/iOS).
+  Dividida em 4 lotes, numa ordem proposta e confirmada com o usuário
+  (das telas mais usadas no dia a dia às administrativas); todos os 4
+  lotes foram implementados numa mesma PR e são avaliados juntos pelo
+  usuário, em vez de aprovar cada lote separadamente:
+  - Lote 1 — painel inicial, detalhe de carnê, painel mensal, dinheiro em
+    mãos.
+  - Lote 2 — listas de cadastro (doadores, categorias, tipos de carnê).
+  - Lote 3 — formulários de cadastro/edição (campanha, categoria, doador,
+    tipo de carnê, doação avulsa).
+  - Lote 4 — telas administrativas (usuários e seus formulários, registro
+    de atividades, trocar senha, login).
+    Ícones novos usam SVG inline compartilhado
+    (`src/app/_components/icons.tsx`), sem adicionar nenhuma biblioteca de
+    ícones. Lacunas encontradas na validação em preview e corrigidas na
+    mesma fatia:
+  - Botão "Editar" da parcela paga saía da tela no mobile quando o texto
+    de status (data/forma de pagamento/recebido por/registrado por) ficava
+    longo — a linha da parcela agora empilha verticalmente no mobile em
+    vez de forçar tudo numa única linha.
+  - Trocar o mês no painel mensal não mostrava nenhum feedback de
+    carregamento — gap conhecido do Next.js App Router (o `loading.tsx`
+    automático não dispara quando só o `searchParams` muda na mesma
+    página); corrigido com `useTransition` no `MonthSelector`, que exibe
+    um skeleton por cima do conteúdo anterior enquanto a nova consulta
+    carrega.
+  - Link "Voltar" em todas as telas trocado por um componente
+    compartilhado (`BackLink`): ícone de seta + rótulo "Voltar" abaixo,
+    maior e mais fácil de tocar (texto sozinho antes).
+  - Ícones adicionados para ações comuns (lixeira para excluir/reverter,
+    lápis para editar, olho para ver dados, pessoas para doadores) nas
+    telas onde já existiam como texto.
+  - Ícone e título do navegador ainda eram o padrão do `create-next-app`
+    (`favicon.ico`, "Create Next App") — trocados por um ícone próprio
+    (`src/app/icon.svg`) e o título "Controle de Caixa"; `lang` do HTML
+    corrigido de `en` para `pt-BR`.
+  - Contraste insuficiente no tema escuro: cabeçalho do painel inicial
+    ganhou fundo próprio (antes se confundia com o fundo preto da
+    página) e a opacidade da borda no tema escuro subiu de 14,5% para
+    16% em todo o app.
+  - O skeleton do painel mensal (item acima) aparecia, mas o overlay não
+    tinha fundo próprio — o conteúdo do mês anterior (com opacidade
+    reduzida) continuava visível por trás dele durante o carregamento.
+    Corrigido dando ao overlay o mesmo fundo sólido do card que o
+    envolve.
+  - O botão "Arquivar" no card de campanha do painel inicial se destacava
+    de forma não intencional — usava o mesmo estilo sólido do botão
+    primário (`SubmitButton`, reaproveitado de ações como "+ Nova
+    campanha"/login), fazendo uma ação secundária parecer a mais
+    importante do card, o oposto do que "cor com significado" pede.
+    `SubmitButton` ganhou uma prop `variant` (`primary` — estilo atual,
+    padrão; `outline` — contorno neutro, mesmo visual dos outros botões
+    do card; `text` — link sublinhado compacto, para listas). Aplicado
+    `outline` em Arquivar/Reativar do painel inicial e `text` em
+    Arquivar/Reativar de categorias e Desativar/Reativar de usuários
+    (mesmo padrão do link "Editar" vizinho em cada lista).
 
 ## Backlog (próximas fatias, em ordem)
 
-1. Revisão de usabilidade/poluição visual em **todas as telas existentes
-   do app** — não é uma correção pontual de uma tela específica, é um
-   passe geral obrigatório em toda a aplicação. Pontos a considerar em
-   cada tela: hierarquia tipográfica (títulos, subtítulos e itens de
-   lista não podem competir todos no mesmo peso/tamanho), separação
-   visual entre seções (linha divisória ou agrupamento em vez de só
-   espaço em branco — hoje várias telas empilham seções num único bloco
-   contínuo), uso consistente de cor com significado (ex.: verde/âmbar
-   para pago/pendente nos dois lados, não só num), ícones para escaneio
-   rápido sem precisar ler todo o texto, e alvos de toque maiores/mais
-   espaçados no geral (não só em modais — foi o caso do modal de "Dar
-   baixa", já corrigido). Escopo grande — decidir com o usuário a ordem
-   das telas antes de começar, mas o item em si cobre o app inteiro, não
-   uma tela isolada.
-2. Revisão de nomenclatura simples em todas as telas existentes: nomes
-   técnicos/jargão em rótulos de campo, títulos de tela, botões e
-   mensagens (ex.: "Custodiante" trocado por "Recebido por" ainda na fase
-   de desenho da fatia "Dinheiro em mãos", ver `Concluído` acima) devem
-   ser revisados e simplificados retroativamente em toda a aplicação — ver
-   regra registrada no `CLAUDE.md`, seção "Nomenclatura simples". Pode ser
-   combinado com o item 1 (revisão de usabilidade) por serem passes gerais
-   parecidos — decidir com o usuário se entram juntos ou em momentos
-   separados.
-3. Revisar todos os formulários existentes do app (campanha, categoria,
+1. Revisar todos os formulários existentes do app (campanha, categoria,
    doador, tipo de carnê, doação avulsa, repasse etc.) quanto a duas
    lacunas encontradas e corrigidas nos formulários de convidar/editar
    usuário (ver `Concluído`, PR #28), que os formulários mais antigos

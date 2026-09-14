@@ -3,7 +3,7 @@ import { Skeleton } from "@/app/_components/skeleton";
 export default function HomeLoading() {
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      <header className="flex items-center justify-between gap-4 border-b border-black/[.08] px-6 py-4 dark:border-white/[.145]">
+      <header className="flex items-center justify-between gap-4 border-b border-black/[.08] bg-white px-6 py-4 dark:border-white/[.16] dark:bg-zinc-950">
         <span className="font-semibold text-black dark:text-zinc-50">Controle de Caixa</span>
         <Skeleton className="h-4 w-24" />
       </header>
@@ -18,7 +18,7 @@ export default function HomeLoading() {
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.145] dark:bg-zinc-950"
+              className="flex flex-col gap-3 rounded-lg border border-black/[.08] bg-white p-5 dark:border-white/[.16] dark:bg-zinc-950"
             >
               <Skeleton className="h-5 w-32" />
               <Skeleton className="h-3 w-40" />

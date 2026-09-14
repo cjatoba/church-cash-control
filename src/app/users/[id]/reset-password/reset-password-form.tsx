@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { BackLink } from "@/app/_components/back-link";
 import { TemporaryPasswordReveal } from "../../_components/temporary-password-reveal";
 
 export interface ResetPasswordState {
@@ -38,14 +38,9 @@ export function ResetPasswordForm({
   return (
     <form
       action={formAction}
-      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950"
+      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950"
     >
-      <Link
-        href="/users"
-        className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-      >
-        ← Voltar para usuários
-      </Link>
+      <BackLink href="/users" />
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
         Gerar nova senha temporária
       </h1>

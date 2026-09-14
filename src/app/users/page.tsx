@@ -6,6 +6,8 @@ import { listManagedUsers, type ManagedUser } from "@/server/application/list-ma
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { BackLink } from "@/app/_components/back-link";
+import { ArrowPathIcon, PencilIcon, TrashIcon } from "@/app/_components/icons";
 
 function capabilityLabels(user: ManagedUser): string[] {
   const labels: string[] = [];
@@ -70,18 +72,13 @@ export default async function UsersPage() {
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.145] dark:bg-zinc-950">
-        <Link
-          href="/"
-          className="self-start text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-        >
-          ← Voltar para o painel
-        </Link>
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
+        <BackLink href="/" />
         <div className="flex items-baseline justify-between gap-4">
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Usuários</h1>
           <Link
             href="/users/new"
-            className="text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
+            className="rounded px-2 py-1.5 text-sm font-medium text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
           >
             + Convidar usuário
           </Link>
@@ -91,10 +88,10 @@ export default async function UsersPage() {
           {activeUsers.map((user) => (
             <li
               key={user.id}
-              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-2 text-sm dark:border-white/[.145]"
+              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
             >
               <div className="flex flex-col">
-                <span className="text-black dark:text-zinc-50">{user.email}</span>
+                <span className="font-medium text-black dark:text-zinc-50">{user.email}</span>
                 {user.phone ? (
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">{user.phone}</span>
                 ) : null}
@@ -107,7 +104,7 @@ export default async function UsersPage() {
                     </span>
                     <Link
                       href={`/users/${user.id}/reset-password`}
-                      className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                      className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
                     >
                       Gerar nova senha
                     </Link>
@@ -123,14 +120,18 @@ export default async function UsersPage() {
                 ))}
                 <Link
                   href={`/users/${user.id}/edit`}
-                  className="text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                  className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
                 >
+                  <PencilIcon className="h-3.5 w-3.5" />
                   Editar
                 </Link>
                 {user.id !== currentUserId ? (
                   <form action={deactivate}>
                     <input type="hidden" name="userId" value={user.id} />
-                    <SubmitButton pendingLabel="Desativando…">Desativar</SubmitButton>
+                    <SubmitButton pendingLabel="Desativando…" variant="text">
+                      <TrashIcon className="h-3.5 w-3.5" />
+                      Desativar
+                    </SubmitButton>
                   </form>
                 ) : null}
               </div>
@@ -139,20 +140,23 @@ export default async function UsersPage() {
         </ul>
 
         {inactiveUsers.length > 0 ? (
-          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
-            <h2 className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
+            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
               Usuários desativados
             </h2>
             <ul className="flex flex-col gap-2">
               {inactiveUsers.map((user) => (
                 <li
                   key={user.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm text-zinc-500 dark:border-white/[.145] dark:text-zinc-400"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm text-zinc-500 dark:border-white/[.16] dark:text-zinc-400"
                 >
                   <span>{user.email}</span>
                   <form action={reactivate}>
                     <input type="hidden" name="userId" value={user.id} />
-                    <SubmitButton pendingLabel="Reativando…">Reativar</SubmitButton>
+                    <SubmitButton pendingLabel="Reativando…" variant="text">
+                      <ArrowPathIcon className="h-3.5 w-3.5" />
+                      Reativar
+                    </SubmitButton>
                   </form>
                 </li>
               ))}

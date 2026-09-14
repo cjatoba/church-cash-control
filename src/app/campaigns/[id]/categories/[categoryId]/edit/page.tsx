@@ -56,7 +56,6 @@ export default async function EditTransactionCategoryPage({
       <CategoryForm
         action={update}
         backHref={`/campaigns/${campaignId}/categories`}
-        backLabel="← Voltar para categorias"
         heading="Editar categoria"
         submitLabel="Salvar categoria"
         pendingLabel="Salvando…"
