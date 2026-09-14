@@ -471,7 +471,7 @@ CASCADE`) + repositório Drizzle + tela protegida
 ## Em andamento (PRs abertas)
 
 - **Revisão dos formulários existentes (preservar dados em erro +
-  mensagem específica)** — item 1 do backlog: campanha (criar/editar),
+  mensagem específica)** — PR #49, item 1 do backlog: campanha (criar/editar),
   categoria (criar/editar), doador, tipo de carnê, doação avulsa, login e
   repasse passam a devolver os valores enviados no estado de erro
   (usados como `defaultValue`, em vez de perder o que a pessoa digitou)
@@ -489,6 +489,22 @@ CASCADE`) + repositório Drizzle + tela protegida
   tratamento, quebrando sem feedback nenhum para quem preenchia. Corrigido
   na mesma fatia, convertendo o formulário para `useActionState` com o
   mesmo padrão dos demais.
+  - Investigando o repasse acima, identificado um cenário real de saldo
+    negativo em "Dinheiro em mãos": reverter uma parcela paga
+    (`revertInstallmentPayment`) depois que o valor recebido já tinha
+    sido repassado deixava `receivedCents - transferredCents` negativo
+    para aquele usuário — e como `Money.fromCents` rejeita valor
+    negativo, a tela "Dinheiro em mãos" quebrava ao tentar calcular o
+    saldo, sem nenhuma mensagem amigável. Decisão tomada com o usuário:
+    em vez de só tratar a exibição (ex.: mostrar R$ 0,00), prevenir o
+    cenário na origem. `revertInstallmentPayment` (domínio) passa a
+    receber o saldo em mãos disponível do recebedor e rejeita a
+    reversão se ela deixaria esse saldo negativo (mensagem explica que o
+    valor já foi repassado); a camada de aplicação busca esse saldo via
+    `CustodyBalanceReader` (mesma porta já usada pelo repasse) antes de
+    reverter. A tela de carnê mostra essa mensagem no lugar de quebrar
+    (revert passou a usar `useActionState`, antes era uma action sem
+    tratamento de erro).
 
 ## Backlog (próximas fatias, em ordem)
 
