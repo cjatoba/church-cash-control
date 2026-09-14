@@ -7,6 +7,7 @@ import { calculateCampaignProgressPercentage } from "@/server/domain/campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { LogoutButton } from "@/app/_components/logout-button";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -81,11 +82,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             </Link>
           ) : null}
           {session?.user.email ? <span>{session.user.email}</span> : null}
-          <form action={logout}>
-            <button type="submit" className="hover:text-black dark:hover:text-zinc-50">
-              Sair
-            </button>
-          </form>
+          <LogoutButton action={logout} />
         </div>
       </header>
 
