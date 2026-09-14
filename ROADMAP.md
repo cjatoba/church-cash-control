@@ -459,6 +459,17 @@ CASCADE`) + repositório Drizzle + tela protegida
     reduzida) continuava visível por trás dele durante o carregamento.
     Corrigido dando ao overlay o mesmo fundo sólido do card que o
     envolve.
+  - O botão "Arquivar" no card de campanha do painel inicial se destacava
+    de forma não intencional — usava o mesmo estilo sólido do botão
+    primário (`SubmitButton`, reaproveitado de ações como "+ Nova
+    campanha"/login), fazendo uma ação secundária parecer a mais
+    importante do card, o oposto do que "cor com significado" pede.
+    `SubmitButton` ganhou uma prop `variant` (`primary` — estilo atual,
+    padrão; `outline` — contorno neutro, mesmo visual dos outros botões
+    do card; `text` — link sublinhado compacto, para listas). Aplicado
+    `outline` em Arquivar/Reativar do painel inicial e `text` em
+    Arquivar/Reativar de categorias e Desativar/Reativar de usuários
+    (mesmo padrão do link "Editar" vizinho em cada lista).
 
 ## Backlog (próximas fatias, em ordem)
 

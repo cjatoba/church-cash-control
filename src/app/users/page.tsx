@@ -128,8 +128,8 @@ export default async function UsersPage() {
                 {user.id !== currentUserId ? (
                   <form action={deactivate}>
                     <input type="hidden" name="userId" value={user.id} />
-                    <SubmitButton pendingLabel="Desativando…">
-                      <TrashIcon className="h-4 w-4" />
+                    <SubmitButton pendingLabel="Desativando…" variant="text">
+                      <TrashIcon className="h-3.5 w-3.5" />
                       Desativar
                     </SubmitButton>
                   </form>
@@ -153,8 +153,8 @@ export default async function UsersPage() {
                   <span>{user.email}</span>
                   <form action={reactivate}>
                     <input type="hidden" name="userId" value={user.id} />
-                    <SubmitButton pendingLabel="Reativando…">
-                      <ArrowPathIcon className="h-4 w-4" />
+                    <SubmitButton pendingLabel="Reativando…" variant="text">
+                      <ArrowPathIcon className="h-3.5 w-3.5" />
                       Reativar
                     </SubmitButton>
                   </form>

@@ -132,8 +132,8 @@ export default async function TransactionCategoriesPage({
                     <form action={archive}>
                       <input type="hidden" name="categoryId" value={category.id} />
                       <input type="hidden" name="categoryName" value={category.name} />
-                      <SubmitButton pendingLabel="Arquivando…">
-                        <ArchiveBoxIcon className="h-4 w-4" />
+                      <SubmitButton pendingLabel="Arquivando…" variant="text">
+                        <ArchiveBoxIcon className="h-3.5 w-3.5" />
                         Arquivar
                       </SubmitButton>
                     </form>
@@ -162,8 +162,8 @@ export default async function TransactionCategoriesPage({
                     <form action={restore}>
                       <input type="hidden" name="categoryId" value={category.id} />
                       <input type="hidden" name="categoryName" value={category.name} />
-                      <SubmitButton pendingLabel="Reativando…">
-                        <ArrowPathIcon className="h-4 w-4" />
+                      <SubmitButton pendingLabel="Reativando…" variant="text">
+                        <ArrowPathIcon className="h-3.5 w-3.5" />
                         Reativar
                       </SubmitButton>
                     </form>

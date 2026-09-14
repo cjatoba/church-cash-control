@@ -275,7 +275,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                         <form action={archive}>
                           <input type="hidden" name="campaignId" value={campaign.id} />
                           <input type="hidden" name="campaignName" value={campaign.name} />
-                          <SubmitButton pendingLabel="Arquivando…">
+                          <SubmitButton pendingLabel="Arquivando…" variant="outline">
                             <ArchiveBoxIcon className="h-4 w-4" />
                             Arquivar
                           </SubmitButton>
@@ -311,7 +311,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     <form action={restore}>
                       <input type="hidden" name="campaignId" value={campaign.id} />
                       <input type="hidden" name="campaignName" value={campaign.name} />
-                      <SubmitButton pendingLabel="Reativando…">
+                      <SubmitButton pendingLabel="Reativando…" variant="outline">
                         <ArrowPathIcon className="h-4 w-4" />
                         Reativar
                       </SubmitButton>
