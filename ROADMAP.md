@@ -378,15 +378,20 @@ CASCADE`) + repositório Drizzle + tela protegida
   enquanto a nova consulta rodava — a mesma PR já adiciona um `loading.tsx`
   (skeleton) a essa tela, adiantando parte do item de skeletons do
   backlog (ver abaixo); as demais telas continuam pendentes.
+- **Skeletons de carregamento nas demais telas** — PR #43: `loading.tsx`
+  (reusando o `Skeleton` compartilhado) adicionado ao painel inicial,
+  `/campaigns/[id]/edit`, categorias (lista e editar),
+  doadores (lista e novo), dinheiro em mãos, doação avulsa, tipos de
+  carnê, detalhe de carnê e editar/resetar senha de usuário — as
+  últimas telas que buscavam dado no servidor sem nenhum indicativo de
+  carregamento. Telas que só renderizam formulário sem leitura prévia
+  do banco (`/campaigns/new`, `/change-password`, `/login`,
+  `/campaigns/[id]/categories/new`, `/users/new`) ficaram de fora, como
+  previsto na exceção da própria regra do `CLAUDE.md`.
 
 ## Em andamento (PRs abertas)
 
-- Skeletons de carregamento nas demais telas que buscam dado no
-  servidor (painel inicial, listas de categorias/tipos de
-  carnê/doadores, detalhe de carnê, telas de editar) — ver regra já
-  registrada em `CLAUDE.md`, seção "Skeletons de carregamento"; falta
-  aplicar retroativamente (`/users` e `/campaigns/[id]/monthly` já têm
-  `loading.tsx` próprio, ver `Concluído`, PR #28, e PR #41).
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
