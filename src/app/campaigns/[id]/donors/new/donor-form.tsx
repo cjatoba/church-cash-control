@@ -6,6 +6,7 @@ import { BackLink } from "@/app/_components/back-link";
 
 export interface CreateDonorState {
   error?: string;
+  values?: { name: string; pledgeTypeId: string };
 }
 
 export function DonorForm({
@@ -33,6 +34,7 @@ export function DonorForm({
           name="name"
           type="text"
           required
+          defaultValue={state.values?.name ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
@@ -41,7 +43,7 @@ export function DonorForm({
         <select
           name="pledgeTypeId"
           required
-          defaultValue=""
+          defaultValue={state.values?.pledgeTypeId ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         >
           <option value="" disabled>

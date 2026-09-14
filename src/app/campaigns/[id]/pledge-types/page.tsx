@@ -5,7 +5,12 @@ import { createPledgeType } from "@/server/application/create-pledge-type";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { PledgeTypeForm, type CreatePledgeTypeState } from "./pledge-type-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -45,8 +50,17 @@ export default async function PledgeTypesPage({
       const repository = createPledgeTypeRepository(db);
       const { id } = await createPledgeType(repository, input);
       return { success: id };
-    } catch {
-      return { error: "Não foi possível criar o tipo de carnê. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível criar o tipo de carnê. Confira os dados informados.",
+        ),
+        values: {
+          name: toStringValue(input.name),
+          installmentValue: toStringValue(input.installmentValue),
+        },
+      };
     }
   }
 

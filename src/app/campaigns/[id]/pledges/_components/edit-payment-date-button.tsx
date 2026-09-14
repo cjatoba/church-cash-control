@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { PencilIcon, TrashIcon } from "@/app/_components/icons";
+import type { RevertPaymentState } from "../[pledgeId]/page";
 
 export function EditPaymentDateButton({
   installmentId,
@@ -19,10 +20,14 @@ export function EditPaymentDateButton({
   currentPaidAtIso: string;
   todayIso: string;
   correctAction: (formData: FormData) => Promise<void>;
-  revertAction: (formData: FormData) => Promise<void>;
+  revertAction: (prevState: RevertPaymentState, formData: FormData) => Promise<RevertPaymentState>;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [confirmingRevert, setConfirmingRevert] = useState(false);
+  const [revertState, revertFormAction] = useActionState<RevertPaymentState, FormData>(
+    revertAction,
+    {},
+  );
 
   function openDialog() {
     setConfirmingRevert(false);
@@ -89,13 +94,16 @@ export function EditPaymentDateButton({
             </button>
           </div>
         ) : (
-          <form action={revertAction} className="flex flex-col gap-3">
+          <form action={revertFormAction} className="flex flex-col gap-3">
             <input type="hidden" name="installmentId" value={installmentId} />
             <input type="hidden" name="donorName" value={donorName} />
             <input type="hidden" name="amountCents" value={amountCents} />
             <p className="text-sm text-red-700 dark:text-red-400">
               Tem certeza? Isso vai apagar o registro de pagamento desta parcela.
             </p>
+            {revertState.error ? (
+              <p className="text-sm text-red-700 dark:text-red-400">{revertState.error}</p>
+            ) : null}
             <div className="flex justify-end gap-3">
               <button
                 type="button"

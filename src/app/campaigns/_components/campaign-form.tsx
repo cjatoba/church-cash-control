@@ -10,6 +10,7 @@ import {
 
 export interface CreateCampaignState {
   error?: string;
+  values?: { name: string; goal: string; startDate: string; endDate: string };
 }
 
 function toDateInputValue(date: Date): string {
@@ -35,6 +36,13 @@ export function CampaignForm({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const pendingSubmitRef = useRef<FormData | null>(null);
   const [affectedCount, setAffectedCount] = useState(0);
+
+  const name = state.values?.name ?? defaultValues?.name ?? "";
+  const goal = state.values?.goal ?? (defaultValues ? String(defaultValues.goal) : "");
+  const startDate =
+    state.values?.startDate ?? (defaultValues ? toDateInputValue(defaultValues.startDate) : "");
+  const endDate =
+    state.values?.endDate ?? (defaultValues ? toDateInputValue(defaultValues.endDate) : "");
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     if (!pendingInstallments) {
@@ -81,7 +89,7 @@ export function CampaignForm({
             name="name"
             type="text"
             required
-            defaultValue={defaultValues?.name}
+            defaultValue={name}
             className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
           />
         </label>
@@ -93,7 +101,7 @@ export function CampaignForm({
             step="0.01"
             min="0.01"
             required
-            defaultValue={defaultValues?.goal}
+            defaultValue={goal}
             className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
           />
         </label>
@@ -103,7 +111,7 @@ export function CampaignForm({
             name="startDate"
             type="date"
             required
-            defaultValue={defaultValues ? toDateInputValue(defaultValues.startDate) : undefined}
+            defaultValue={startDate}
             className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
           />
         </label>
@@ -113,7 +121,7 @@ export function CampaignForm({
             name="endDate"
             type="date"
             required
-            defaultValue={defaultValues ? toDateInputValue(defaultValues.endDate) : undefined}
+            defaultValue={endDate}
             className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
           />
         </label>

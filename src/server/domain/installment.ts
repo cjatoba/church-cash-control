@@ -65,8 +65,16 @@ export function correctInstallmentPaymentDate(
   };
 }
 
-export function revertInstallmentPayment(installment: InstallmentState): void {
+export function revertInstallmentPayment(
+  installment: InstallmentState,
+  availableBalance: Money,
+): void {
   if (!installment.paidAt) {
     throw new Error("Parcela ainda não foi paga");
+  }
+  if (availableBalance.toCents() < installment.amount.toCents()) {
+    throw new Error(
+      "Não é possível reverter: o valor já foi repassado e reverter deixaria o saldo em mãos negativo",
+    );
   }
 }

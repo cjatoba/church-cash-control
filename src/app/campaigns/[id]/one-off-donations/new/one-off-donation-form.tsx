@@ -7,16 +7,25 @@ import { BackLink } from "@/app/_components/back-link";
 export interface CreateOneOffDonationState {
   error?: string;
   success?: string;
+  values?: {
+    donorName: string;
+    amount: string;
+    date: string;
+    paymentMethod: string;
+    receivedByUserId: string;
+  };
 }
 
 function ReceivedBySelect({
   users,
   currentUserId,
+  defaultReceivedByUserId,
 }: {
   users: { id: string; email: string }[];
   currentUserId: string;
+  defaultReceivedByUserId: string;
 }) {
-  const [receivedByUserId, setReceivedByUserId] = useState(currentUserId);
+  const [receivedByUserId, setReceivedByUserId] = useState(defaultReceivedByUserId);
 
   return (
     <>
@@ -90,6 +99,7 @@ export function OneOffDonationForm({
           name="donorName"
           type="text"
           placeholder="Nome (ou deixe em branco p/ anônimo)"
+          defaultValue={state.values?.donorName ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
@@ -101,6 +111,7 @@ export function OneOffDonationForm({
           step="0.01"
           min="0.01"
           required
+          defaultValue={state.values?.amount ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
@@ -110,6 +121,7 @@ export function OneOffDonationForm({
           name="date"
           type="date"
           required
+          defaultValue={state.values?.date ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
@@ -121,14 +133,20 @@ export function OneOffDonationForm({
               type="radio"
               name="paymentMethod"
               value="pix"
-              defaultChecked
+              defaultChecked={(state.values?.paymentMethod ?? "pix") === "pix"}
               required
               className="h-4 w-4"
             />
             Pix
           </label>
           <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16]">
-            <input type="radio" name="paymentMethod" value="cash" className="h-4 w-4" />
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="cash"
+              defaultChecked={state.values?.paymentMethod === "cash"}
+              className="h-4 w-4"
+            />
             Dinheiro
           </label>
         </div>
@@ -137,6 +155,7 @@ export function OneOffDonationForm({
         key={state.success ?? "initial"}
         users={users}
         currentUserId={currentUserId}
+        defaultReceivedByUserId={state.values?.receivedByUserId ?? currentUserId}
       />
       <SubmitButton pendingLabel="Registrando…">Registrar doação</SubmitButton>
     </form>

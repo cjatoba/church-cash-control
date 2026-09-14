@@ -6,6 +6,7 @@ import { SubmitButton } from "@/app/_components/submit-button";
 export interface CreatePledgeTypeState {
   error?: string;
   success?: string;
+  values?: { name: string; installmentValue: string };
 }
 
 export function PledgeTypeForm({
@@ -41,6 +42,7 @@ export function PledgeTypeForm({
           name="name"
           type="text"
           required
+          defaultValue={state.values?.name ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
@@ -52,6 +54,7 @@ export function PledgeTypeForm({
           step="0.01"
           min="0.01"
           required
+          defaultValue={state.values?.installmentValue ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>

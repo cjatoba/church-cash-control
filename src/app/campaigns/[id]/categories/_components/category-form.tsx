@@ -7,6 +7,7 @@ import { BackLink } from "@/app/_components/back-link";
 export interface CreateCategoryState {
   error?: string;
   success?: number;
+  values?: { name: string; type: string };
 }
 
 export function CategoryForm({
@@ -35,6 +36,9 @@ export function CategoryForm({
     }
   }, [state.success]);
 
+  const name = state.values?.name ?? defaultValues?.name ?? "";
+  const type = state.values?.type ?? defaultValues?.type ?? "";
+
   return (
     <form
       ref={formRef}
@@ -55,7 +59,7 @@ export function CategoryForm({
           name="name"
           type="text"
           required
-          defaultValue={defaultValues?.name}
+          defaultValue={name}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
@@ -64,7 +68,7 @@ export function CategoryForm({
         <select
           name="type"
           required
-          defaultValue={defaultValues?.type ?? ""}
+          defaultValue={type}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         >
           <option value="" disabled>

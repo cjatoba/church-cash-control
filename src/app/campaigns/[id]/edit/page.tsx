@@ -7,7 +7,12 @@ import { createCampaignRepository } from "@/server/infrastructure/db/campaign-re
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { CampaignForm, type CreateCampaignState } from "../../_components/campaign-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 export default async function EditCampaignPage({ params }: PageProps<"/campaigns/[id]/edit">) {
   const session = await auth();
@@ -61,8 +66,19 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
         input,
         previousEndDate,
       );
-    } catch {
-      return { error: "Não foi possível salvar a campanha. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível salvar a campanha. Confira os dados informados.",
+        ),
+        values: {
+          name: toStringValue(input.name),
+          goal: toStringValue(input.goal),
+          startDate: toStringValue(input.startDate),
+          endDate: toStringValue(input.endDate),
+        },
+      };
     }
 
     if (typeof input.name === "string") {

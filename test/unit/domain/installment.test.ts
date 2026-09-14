@@ -139,23 +139,29 @@ describe("correctInstallmentPaymentDate", () => {
 });
 
 describe("revertInstallmentPayment", () => {
-  it("permite reverter uma parcela paga", () => {
-    const installment = {
-      amount: Money.fromReais(100),
-      paidAt: new Date("2026-03-10"),
-      paymentMethod: "pix" as const,
-      receivedByUserId: "user-1",
-      registeredByUserId: "user-1",
-    };
+  const paidInstallment = {
+    amount: Money.fromReais(100),
+    paidAt: new Date("2026-03-10"),
+    paymentMethod: "pix" as const,
+    receivedByUserId: "user-1",
+    registeredByUserId: "user-1",
+  };
 
+  it("permite reverter uma parcela paga quando o saldo em mãos cobre o valor", () => {
     expect(() => {
-      revertInstallmentPayment(installment);
+      revertInstallmentPayment(paidInstallment, Money.fromReais(100));
     }).not.toThrow();
   });
 
   it("rejeita reverter uma parcela que ainda não foi paga", () => {
     expect(() => {
-      revertInstallmentPayment(unpaidInstallment);
+      revertInstallmentPayment(unpaidInstallment, Money.fromReais(100));
+    }).toThrow();
+  });
+
+  it("rejeita reverter quando o valor já foi repassado e deixaria o saldo negativo", () => {
+    expect(() => {
+      revertInstallmentPayment(paidInstallment, Money.fromReais(40));
     }).toThrow();
   });
 });

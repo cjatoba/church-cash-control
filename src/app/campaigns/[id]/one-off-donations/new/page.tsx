@@ -5,7 +5,12 @@ import { listUsers } from "@/server/application/list-users";
 import { createOneOffDonationRepository } from "@/server/infrastructure/db/one-off-donation-repository";
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { OneOffDonationForm, type CreateOneOffDonationState } from "./one-off-donation-form";
+
+function toStringValue(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
 
 export default async function NewOneOffDonationPage({
   params,
@@ -49,8 +54,20 @@ export default async function NewOneOffDonationPage({
       const repository = createOneOffDonationRepository(db);
       const { id } = await createOneOffDonation(repository, input, registeredByUserId);
       return { success: id };
-    } catch {
-      return { error: "Não foi possível registrar a doação. Confira os dados informados." };
+    } catch (error) {
+      return {
+        error: toFriendlyErrorMessage(
+          error,
+          "Não foi possível registrar a doação. Confira os dados informados.",
+        ),
+        values: {
+          donorName: toStringValue(input.donorName),
+          amount: toStringValue(input.amount),
+          date: toStringValue(input.date),
+          paymentMethod: toStringValue(input.paymentMethod),
+          receivedByUserId: toStringValue(input.receivedByUserId),
+        },
+      };
     }
   }
 

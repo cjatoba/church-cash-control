@@ -8,9 +8,11 @@ import { revertInstallmentPayment } from "@/server/application/revert-installmen
 import { listUsers } from "@/server/application/list-users";
 import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
+import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { CheckCircleIcon, ClockIcon } from "@/app/_components/icons";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
+import { createCustodyRepository } from "@/server/infrastructure/db/custody-repository";
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
@@ -37,6 +39,10 @@ function formatMonthLabel(date: Date): string {
 }
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
+
+export interface RevertPaymentState {
+  error?: string;
+}
 
 export default async function PledgeDetailPage({
   params,
@@ -146,7 +152,10 @@ export default async function PledgeDetailPage({
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
 
-  async function revertPayment(formData: FormData): Promise<void> {
+  async function revertPayment(
+    _prevState: RevertPaymentState,
+    formData: FormData,
+  ): Promise<RevertPaymentState> {
     "use server";
 
     const actionSession = await auth();
@@ -167,10 +176,20 @@ export default async function PledgeDetailPage({
 
     const db = createDbClient();
     const installmentRepository = createInstallmentRepository(db);
-    await revertInstallmentPayment(
-      { installmentReader: installmentRepository, installmentRepository },
-      installmentId,
-    );
+    const custodyRepository = createCustodyRepository(db);
+    try {
+      await revertInstallmentPayment(
+        {
+          installmentReader: installmentRepository,
+          installmentRepository,
+          balanceReader: custodyRepository,
+        },
+        campaignId,
+        installmentId,
+      );
+    } catch (error) {
+      return { error: toFriendlyErrorMessage(error, "Não foi possível reverter o pagamento.") };
+    }
 
     const activityLogRepository = createActivityLogRepository(db);
     await recordActivity(activityLogRepository, {
