@@ -52,7 +52,7 @@ export function MonthSelector({
           {children}
         </div>
         {isPending ? (
-          <div className="absolute inset-0 flex flex-col gap-4 pt-1">
+          <div className="absolute inset-0 flex flex-col gap-4 bg-white pt-1 dark:bg-zinc-950">
             <div className="flex flex-col gap-1">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-2.5 w-full" />
