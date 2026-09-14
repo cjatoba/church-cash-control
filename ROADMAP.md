@@ -403,9 +403,6 @@ CASCADE`) + repositório Drizzle + tela protegida
   as ações citadas acima (as mesmas do exemplo original do backlog);
   outras mutações do app (doador, usuário, repasse etc.) ficam de fora
   até aparecer necessidade concreta de auditá-las também.
-
-## Em andamento (PRs abertas)
-
 - **Revisão de usabilidade + nomenclatura em todas as telas existentes**
   — PR #47: decisões tomadas com o usuário antes de começar — os dois
   passes (usabilidade/poluição visual e nomenclatura simples) combinados
@@ -470,6 +467,10 @@ CASCADE`) + repositório Drizzle + tela protegida
     `outline` em Arquivar/Reativar do painel inicial e `text` em
     Arquivar/Reativar de categorias e Desativar/Reativar de usuários
     (mesmo padrão do link "Editar" vizinho em cada lista).
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
