@@ -388,24 +388,25 @@ CASCADE`) + repositório Drizzle + tela protegida
   do banco (`/campaigns/new`, `/change-password`, `/login`,
   `/campaigns/[id]/categories/new`, `/users/new`) ficaram de fora, como
   previsto na exceção da própria regra do `CLAUDE.md`.
+- **Log de atividades (auditoria)** — PR #45: registra dar
+  baixa/corrigir/reverter parcela, editar/arquivar/reativar campanha e
+  arquivar/reativar categoria (`activityLog`, domínio + `recordActivity`)
+  com quem fez e quando, consultável em `/activity-log`. Decisões tomadas
+  com o usuário antes de implementar: tela restrita a quem tem
+  `canManageUsers` (sem capacidade própria nova); sem retenção/expurgo
+  por ora (mantém tudo, volume esperado pequeno); guarda nome do
+  doador/campanha/categoria e valor vinculados à ação (mesmos cuidados de
+  LGPD já aplicados nos demais dados sensíveis — nunca exposto fora dessa
+  tela restrita). `subjectName` é um retrato do momento da ação, não FK,
+  para o registro continuar legível mesmo que a campanha/categoria/parcela
+  referenciada mude ou seja removida depois. Escopo desta fatia cobre só
+  as ações citadas acima (as mesmas do exemplo original do backlog);
+  outras mutações do app (doador, usuário, repasse etc.) ficam de fora
+  até aparecer necessidade concreta de auditá-las também.
 
 ## Em andamento (PRs abertas)
 
-- **Log de atividades (auditoria)**: registra dar baixa/corrigir/reverter
-  parcela, editar/arquivar/reativar campanha e arquivar/reativar categoria
-  (`activityLog`, domínio + `recordActivity`) com quem fez e quando,
-  consultável em `/activity-log`. Decisões tomadas com o usuário antes de
-  implementar: tela restrita a quem tem `canManageUsers` (sem capacidade
-  própria nova); sem retenção/expurgo por ora (mantém tudo, volume
-  esperado pequeno); guarda nome do doador/campanha/categoria e valor
-  vinculados à ação (mesmos cuidados de LGPD já aplicados nos demais
-  dados sensíveis — nunca exposto fora dessa tela restrita). `subjectName`
-  é um retrato do momento da ação, não FK, para o registro continuar
-  legível mesmo que a campanha/categoria/parcela referenciada mude ou
-  seja removida depois. Escopo desta fatia cobre só as ações citadas
-  acima (as mesmas do exemplo original do backlog); outras mutações do
-  app (doador, usuário, repasse etc.) ficam de fora até aparecer
-  necessidade concreta de auditá-las também.
+Nenhuma no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
