@@ -504,24 +504,43 @@ CASCADE`) + repositório Drizzle + tela protegida
     (revert passou a usar `useActionState`, antes era uma action sem
     tratamento de erro).
 
-## Em andamento (PRs abertas)
-
-- **Remoção de categorias de lançamento** — categoria (`TransactionCategory`,
-  cadastrada desde a PR #19) nunca chegou a ser usada por nenhum fluxo real
-  do app (carnê, doação avulsa e repasse são conceitos próprios, sem
-  referenciar categoria — decisão já registrada no histórico deste
-  arquivo). Removida por completo: domínio, casos de uso, repositório,
-  telas (`/campaigns/[id]/categories*`), link "Categorias" no card da
-  campanha e menções em textos de tela. Tabela `transaction_categories` e
-  o enum `transaction_category_type` removidos do banco via migration
-  nova (`DROP TABLE ... CASCADE` + `DROP TYPE`). Decisão registrada: os
-  valores `transaction_category_archived`/`transaction_category_restored`
-  do enum `activity_log_action` **não** foram removidos — são histórico de
+- **Remoção de categorias de lançamento** — PR #51: categoria
+  (`TransactionCategory`, cadastrada desde a PR #19) nunca chegou a ser
+  usada por nenhum fluxo real do app (carnê, doação avulsa e repasse são
+  conceitos próprios, sem referenciar categoria — decisão já registrada
+  no histórico deste arquivo). Removida por completo: domínio, casos de
+  uso, repositório, telas (`/campaigns/[id]/categories*`), link
+  "Categorias" no card da campanha e menções em textos de tela. Tabela
+  `transaction_categories` e o enum `transaction_category_type`
+  removidos do banco via migration nova (`DROP TABLE ... CASCADE` +
+  `DROP TYPE`). Decisão registrada: os valores
+  `transaction_category_archived`/`transaction_category_restored` do
+  enum `activity_log_action` **não** foram removidos — são histórico de
   auditoria (mesmo princípio já usado para `subjectName`: um registro de
   atividade continua legível mesmo que o que ele descreve deixe de
   existir), então uma eventual entrada antiga desse tipo no
   `/activity-log` continua exibindo a mensagem certa; só não é mais
   possível gerar uma nova.
+  - **Lição aprendida durante a validação em preview**: depois de
+    mergear duas PRs seguidas (#49, #50) sem recriar a branch de
+    trabalho a partir da `main` entre elas, um commit local ficou
+    "órfão" (conteúdo idêntico ao que já tinha sido mergeado via squash,
+    mas com hash de commit diferente) — ao empilhar a mudança desta
+    fatia em cima dele e abrir a PR #51, o GitHub reportou
+    `mergeable_state: dirty` (conflito) e, por causa disso, a checagem
+    de CI (`Lint, typecheck, test, build`) nunca chegou a disparar nem
+    aparecer no histórico de Actions, mesmo o código estando correto (só
+    o comentário do preview da Vercel aparecia). Corrigido reconstruindo
+    a branch do zero a partir da `main` atual e reaplicando só o commit
+    real da fatia (`git cherry-pick`) antes de subir de novo. Regra
+    prática: sempre recriar a branch de trabalho a partir da `main`
+    (`git checkout -B ... origin/main`) depois de cada merge, mesmo
+    quando a próxima fatia começa "logo em seguida" — nunca empilhar em
+    cima de uma branch que já teve conteúdo mergeado por squash.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
