@@ -31,6 +31,16 @@ export async function findUserByEmail(db: DbClient, email: string): Promise<User
   return rows[0] ?? null;
 }
 
+export async function findPasswordHashById(db: DbClient, userId: string): Promise<string | null> {
+  const [row] = await db
+    .select({ passwordHash: users.passwordHash })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return row?.passwordHash ?? null;
+}
+
 export async function completeUserPasswordChange(
   db: DbClient,
   userId: string,

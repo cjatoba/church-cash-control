@@ -107,6 +107,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               Registro de atividades
             </Link>
           ) : null}
+          {session ? (
+            <Link href="/account/password" className="hover:text-black dark:hover:text-zinc-50">
+              Trocar senha
+            </Link>
+          ) : null}
           {session?.user.email ? (
             <span className="hidden sm:inline">{session.user.email}</span>
           ) : null}

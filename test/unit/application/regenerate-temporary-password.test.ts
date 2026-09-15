@@ -5,7 +5,7 @@ import {
 } from "@/server/application/regenerate-temporary-password";
 
 function createInMemoryRepository(
-  user: { id: string; email: string; phone: string | null; mustChangePassword: boolean } | null,
+  user: { id: string; email: string; phone: string | null; active: boolean } | null,
 ): RegenerateTemporaryPasswordRepository & { updates: { userId: string; passwordHash: string }[] } {
   const updates: { userId: string; passwordHash: string }[] = [];
   return {
@@ -27,12 +27,12 @@ const dependencies = {
 };
 
 describe("regenerateTemporaryPassword", () => {
-  it("gera e persiste uma nova senha temporária para usuário pendente", async () => {
+  it("gera e persiste uma nova senha temporária para usuário ativo", async () => {
     const repository = createInMemoryRepository({
       id: "user-1",
       email: "voluntario@igreja.exemplo",
       phone: "11912345678",
-      mustChangePassword: true,
+      active: true,
     });
 
     const result = await regenerateTemporaryPassword(repository, dependencies, "user-1");
@@ -47,7 +47,7 @@ describe("regenerateTemporaryPassword", () => {
       id: "user-1",
       email: "voluntario@igreja.exemplo",
       phone: null,
-      mustChangePassword: true,
+      active: true,
     });
 
     const result = await regenerateTemporaryPassword(repository, dependencies, "user-1");
@@ -55,12 +55,26 @@ describe("regenerateTemporaryPassword", () => {
     expect(result.whatsappLink).toBeUndefined();
   });
 
-  it("rejeita gerar senha temporária para usuário que já trocou a senha", async () => {
+  it("gera nova senha temporária mesmo para quem já trocou a senha antes, desde que esteja ativo", async () => {
     const repository = createInMemoryRepository({
       id: "user-1",
       email: "voluntario@igreja.exemplo",
       phone: null,
-      mustChangePassword: false,
+      active: true,
+    });
+
+    const result = await regenerateTemporaryPassword(repository, dependencies, "user-1");
+
+    expect(repository.updates).toEqual([{ userId: "user-1", passwordHash: "hashed:k7Rt9mQx" }]);
+    expect(result.temporaryPassword).toBe("k7Rt9mQx");
+  });
+
+  it("rejeita gerar senha temporária para usuário desativado", async () => {
+    const repository = createInMemoryRepository({
+      id: "user-1",
+      email: "voluntario@igreja.exemplo",
+      phone: null,
+      active: false,
     });
 
     await expect(regenerateTemporaryPassword(repository, dependencies, "user-1")).rejects.toThrow();
