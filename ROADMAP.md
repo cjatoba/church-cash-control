@@ -538,21 +538,19 @@ CASCADE`) + repositório Drizzle + tela protegida
     quando a próxima fatia começa "logo em seguida" — nunca empilhar em
     cima de uma branch que já teve conteúdo mergeado por squash.
 
-## Em andamento (PRs abertas)
-
-- **Trocar senha a qualquer momento + resetar senha de usuário ativo** —
-  hoje só existia troca de senha forçada no primeiro acesso
+- **Trocar senha a qualquer momento + resetar senha de usuário ativo**
+  — PR #53: hoje só existia troca de senha forçada no primeiro acesso
   (`/change-password`); depois de trocada uma vez, ninguém — nem o
   próprio usuário, nem um admin — conseguia trocá-la de novo pelo app
   (o botão "Gerar nova senha" em `/users` também só funcionava enquanto
   `mustChangePassword` estivesse ativo). Adicionado:
   - Tela `/account/password` ("Trocar senha", link no cabeçalho do
-    painel para qualquer usuário logado): pede senha atual + nova senha
-    - confirmação (`changeOwnPassword`, domínio/aplicação com TDD
-      completo); confere a senha atual antes de trocar. Ao salvar, encerra
-      a sessão e redireciona para o login com a senha nova — mesmo padrão
-      já usado no fluxo de troca obrigatória (evita ter que reemitir o
-      JWT em memória).
+    painel para qualquer usuário logado): pede senha atual, nova senha e
+    confirmação (`changeOwnPassword`, domínio/aplicação com TDD
+    completo); confere a senha atual antes de trocar. Ao salvar, encerra
+    a sessão e redireciona para o login com a senha nova — mesmo padrão
+    já usado no fluxo de troca obrigatória (evita ter que reemitir o
+    JWT em memória).
   - `canRegenerateTemporaryPassword` (domínio) passa a checar se o
     usuário está **ativo**, em vez de se ele "ainda não trocou a senha"
     — um admin agora pode gerar uma nova senha temporária para qualquer
@@ -565,6 +563,17 @@ CASCADE`) + repositório Drizzle + tela protegida
   - `/users`: o link "Gerar nova senha" deixa de aparecer só ao lado do
     selo "Troca pendente" — agora fica sempre visível para qualquer
     usuário ativo da lista.
+  - **A mesma lição da PR #51 se repetiu aqui** (branch não reconstruída
+    a partir da `main` logo após o merge anterior, deixando um commit
+    "órfão" que gerou `mergeable_state: dirty` e impediu o CI de
+    disparar na primeira tentativa desta PR) — corrigido do mesmo jeito
+    (reconstruir a branch e `git cherry-pick` só o commit real). A regra
+    já estava registrada no `ROADMAP.md`; o problema foi não segui-la de
+    fato logo depois do merge anterior, não desconhecê-la.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
