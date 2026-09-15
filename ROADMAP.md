@@ -506,7 +506,22 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Remoção de categorias de lançamento** — categoria (`TransactionCategory`,
+  cadastrada desde a PR #19) nunca chegou a ser usada por nenhum fluxo real
+  do app (carnê, doação avulsa e repasse são conceitos próprios, sem
+  referenciar categoria — decisão já registrada no histórico deste
+  arquivo). Removida por completo: domínio, casos de uso, repositório,
+  telas (`/campaigns/[id]/categories*`), link "Categorias" no card da
+  campanha e menções em textos de tela. Tabela `transaction_categories` e
+  o enum `transaction_category_type` removidos do banco via migration
+  nova (`DROP TABLE ... CASCADE` + `DROP TYPE`). Decisão registrada: os
+  valores `transaction_category_archived`/`transaction_category_restored`
+  do enum `activity_log_action` **não** foram removidos — são histórico de
+  auditoria (mesmo princípio já usado para `subjectName`: um registro de
+  atividade continua legível mesmo que o que ele descreve deixe de
+  existir), então uma eventual entrada antiga desse tipo no
+  `/activity-log` continua exibindo a mensagem certa; só não é mais
+  possível gerar uma nova.
 
 ## Backlog (próximas fatias, em ordem)
 

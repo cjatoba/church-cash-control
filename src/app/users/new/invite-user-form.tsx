@@ -124,7 +124,7 @@ function InviteUserFormFields({
             defaultChecked={state.values?.canManageCampaigns ?? false}
             className="h-4 w-4"
           />
-          Gerenciar campanhas (criar/editar/arquivar campanha, categoria, tipo de carnê)
+          Gerenciar campanhas (criar/editar/arquivar campanha, tipo de carnê)
         </label>
         <label className="flex items-center gap-2.5 rounded border border-black/[.08] px-3 py-2.5 dark:border-white/[.16]">
           <input
