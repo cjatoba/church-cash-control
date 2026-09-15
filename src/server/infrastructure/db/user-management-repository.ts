@@ -64,7 +64,7 @@ export function createUserManagementRepository(
           id: users.id,
           email: users.email,
           phone: users.phone,
-          mustChangePassword: users.mustChangePassword,
+          active: users.active,
         })
         .from(users)
         .where(eq(users.id, userId))
@@ -74,7 +74,13 @@ export function createUserManagementRepository(
     },
 
     async updatePasswordHash(userId, passwordHash) {
-      await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+      // Regenerar a senha temporária de alguém que já trocou a senha exige
+      // forçar a troca de novo no próximo login — senão a pessoa fica com uma
+      // senha temporária mas sem o fluxo de /change-password para defini-la.
+      await db
+        .update(users)
+        .set({ passwordHash, mustChangePassword: true })
+        .where(eq(users.id, userId));
     },
 
     async setActive(userId, active) {

@@ -1,3 +1,3 @@
-export function canRegenerateTemporaryPassword(user: { mustChangePassword: boolean }): boolean {
-  return user.mustChangePassword;
+export function canRegenerateTemporaryPassword(user: { active: boolean }): boolean {
+  return user.active;
 }

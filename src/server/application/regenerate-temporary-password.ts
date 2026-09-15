@@ -6,7 +6,7 @@ export interface RegenerateTemporaryPasswordRepository {
     id: string;
     email: string;
     phone: string | null;
-    mustChangePassword: boolean;
+    active: boolean;
   } | null>;
   updatePasswordHash(userId: string, passwordHash: string): Promise<void>;
 }
@@ -34,7 +34,7 @@ export async function regenerateTemporaryPassword(
     throw new Error("Usuário não encontrado");
   }
   if (!canRegenerateTemporaryPassword(user)) {
-    throw new Error("Usuário já trocou a senha; não é possível gerar uma nova temporária");
+    throw new Error("Usuário desativado; não é possível gerar uma nova senha temporária");
   }
 
   const temporaryPassword = dependencies.generateTemporaryPassword();

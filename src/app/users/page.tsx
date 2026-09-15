@@ -98,18 +98,16 @@ export default async function UsersPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {user.mustChangePassword ? (
-                  <>
-                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
-                      Troca pendente
-                    </span>
-                    <Link
-                      href={`/users/${user.id}/reset-password`}
-                      className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-                    >
-                      Gerar nova senha
-                    </Link>
-                  </>
+                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                    Troca pendente
+                  </span>
                 ) : null}
+                <Link
+                  href={`/users/${user.id}/reset-password`}
+                  className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                >
+                  Gerar nova senha
+                </Link>
                 {capabilityLabels(user).map((label) => (
                   <span
                     key={label}

@@ -45,8 +45,8 @@ export function ResetPasswordForm({
         Gerar nova senha temporária
       </h1>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        {email} ainda não trocou a senha. Isso substitui a senha temporária anterior — a antiga
-        deixa de funcionar.
+        Isso substitui a senha atual de {email} por uma nova senha temporária — a antiga deixa de
+        funcionar, e a pessoa vai precisar definir uma senha nova no próximo login.
       </p>
       {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
       <SubmitButton pendingLabel="Gerando…">Gerar nova senha</SubmitButton>

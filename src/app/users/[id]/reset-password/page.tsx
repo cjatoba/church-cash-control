@@ -65,12 +65,9 @@ export default async function ResetPasswordPage({
       <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
         <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
           <BackLink href="/users" />
-          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
-            Senha já foi trocada
-          </h1>
+          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Usuário desativado</h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {user.email} já definiu a própria senha — não é possível gerar uma nova senha temporária
-            por aqui.
+            {user.email} está desativado — reative o usuário antes de gerar uma nova senha.
           </p>
         </div>
       </div>

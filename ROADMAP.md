@@ -540,7 +540,31 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Trocar senha a qualquer momento + resetar senha de usuário ativo** —
+  hoje só existia troca de senha forçada no primeiro acesso
+  (`/change-password`); depois de trocada uma vez, ninguém — nem o
+  próprio usuário, nem um admin — conseguia trocá-la de novo pelo app
+  (o botão "Gerar nova senha" em `/users` também só funcionava enquanto
+  `mustChangePassword` estivesse ativo). Adicionado:
+  - Tela `/account/password` ("Trocar senha", link no cabeçalho do
+    painel para qualquer usuário logado): pede senha atual + nova senha
+    - confirmação (`changeOwnPassword`, domínio/aplicação com TDD
+      completo); confere a senha atual antes de trocar. Ao salvar, encerra
+      a sessão e redireciona para o login com a senha nova — mesmo padrão
+      já usado no fluxo de troca obrigatória (evita ter que reemitir o
+      JWT em memória).
+  - `canRegenerateTemporaryPassword` (domínio) passa a checar se o
+    usuário está **ativo**, em vez de se ele "ainda não trocou a senha"
+    — um admin agora pode gerar uma nova senha temporária para qualquer
+    usuário ativo a qualquer momento, não só durante a janela do
+    convite inicial. Isso também volta a marcar `mustChangePassword` no
+    banco, obrigando a pessoa a definir uma senha nova no próximo login
+    (antes esse campo só era usado na criação do convite). Usuário
+    desativado continua bloqueado (não faz sentido gerar senha para
+    quem não pode logar).
+  - `/users`: o link "Gerar nova senha" deixa de aparecer só ao lado do
+    selo "Troca pendente" — agora fica sempre visível para qualquer
+    usuário ativo da lista.
 
 ## Backlog (próximas fatias, em ordem)
 
