@@ -573,7 +573,21 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Carnê avulso (valor livre, sem parcela fixa)**: hoje o carnê
+  (`Pledge`/`PledgeType`) sempre tem um valor de parcela fixo e gera
+  parcelas mensais automáticas; a doação avulsa (`OneOffDonation`) é uma
+  contribuição pontual sem vínculo com doador cadastrado. Nenhum dos dois
+  cobre o caso de distribuir um carnê a um doador cadastrado sem valor
+  pré-definido, para ele arrecadar com quem quiser e entregar (em uma ou
+  mais vezes) até encerrar — faltava controle de quem está com um carnê
+  desses em aberto. Domínio novo `LoosePledge` (doador + status
+  aberto/encerrado) e `LoosePledgeContribution` (valor livre, data, forma
+  de pagamento, recebido por/registrado por, sem vínculo com parcela
+  fixa) + telas `/campaigns/[id]/loose-pledges(/new)`. Contribuições
+  entram na soma "Arrecadado" da campanha e no saldo de "Dinheiro em
+  mãos" de quem recebeu, mesma regra já usada por parcela paga/doação
+  avulsa; painel mensal (focado em parcela com vencimento por mês) fica
+  fora do escopo desta fatia.
 
 ## Backlog (próximas fatias, em ordem)
 
