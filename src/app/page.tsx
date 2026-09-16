@@ -242,6 +242,12 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       <UsersIcon className="h-4 w-4" />
                       Doadores
                     </Link>
+                    <Link
+                      href={`/campaigns/${campaign.id}/loose-pledges`}
+                      className="self-start rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]"
+                    >
+                      Carnês avulsos
+                    </Link>
                     {session?.user.canReceiveFunds ? (
                       <Link
                         href={`/campaigns/${campaign.id}/one-off-donations/new`}

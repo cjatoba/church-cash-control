@@ -79,6 +79,37 @@ export const oneOffDonations = pgTable("one_off_donations", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const loosePledgeStatusEnum = pgEnum("loose_pledge_status", ["open", "closed"]);
+
+export const loosePledges = pgTable("loose_pledges", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  donorId: uuid("donor_id")
+    .notNull()
+    .references(() => donors.id, { onDelete: "cascade" }),
+  status: loosePledgeStatusEnum("status").notNull().default("open"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const loosePledgeContributions = pgTable("loose_pledge_contributions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  loosePledgeId: uuid("loose_pledge_id")
+    .notNull()
+    .references(() => loosePledges.id, { onDelete: "cascade" }),
+  amountCents: integer("amount_cents").notNull(),
+  date: date("date", { mode: "date" }).notNull(),
+  paymentMethod: paymentMethodEnum("payment_method").notNull(),
+  receivedByUserId: uuid("received_by_user_id")
+    .notNull()
+    .references(() => users.id),
+  registeredByUserId: uuid("registered_by_user_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const installments = pgTable("installments", {
   id: uuid("id").primaryKey().defaultRandom(),
   pledgeId: uuid("pledge_id")
