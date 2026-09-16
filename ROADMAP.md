@@ -580,14 +580,32 @@ CASCADE`) + repositório Drizzle + tela protegida
   cobre o caso de distribuir um carnê a um doador cadastrado sem valor
   pré-definido, para ele arrecadar com quem quiser e entregar (em uma ou
   mais vezes) até encerrar — faltava controle de quem está com um carnê
-  desses em aberto. Domínio novo `LoosePledge` (doador + status
-  aberto/encerrado) e `LoosePledgeContribution` (valor livre, data, forma
-  de pagamento, recebido por/registrado por, sem vínculo com parcela
-  fixa) + telas `/campaigns/[id]/loose-pledges(/new)`. Contribuições
-  entram na soma "Arrecadado" da campanha e no saldo de "Dinheiro em
-  mãos" de quem recebeu, mesma regra já usada por parcela paga/doação
-  avulsa; painel mensal (focado em parcela com vencimento por mês) fica
-  fora do escopo desta fatia.
+  desses em aberto. Domínio novo `LoosePledge` (doador + tipo de carnê +
+  status aberto/encerrado) e `LoosePledgeContribution` (valor livre,
+  data, forma de pagamento, recebido por/registrado por, sem vínculo com
+  parcela fixa).
+  - **Decisão revista durante a implementação**: a primeira versão desta
+    fatia criou telas próprias (`/campaigns/[id]/loose-pledges(/new)`)
+    separadas do cadastro de doador — feedback do usuário foi que isso
+    duplicava o cadastro de doador em dois lugares diferentes, confuso no
+    dia a dia. Redesenhado para reaproveitar o mesmo fluxo: `PledgeType`
+    ganha valor de parcela **opcional** (`installmentValueCents` agora
+    aceita `null` no banco) — um tipo de carnê sem valor é um "tipo
+    avulso"; a tela `/campaigns/[id]/pledge-types` ganha uma opção
+    "Carnê avulso (sem valor fixo)" ao criar um tipo. O formulário
+    `/campaigns/[id]/donors/new` continua sendo o único ponto de cadastro
+    de doador+carnê (nenhuma tela nova): ao escolher um tipo avulso, a
+    action cria um `LoosePledge` em vez de um `Pledge`/parcelas
+    automáticas. A tela `/campaigns/[id]/donors` (lista) e a tela de
+    dados do doador passam a mesclar carnês de valor fixo e avulsos numa
+    lista só, com o mesmo selo "Em aberto"/"Fechado". Só a tela de
+    detalhe/registro de contribuições (`/campaigns/[id]/loose-pledges/[id]`)
+    continua separada — mesmo padrão de `/campaigns/[id]/pledges/[pledgeId]`
+    ser uma tela própria para o carnê de valor fixo.
+  - Contribuições entram na soma "Arrecadado" da campanha e no saldo de
+    "Dinheiro em mãos" de quem recebeu, mesma regra já usada por parcela
+    paga/doação avulsa; painel mensal (focado em parcela com vencimento
+    por mês) fica fora do escopo desta fatia.
 
 ## Backlog (próximas fatias, em ordem)
 

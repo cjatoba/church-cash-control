@@ -4,14 +4,27 @@ import { auth } from "@/auth";
 import { anonymizeDonor } from "@/server/application/anonymize-donor";
 import { getDonor } from "@/server/application/get-donor";
 import { listDonorPledges } from "@/server/application/list-donor-pledges";
+import { listDonorLoosePledges } from "@/server/application/list-donor-loose-pledges";
 import { updateDonor } from "@/server/application/update-donor";
 import { isPledgeClosed } from "@/server/domain/pledge";
 import { createDonorRepository } from "@/server/infrastructure/db/donor-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
+import { createLoosePledgeRepository } from "@/server/infrastructure/db/loose-pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { BackLink } from "@/app/_components/back-link";
 import { AnonymizeDonorButton } from "./_components/anonymize-donor-button";
 import { EditDonorNameButton } from "./_components/edit-donor-name-button";
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+interface DonorPledgeRow {
+  key: string;
+  campaignName: string;
+  pledgeTypeName: string;
+  subtitle: string;
+  closed: boolean;
+  href: string;
+}
 
 export default async function DonorDetailPage({
   params,
@@ -25,14 +38,35 @@ export default async function DonorDetailPage({
   const db = createDbClient();
   const donorRepository = createDonorRepository(db);
   const pledgeRepository = createPledgeRepository(db);
-  const [donor, donorPledges] = await Promise.all([
+  const loosePledgeRepository = createLoosePledgeRepository(db);
+  const [donor, donorPledges, donorLoosePledges] = await Promise.all([
     getDonor(donorRepository, donorId),
     listDonorPledges(pledgeRepository, donorId),
+    listDonorLoosePledges(loosePledgeRepository, donorId),
   ]);
 
   if (!donor) {
     notFound();
   }
+
+  const pledgeRows: DonorPledgeRow[] = [
+    ...donorPledges.map((pledge) => ({
+      key: `pledge-${pledge.id}`,
+      campaignName: pledge.campaignName,
+      pledgeTypeName: pledge.pledgeTypeName,
+      subtitle: `pago ${String(pledge.paidInstallments)} de ${String(pledge.totalInstallments)}`,
+      closed: isPledgeClosed(pledge),
+      href: `/campaigns/${pledge.campaignId}/pledges/${pledge.id}`,
+    })),
+    ...donorLoosePledges.map((loosePledge) => ({
+      key: `loose-pledge-${loosePledge.id}`,
+      campaignName: loosePledge.campaignName,
+      pledgeTypeName: loosePledge.pledgeTypeName,
+      subtitle: `arrecadado ${currencyFormatter.format(loosePledge.totalContributed.toCents() / 100)}`,
+      closed: loosePledge.status === "closed",
+      href: `/campaigns/${loosePledge.campaignId}/loose-pledges/${loosePledge.id}`,
+    })),
+  ];
 
   async function saveName(formData: FormData): Promise<void> {
     "use server";
@@ -88,39 +122,36 @@ export default async function DonorDetailPage({
           <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
             Carnês deste doador
           </h2>
-          {donorPledges.length === 0 ? (
+          {pledgeRows.length === 0 ? (
             <p className="text-sm text-zinc-600 dark:text-zinc-400">Nenhum carnê cadastrado.</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {donorPledges.map((pledge) => {
-                const closed = isPledgeClosed(pledge);
-                return (
-                  <li key={pledge.id}>
-                    <Link
-                      href={`/campaigns/${pledge.campaignId}/pledges/${pledge.id}`}
-                      className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:hover:border-white/[.22]"
+              {pledgeRows.map((row) => (
+                <li key={row.key}>
+                  <Link
+                    href={row.href}
+                    className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:hover:border-white/[.22]"
+                  >
+                    <span>
+                      <span className="block text-zinc-900 dark:text-zinc-100">
+                        {row.campaignName} · {row.pledgeTypeName}
+                      </span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {row.subtitle}
+                      </span>
+                    </span>
+                    <span
+                      className={
+                        row.closed
+                          ? "rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                          : "rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                      }
                     >
-                      <span>
-                        <span className="block text-zinc-900 dark:text-zinc-100">
-                          {pledge.campaignName} · {pledge.pledgeTypeName}
-                        </span>
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                          pago {pledge.paidInstallments} de {pledge.totalInstallments}
-                        </span>
-                      </span>
-                      <span
-                        className={
-                          closed
-                            ? "rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                            : "rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                        }
-                      >
-                        {closed ? "Fechado" : "Em aberto"}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
+                      {row.closed ? "Fechado" : "Em aberto"}
+                    </span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           )}
         </div>

@@ -15,7 +15,7 @@ export function DonorForm({
   action,
 }: {
   campaignId: string;
-  pledgeTypes: { id: string; name: string; installmentValueLabel: string }[];
+  pledgeTypes: { id: string; name: string; installmentValueLabel: string | null }[];
   action: (prevState: CreateDonorState, formData: FormData) => Promise<CreateDonorState>;
 }) {
   const [state, formAction] = useActionState<CreateDonorState, FormData>(action, {});
@@ -51,13 +51,18 @@ export function DonorForm({
           </option>
           {pledgeTypes.map((pledgeType) => (
             <option key={pledgeType.id} value={pledgeType.id}>
-              {pledgeType.name} · {pledgeType.installmentValueLabel}/mês
+              {pledgeType.name} ·{" "}
+              {pledgeType.installmentValueLabel
+                ? `${pledgeType.installmentValueLabel}/mês`
+                : "Avulso (valor livre)"}
             </option>
           ))}
         </select>
       </label>
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        As parcelas mensais são geradas automaticamente, do mês atual até o fim da campanha.
+        Carnê com valor fixo: as parcelas mensais são geradas automaticamente, do mês atual até o
+        fim da campanha. Carnê avulso: sem parcela — o doador arrecada com quem quiser e entrega o
+        valor depois, em uma ou mais vezes.
       </p>
       <SubmitButton pendingLabel="Cadastrando…">Cadastrar doador e gerar carnê</SubmitButton>
     </form>

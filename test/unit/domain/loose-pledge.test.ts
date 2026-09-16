@@ -5,6 +5,7 @@ describe("parseLoosePledgeInput", () => {
   const validInput = {
     campaignId: "11111111-1111-1111-1111-111111111111",
     donorId: "22222222-2222-2222-2222-222222222222",
+    pledgeTypeId: "33333333-3333-3333-3333-333333333333",
   };
 
   it("aceita dados válidos", () => {
@@ -17,6 +18,10 @@ describe("parseLoosePledgeInput", () => {
 
   it("rejeita doador vazio", () => {
     expect(() => parseLoosePledgeInput({ ...validInput, donorId: "" })).toThrow();
+  });
+
+  it("rejeita tipo de carnê vazio", () => {
+    expect(() => parseLoosePledgeInput({ ...validInput, pledgeTypeId: "" })).toThrow();
   });
 });
 

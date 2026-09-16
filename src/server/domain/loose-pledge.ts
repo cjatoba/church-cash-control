@@ -5,11 +5,13 @@ import { parsePaymentMethod, type PaymentMethod } from "./payment-method";
 const loosePledgeInputSchema = z.object({
   campaignId: z.string().trim().min(1, "Campanha é obrigatória"),
   donorId: z.string().trim().min(1, "Doador é obrigatório"),
+  pledgeTypeId: z.string().trim().min(1, "Tipo de carnê é obrigatório"),
 });
 
 export interface LoosePledgeInput {
   campaignId: string;
   donorId: string;
+  pledgeTypeId: string;
 }
 
 export function parseLoosePledgeInput(input: unknown): LoosePledgeInput {
@@ -60,6 +62,7 @@ export interface LoosePledgeSummary {
   id: string;
   donorId: string;
   donorName: string;
+  pledgeTypeName: string;
   status: LoosePledgeStatus;
   totalContributed: Money;
 }
@@ -76,6 +79,7 @@ export interface LoosePledgeContributionDetail {
 export interface LoosePledgeDetail {
   id: string;
   donorName: string;
+  pledgeTypeName: string;
   status: LoosePledgeStatus;
   contributions: LoosePledgeContributionDetail[];
 }

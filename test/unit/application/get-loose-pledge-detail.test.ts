@@ -19,6 +19,7 @@ describe("getLoosePledgeDetail", () => {
     const pledge: LoosePledgeDetail = {
       id: "loose-pledge-1",
       donorName: "Maria Souza",
+      pledgeTypeName: "Avulso",
       status: "open",
       contributions: [
         {

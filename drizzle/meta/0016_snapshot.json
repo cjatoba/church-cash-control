@@ -1,5 +1,5 @@
 {
-  "id": "99cbb971-0db0-4987-84f8-a56356b1dc7b",
+  "id": "681f6577-04e1-4900-b947-feb883300a8e",
   "prevId": "3bd6b447-b661-47dc-8d15-a77d8a4cfec7",
   "version": "7",
   "dialect": "postgresql",
@@ -518,6 +518,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "pledge_type_id": {
+          "name": "pledge_type_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "status": {
           "name": "status",
           "type": "loose_pledge_status",
@@ -555,6 +561,19 @@
           "tableTo": "donors",
           "columnsFrom": [
             "donor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "loose_pledges_pledge_type_id_pledge_types_id_fk": {
+          "name": "loose_pledges_pledge_type_id_pledge_types_id_fk",
+          "tableFrom": "loose_pledges",
+          "tableTo": "pledge_types",
+          "columnsFrom": [
+            "pledge_type_id"
           ],
           "columnsTo": [
             "id"
@@ -706,7 +725,7 @@
           "name": "installment_value_cents",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

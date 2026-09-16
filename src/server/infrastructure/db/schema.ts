@@ -47,7 +47,8 @@ export const pledgeTypes = pgTable("pledge_types", {
     .notNull()
     .references(() => campaigns.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
-  installmentValueCents: integer("installment_value_cents").notNull(),
+  // null = tipo de carnê avulso (valor livre, sem parcela mensal fixa).
+  installmentValueCents: integer("installment_value_cents"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -89,6 +90,9 @@ export const loosePledges = pgTable("loose_pledges", {
   donorId: uuid("donor_id")
     .notNull()
     .references(() => donors.id, { onDelete: "cascade" }),
+  pledgeTypeId: uuid("pledge_type_id")
+    .notNull()
+    .references(() => pledgeTypes.id, { onDelete: "cascade" }),
   status: loosePledgeStatusEnum("status").notNull().default("open"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

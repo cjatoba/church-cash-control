@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 
 export interface CreatePledgeTypeState {
   error?: string;
   success?: string;
-  values?: { name: string; installmentValue: string };
+  values?: { name: string; installmentValue: string; isLoose: boolean };
 }
 
 export function PledgeTypeForm({
@@ -15,17 +15,11 @@ export function PledgeTypeForm({
   action: (prevState: CreatePledgeTypeState, formData: FormData) => Promise<CreatePledgeTypeState>;
 }) {
   const [state, formAction] = useActionState<CreatePledgeTypeState, FormData>(action, {});
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (state.success) {
-      formRef.current?.reset();
-    }
-  }, [state.success]);
+  const [isLoose, setIsLoose] = useState(state.values?.isLoose ?? false);
 
   return (
     <form
-      ref={formRef}
+      key={state.success ?? "form"}
       action={formAction}
       className="flex flex-col gap-3 border-t border-black/[.08] pt-4 dark:border-white/[.16]"
     >
@@ -46,18 +40,31 @@ export function PledgeTypeForm({
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        Valor da parcela (R$/mês)
+      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
         <input
-          name="installmentValue"
-          type="number"
-          step="0.01"
-          min="0.01"
-          required
-          defaultValue={state.values?.installmentValue ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          name="isLoose"
+          type="checkbox"
+          checked={isLoose}
+          onChange={(event) => {
+            setIsLoose(event.target.checked);
+          }}
         />
+        Carnê avulso (sem valor fixo — a pessoa arrecada e entrega o quanto conseguir)
       </label>
+      {!isLoose ? (
+        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+          Valor da parcela (R$/mês)
+          <input
+            name="installmentValue"
+            type="number"
+            step="0.01"
+            min="0.01"
+            required
+            defaultValue={state.values?.installmentValue ?? ""}
+            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          />
+        </label>
+      ) : null}
       <SubmitButton pendingLabel="Criando…">Criar tipo de carnê</SubmitButton>
     </form>
   );

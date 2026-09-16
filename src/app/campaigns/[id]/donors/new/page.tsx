@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { createDonor } from "@/server/application/create-donor";
 import { createPledge } from "@/server/application/create-pledge";
+import { createLoosePledge } from "@/server/application/create-loose-pledge";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDonorRepository } from "@/server/infrastructure/db/donor-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
+import { createLoosePledgeRepository } from "@/server/infrastructure/db/loose-pledge-repository";
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
@@ -50,24 +52,31 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
 
     try {
       const db = createDbClient();
+      const pledgeTypeRepository = createPledgeTypeRepository(db);
+      const pledgeTypeId = toStringValue(input.pledgeTypeId);
+      const pledgeType = await pledgeTypeRepository.findById(pledgeTypeId);
+
       const donorRepository = createDonorRepository(db);
       const { id: donorId } = await createDonor(donorRepository, { name: input.name });
 
-      const pledgeTypeRepository = createPledgeTypeRepository(db);
-      const campaignRepository = createCampaignRepository(db);
-      const pledgeRepository = createPledgeRepository(db);
-      await createPledge(
-        {
-          campaignReader: campaignRepository,
-          pledgeTypeReader: pledgeTypeRepository,
-          pledgeRepository,
-        },
-        {
-          campaignId,
-          donorId,
-          pledgeTypeId: input.pledgeTypeId,
-        },
-      );
+      if (pledgeType?.installmentValue) {
+        const campaignRepository = createCampaignRepository(db);
+        const pledgeRepository = createPledgeRepository(db);
+        await createPledge(
+          {
+            campaignReader: campaignRepository,
+            pledgeTypeReader: pledgeTypeRepository,
+            pledgeRepository,
+          },
+          { campaignId, donorId, pledgeTypeId },
+        );
+      } else {
+        const loosePledgeRepository = createLoosePledgeRepository(db);
+        await createLoosePledge(
+          { pledgeTypeReader: pledgeTypeRepository, repository: loosePledgeRepository },
+          { campaignId, donorId, pledgeTypeId },
+        );
+      }
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(
@@ -92,7 +101,7 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
             Nenhum tipo de carnê cadastrado
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Cadastre um tipo de carnê (ex.: valor da parcela) antes de vincular um doador.
+            Cadastre um tipo de carnê (com valor fixo ou avulso) antes de vincular um doador.
           </p>
           <Link
             href={`/campaigns/${campaignId}/pledge-types`}
@@ -112,9 +121,9 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
         pledgeTypes={pledgeTypes.map((pledgeType) => ({
           id: pledgeType.id,
           name: pledgeType.name,
-          installmentValueLabel: currencyFormatter.format(
-            pledgeType.installmentValue.toCents() / 100,
-          ),
+          installmentValueLabel: pledgeType.installmentValue
+            ? currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)
+            : null,
         }))}
         action={create}
       />

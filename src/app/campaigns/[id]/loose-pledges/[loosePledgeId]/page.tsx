@@ -133,7 +133,7 @@ export default async function LoosePledgeDetailPage({
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href={`/campaigns/${campaignId}/loose-pledges`} />
+        <BackLink href={`/campaigns/${campaignId}/donors`} />
         <div className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-2">
             <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
@@ -146,11 +146,11 @@ export default async function LoosePledgeDetailPage({
                   : "shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
               }
             >
-              {closed ? "Encerrado" : "Aberto"}
+              {closed ? "Fechado" : "Em aberto"}
             </span>
           </div>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Carnê avulso · arrecadado{" "}
+            Carnê {loosePledge.pledgeTypeName} (avulso) · arrecadado{" "}
             <span className="font-semibold text-black dark:text-zinc-50">
               {currencyFormatter.format(totalCents / 100)}
             </span>

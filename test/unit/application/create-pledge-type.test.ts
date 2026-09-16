@@ -31,7 +31,7 @@ describe("createPledgeType", () => {
     expect(result.id).toBe("pledge-type-1");
     expect(repository.saved).toHaveLength(1);
     expect(repository.saved[0]?.name).toBe("Bronze");
-    expect(repository.saved[0]?.installmentValue.toCents()).toBe(5000);
+    expect(repository.saved[0]?.installmentValue?.toCents()).toBe(5000);
   });
 
   it("rejeita entrada inválida sem persistir nada", async () => {
