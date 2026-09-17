@@ -573,7 +573,53 @@ CASCADE`) + repositório Drizzle + tela protegida
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Carnê avulso (valor livre, sem parcela fixa)**: hoje o carnê
+  (`Pledge`/`PledgeType`) sempre tem um valor de parcela fixo e gera
+  parcelas mensais automáticas; a doação avulsa (`OneOffDonation`) é uma
+  contribuição pontual sem vínculo com doador cadastrado. Nenhum dos dois
+  cobre o caso de distribuir um carnê a um doador cadastrado sem valor
+  pré-definido, para ele arrecadar com quem quiser e entregar (em uma ou
+  mais vezes) até encerrar — faltava controle de quem está com um carnê
+  desses em aberto. Domínio novo `LoosePledge` (doador + tipo de carnê +
+  status aberto/encerrado) e `LoosePledgeContribution` (valor livre,
+  data, forma de pagamento, recebido por/registrado por, sem vínculo com
+  parcela fixa).
+  - **Decisão revista durante a implementação**: a primeira versão desta
+    fatia criou telas próprias (`/campaigns/[id]/loose-pledges(/new)`)
+    separadas do cadastro de doador — feedback do usuário foi que isso
+    duplicava o cadastro de doador em dois lugares diferentes, confuso no
+    dia a dia. Redesenhado para reaproveitar o mesmo fluxo: `PledgeType`
+    ganha valor de parcela **opcional** (`installmentValueCents` agora
+    aceita `null` no banco) — um tipo de carnê sem valor é um "tipo
+    avulso"; a tela `/campaigns/[id]/pledge-types` ganha uma opção
+    "Carnê avulso (sem valor fixo)" ao criar um tipo. O formulário
+    `/campaigns/[id]/donors/new` continua sendo o único ponto de cadastro
+    de doador+carnê (nenhuma tela nova): ao escolher um tipo avulso, a
+    action cria um `LoosePledge` em vez de um `Pledge`/parcelas
+    automáticas. A tela `/campaigns/[id]/donors` (lista) e a tela de
+    dados do doador passam a mesclar carnês de valor fixo e avulsos numa
+    lista só, com o mesmo selo "Em aberto"/"Fechado". Só a tela de
+    detalhe/registro de contribuições (`/campaigns/[id]/loose-pledges/[id]`)
+    continua separada — mesmo padrão de `/campaigns/[id]/pledges/[pledgeId]`
+    ser uma tela própria para o carnê de valor fixo.
+  - Contribuições entram na soma "Arrecadado" da campanha e no saldo de
+    "Dinheiro em mãos" de quem recebeu, mesma regra já usada por parcela
+    paga/doação avulsa; painel mensal (focado em parcela com vencimento
+    por mês) fica fora do escopo desta fatia.
+  - **A mesma lição de "nunca editar uma migration já aplicada" se
+    repetiu aqui, numa variante nova**: ao redesenhar o modelo (item
+    acima), a migration `0016` (que já tinha rodado com sucesso no
+    preview desta própria PR, antes do redesenho) foi apagada e
+    recriada do zero com conteúdo diferente, na suposição errada de que
+    "a PR ainda não foi mergeada" tornava isso seguro — mas a regra já
+    registrada neste arquivo é sobre a migration já ter **rodado em
+    qualquer ambiente**, preview incluído, não sobre ter sido mergeada.
+    Isso quebrou o próximo deploy de preview (`drizzle-kit migrate`
+    tentando recriar tabela/enum que já existiam). Corrigido restaurando
+    o arquivo `0016` original (idêntico ao já aplicado) e criando uma
+    migration `0017` nova só com o delta real (`ALTER TABLE pledge_types
+ALTER COLUMN installment_value_cents DROP NOT NULL` +
+    `ALTER TABLE loose_pledges ADD COLUMN pledge_type_id ...`).
 
 ## Backlog (próximas fatias, em ordem)
 

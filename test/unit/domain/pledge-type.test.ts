@@ -13,7 +13,7 @@ describe("parsePledgeType", () => {
 
     expect(pledgeType.campaignId).toBe(validInput.campaignId);
     expect(pledgeType.name).toBe("Bronze");
-    expect(pledgeType.installmentValue.toCents()).toBe(5000);
+    expect(pledgeType.installmentValue?.toCents()).toBe(5000);
   });
 
   it("rejeita nome vazio", () => {
@@ -27,5 +27,19 @@ describe("parsePledgeType", () => {
   it("rejeita valor de parcela zero ou negativo", () => {
     expect(() => parsePledgeType({ ...validInput, installmentValue: 0 })).toThrow();
     expect(() => parsePledgeType({ ...validInput, installmentValue: -10 })).toThrow();
+  });
+
+  it("cria um tipo de carnê avulso quando o valor da parcela não é informado", () => {
+    const withoutValue = { campaignId: validInput.campaignId, name: validInput.name };
+
+    const pledgeType = parsePledgeType(withoutValue);
+
+    expect(pledgeType.installmentValue).toBeNull();
+  });
+
+  it("trata valor de parcela vazio como carnê avulso", () => {
+    const pledgeType = parsePledgeType({ ...validInput, installmentValue: "" });
+
+    expect(pledgeType.installmentValue).toBeNull();
   });
 });

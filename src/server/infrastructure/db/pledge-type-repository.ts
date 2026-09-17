@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { PledgeTypeRepository } from "@/server/application/create-pledge-type";
 import type { PledgeTypeReader } from "@/server/application/create-pledge";
+import type { LoosePledgeTypeReader } from "@/server/application/create-loose-pledge";
 import type { PledgeTypeListRepository } from "@/server/application/list-pledge-types";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
@@ -8,7 +9,7 @@ import { pledgeTypes } from "./schema";
 
 export function createPledgeTypeRepository(
   db: DbClient,
-): PledgeTypeRepository & PledgeTypeReader & PledgeTypeListRepository {
+): PledgeTypeRepository & PledgeTypeReader & LoosePledgeTypeReader & PledgeTypeListRepository {
   return {
     async create(pledgeType) {
       const [row] = await db
@@ -16,7 +17,7 @@ export function createPledgeTypeRepository(
         .values({
           campaignId: pledgeType.campaignId,
           name: pledgeType.name,
-          installmentValueCents: pledgeType.installmentValue.toCents(),
+          installmentValueCents: pledgeType.installmentValue?.toCents() ?? null,
         })
         .returning({ id: pledgeTypes.id });
 
@@ -38,7 +39,8 @@ export function createPledgeTypeRepository(
       }
       return {
         campaignId: row.campaignId,
-        installmentValue: Money.fromCents(row.installmentValueCents),
+        installmentValue:
+          row.installmentValueCents === null ? null : Money.fromCents(row.installmentValueCents),
       };
     },
 
@@ -52,7 +54,8 @@ export function createPledgeTypeRepository(
         id: row.id,
         campaignId: row.campaignId,
         name: row.name,
-        installmentValue: Money.fromCents(row.installmentValueCents),
+        installmentValue:
+          row.installmentValueCents === null ? null : Money.fromCents(row.installmentValueCents),
       }));
     },
   };

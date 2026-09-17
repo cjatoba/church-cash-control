@@ -14,7 +14,7 @@ const pledgeTypeId = "33333333-3333-3333-3333-333333333333";
 
 function createDependencies(options?: {
   campaignEndDate?: Date | null;
-  pledgeType?: { campaignId: string; installmentValue: Money } | null;
+  pledgeType?: { campaignId: string; installmentValue: Money | null } | null;
 }) {
   const saved: Pledge[] = [];
   const campaignReader: CampaignPeriodReader = {
@@ -87,6 +87,15 @@ describe("createPledge", () => {
 
   it("rejeita quando a campanha já terminou", async () => {
     const dependencies = createDependencies({ campaignEndDate: new Date("2026-01-31") });
+
+    await expect(createPledge(dependencies, validInput, new Date("2026-03-15"))).rejects.toThrow();
+    expect(dependencies.pledgeRepository.saved).toHaveLength(0);
+  });
+
+  it("rejeita quando o tipo de carnê é avulso (sem valor fixo)", async () => {
+    const dependencies = createDependencies({
+      pledgeType: { campaignId, installmentValue: null },
+    });
 
     await expect(createPledge(dependencies, validInput, new Date("2026-03-15"))).rejects.toThrow();
     expect(dependencies.pledgeRepository.saved).toHaveLength(0);

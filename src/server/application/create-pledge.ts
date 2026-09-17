@@ -6,7 +6,9 @@ export interface CampaignPeriodReader {
 }
 
 export interface PledgeTypeReader {
-  findById(pledgeTypeId: string): Promise<{ campaignId: string; installmentValue: Money } | null>;
+  findById(
+    pledgeTypeId: string,
+  ): Promise<{ campaignId: string; installmentValue: Money | null } | null>;
 }
 
 export interface PledgeRepository {
@@ -29,6 +31,9 @@ export async function createPledge(
   const pledgeType = await dependencies.pledgeTypeReader.findById(data.pledgeTypeId);
   if (pledgeType?.campaignId !== data.campaignId) {
     throw new Error("Tipo de carnê inválido para esta campanha");
+  }
+  if (pledgeType.installmentValue === null) {
+    throw new Error("Este tipo de carnê é avulso — use o cadastro de carnê avulso");
   }
 
   const campaign = await dependencies.campaignReader.findPeriodById(data.campaignId);

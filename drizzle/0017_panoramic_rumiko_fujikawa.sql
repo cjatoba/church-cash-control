@@ -1,0 +1,3 @@
+ALTER TABLE "pledge_types" ALTER COLUMN "installment_value_cents" DROP NOT NULL;--> statement-breakpoint
+ALTER TABLE "loose_pledges" ADD COLUMN "pledge_type_id" uuid NOT NULL;--> statement-breakpoint
+ALTER TABLE "loose_pledges" ADD CONSTRAINT "loose_pledges_pledge_type_id_pledge_types_id_fk" FOREIGN KEY ("pledge_type_id") REFERENCES "public"."pledge_types"("id") ON DELETE cascade ON UPDATE no action;

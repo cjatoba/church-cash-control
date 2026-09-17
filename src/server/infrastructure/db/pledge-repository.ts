@@ -13,6 +13,15 @@ function toPaymentMethod(value: string | null): PaymentMethod | null {
   return value === "pix" || value === "cash" ? value : null;
 }
 
+// Todo Pledge referencia um PledgeType com valor fixo (createPledge rejeita
+// tipos avulsos) — um valor nulo aqui indica inconsistência de dados.
+function requireInstallmentValueCents(value: number | null): number {
+  if (value === null) {
+    throw new Error("Carnê com tipo de carnê avulso — dado inconsistente");
+  }
+  return value;
+}
+
 const receivedByUser = alias(users, "received_by_user");
 const registeredByUser = alias(users, "registered_by_user");
 
@@ -82,7 +91,9 @@ export function createPledgeRepository(
           donorId: row.donorId,
           donorName: row.donorName,
           pledgeTypeName: row.pledgeTypeName,
-          installmentValue: Money.fromCents(row.installmentValueCents),
+          installmentValue: Money.fromCents(
+            requireInstallmentValueCents(row.installmentValueCents),
+          ),
           totalInstallments: counts.total,
           paidInstallments: counts.paid,
         };
@@ -129,7 +140,9 @@ export function createPledgeRepository(
           donorId: row.donorId,
           donorName: row.donorName,
           pledgeTypeName: row.pledgeTypeName,
-          installmentValue: Money.fromCents(row.installmentValueCents),
+          installmentValue: Money.fromCents(
+            requireInstallmentValueCents(row.installmentValueCents),
+          ),
           totalInstallments: counts.total,
           paidInstallments: counts.paid,
           campaignId: row.campaignId,
@@ -176,7 +189,9 @@ export function createPledgeRepository(
         id: pledgeRow.id,
         donorName: pledgeRow.donorName,
         pledgeTypeName: pledgeRow.pledgeTypeName,
-        installmentValue: Money.fromCents(pledgeRow.installmentValueCents),
+        installmentValue: Money.fromCents(
+          requireInstallmentValueCents(pledgeRow.installmentValueCents),
+        ),
         installments: installmentRows
           .map((row) => ({
             id: row.id,

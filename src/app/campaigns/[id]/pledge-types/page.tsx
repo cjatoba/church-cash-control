@@ -39,6 +39,7 @@ export default async function PledgeTypesPage({
       redirect("/");
     }
 
+    const isLoose = formData.get("isLoose") === "on";
     const input = {
       campaignId,
       name: formData.get("name"),
@@ -59,6 +60,7 @@ export default async function PledgeTypesPage({
         values: {
           name: toStringValue(input.name),
           installmentValue: toStringValue(input.installmentValue),
+          isLoose,
         },
       };
     }
@@ -85,7 +87,9 @@ export default async function PledgeTypesPage({
                   {pledgeType.name}
                 </span>
                 <span className="text-sm font-semibold text-black dark:text-zinc-50">
-                  {currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)}/mês
+                  {pledgeType.installmentValue
+                    ? `${currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)}/mês`
+                    : "Avulso (valor livre)"}
                 </span>
               </li>
             ))}

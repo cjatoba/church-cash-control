@@ -8,7 +8,14 @@ import type { CampaignArchiveRepository } from "@/server/application/archive-cam
 import type { CampaignDetailRepository } from "@/server/application/get-campaign";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
-import { campaigns, installments, oneOffDonations, pledges } from "./schema";
+import {
+  campaigns,
+  installments,
+  loosePledgeContributions,
+  loosePledges,
+  oneOffDonations,
+  pledges,
+} from "./schema";
 
 async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
   const installmentRows = await db
@@ -29,8 +36,17 @@ async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
     .from(oneOffDonations)
     .groupBy(oneOffDonations.campaignId);
 
+  const loosePledgeContributionRows = await db
+    .select({
+      campaignId: loosePledges.campaignId,
+      totalCents: sql<number>`coalesce(sum(${loosePledgeContributions.amountCents}), 0)::int`,
+    })
+    .from(loosePledgeContributions)
+    .innerJoin(loosePledges, eq(loosePledgeContributions.loosePledgeId, loosePledges.id))
+    .groupBy(loosePledges.campaignId);
+
   const totals = new Map<string, number>();
-  for (const row of [...installmentRows, ...donationRows]) {
+  for (const row of [...installmentRows, ...donationRows, ...loosePledgeContributionRows]) {
     totals.set(row.campaignId, (totals.get(row.campaignId) ?? 0) + row.totalCents);
   }
   return totals;

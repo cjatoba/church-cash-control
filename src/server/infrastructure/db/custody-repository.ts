@@ -8,7 +8,15 @@ import type { MoneyInHandReader } from "@/server/application/get-money-in-hand";
 import type { CustodyTransferListReader } from "@/server/application/list-custody-transfers";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
-import { custodyTransfers, installments, oneOffDonations, pledges, users } from "./schema";
+import {
+  custodyTransfers,
+  installments,
+  loosePledgeContributions,
+  loosePledges,
+  oneOffDonations,
+  pledges,
+  users,
+} from "./schema";
 
 async function sumReceivedByUser(db: DbClient, campaignId: string): Promise<Map<string, number>> {
   const installmentRows = await db
@@ -30,8 +38,18 @@ async function sumReceivedByUser(db: DbClient, campaignId: string): Promise<Map<
     .where(eq(oneOffDonations.campaignId, campaignId))
     .groupBy(oneOffDonations.receivedByUserId);
 
+  const loosePledgeContributionRows = await db
+    .select({
+      userId: loosePledgeContributions.receivedByUserId,
+      totalCents: sql<number>`coalesce(sum(${loosePledgeContributions.amountCents}), 0)::int`,
+    })
+    .from(loosePledgeContributions)
+    .innerJoin(loosePledges, eq(loosePledgeContributions.loosePledgeId, loosePledges.id))
+    .where(eq(loosePledges.campaignId, campaignId))
+    .groupBy(loosePledgeContributions.receivedByUserId);
+
   const totals = new Map<string, number>();
-  for (const row of [...installmentRows, ...donationRows]) {
+  for (const row of [...installmentRows, ...donationRows, ...loosePledgeContributionRows]) {
     if (!row.userId) {
       continue;
     }
