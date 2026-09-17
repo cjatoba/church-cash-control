@@ -117,8 +117,15 @@
     {
       "idx": 16,
       "version": "7",
-      "when": 1789596250839,
-      "tag": "0016_kind_vivisector",
+      "when": 1789527301662,
+      "tag": "0016_minor_dragon_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789611596777,
+      "tag": "0017_panoramic_rumiko_fujikawa",
       "breakpoints": true
     }
   ]

@@ -606,6 +606,20 @@ CASCADE`) + repositório Drizzle + tela protegida
     "Dinheiro em mãos" de quem recebeu, mesma regra já usada por parcela
     paga/doação avulsa; painel mensal (focado em parcela com vencimento
     por mês) fica fora do escopo desta fatia.
+  - **A mesma lição de "nunca editar uma migration já aplicada" se
+    repetiu aqui, numa variante nova**: ao redesenhar o modelo (item
+    acima), a migration `0016` (que já tinha rodado com sucesso no
+    preview desta própria PR, antes do redesenho) foi apagada e
+    recriada do zero com conteúdo diferente, na suposição errada de que
+    "a PR ainda não foi mergeada" tornava isso seguro — mas a regra já
+    registrada neste arquivo é sobre a migration já ter **rodado em
+    qualquer ambiente**, preview incluído, não sobre ter sido mergeada.
+    Isso quebrou o próximo deploy de preview (`drizzle-kit migrate`
+    tentando recriar tabela/enum que já existiam). Corrigido restaurando
+    o arquivo `0016` original (idêntico ao já aplicado) e criando uma
+    migration `0017` nova só com o delta real (`ALTER TABLE pledge_types
+ALTER COLUMN installment_value_cents DROP NOT NULL` +
+    `ALTER TABLE loose_pledges ADD COLUMN pledge_type_id ...`).
 
 ## Backlog (próximas fatias, em ordem)
 
