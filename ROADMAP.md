@@ -571,9 +571,7 @@ CASCADE`) + repositório Drizzle + tela protegida
     já estava registrada no `ROADMAP.md`; o problema foi não segui-la de
     fato logo depois do merge anterior, não desconhecê-la.
 
-## Em andamento (PRs abertas)
-
-- **Carnê avulso (valor livre, sem parcela fixa)**: hoje o carnê
+- **Carnê avulso (valor livre, sem parcela fixa)** — PR #55: hoje o carnê
   (`Pledge`/`PledgeType`) sempre tem um valor de parcela fixo e gera
   parcelas mensais automáticas; a doação avulsa (`OneOffDonation`) é uma
   contribuição pontual sem vínculo com doador cadastrado. Nenhum dos dois
@@ -620,6 +618,10 @@ CASCADE`) + repositório Drizzle + tela protegida
     migration `0017` nova só com o delta real (`ALTER TABLE pledge_types
 ALTER COLUMN installment_value_cents DROP NOT NULL` +
     `ALTER TABLE loose_pledges ADD COLUMN pledge_type_id ...`).
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
