@@ -1,4 +1,9 @@
-import { generateInstallments, parsePledgeInput, type Pledge } from "../domain/pledge";
+import {
+  generateInstallments,
+  parsePledgeInput,
+  selectFirstInstallments,
+  type Pledge,
+} from "../domain/pledge";
 import type { Money } from "../domain/money";
 
 export interface CampaignPeriodReader {
@@ -55,6 +60,9 @@ export async function createPledge(
     campaignId: data.campaignId,
     donorId: data.donorId,
     pledgeTypeId: data.pledgeTypeId,
-    installments,
+    installments:
+      data.installmentCount === undefined
+        ? installments
+        : selectFirstInstallments(installments, data.installmentCount),
   });
 }
