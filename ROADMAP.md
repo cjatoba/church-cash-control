@@ -619,20 +619,22 @@ CASCADE`) + repositório Drizzle + tela protegida
 ALTER COLUMN installment_value_cents DROP NOT NULL` +
     `ALTER TABLE loose_pledges ADD COLUMN pledge_type_id ...`).
 
+- **Quantidade de parcelas escolhida no cadastro do carnê (valor fixo)**
+  — PR #57: antes, `generateInstallments` sempre gerava parcelas
+  automaticamente do mês atual até o fim da campanha, sem nenhuma
+  escolha — o doador nunca podia se comprometer com menos meses do que o
+  restante da campanha. A tela `/campaigns/[id]/donors/new` (único
+  cadastro de doador+carnê) ganha, só para tipo de carnê com valor fixo,
+  a escolha entre "Até o fim da campanha" (padrão, mesmo comportamento de
+  antes) e "Quantidade customizada" — sempre limitada ao número de meses
+  restantes até o fim da campanha (decisão tomada com o usuário: nunca
+  ultrapassa esse teto, mantendo a regra já existente de que toda parcela
+  pendente fora do período é removida ao editar a campanha). Carnê avulso
+  não é afetado (não tem parcela).
+
 ## Em andamento (PRs abertas)
 
-- **Quantidade de parcelas escolhida no cadastro do carnê (valor fixo)**:
-  hoje `generateInstallments` sempre gera parcelas automaticamente do mês
-  atual até o fim da campanha, sem nenhuma escolha — o doador nunca pode
-  se comprometer com menos meses do que o restante da campanha. A tela
-  `/campaigns/[id]/donors/new` (único cadastro de doador+carnê) ganha,
-  só para tipo de carnê com valor fixo, a escolha entre "Até o fim da
-  campanha" (padrão, mesmo comportamento de hoje) e "Quantidade
-  customizada" — sempre limitada ao número de meses restantes até o fim
-  da campanha (decisão tomada com o usuário: nunca ultrapassa esse teto,
-  mantendo a regra já existente de que toda parcela pendente fora do
-  período é removida ao editar a campanha). Carnê avulso não é afetado
-  (não tem parcela).
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
