@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  countRemainingInstallments,
   generateInstallments,
   isPledgeClosed,
   parsePledgeInput,
+  selectFirstInstallments,
   selectInstallmentsOutsidePeriod,
 } from "@/server/domain/pledge";
 import { Money } from "@/server/domain/money";
@@ -31,6 +33,23 @@ describe("parsePledgeInput", () => {
 
   it("rejeita tipo de carnê vazio", () => {
     expect(() => parsePledgeInput({ ...validInput, pledgeTypeId: "" })).toThrow();
+  });
+
+  it("aceita quantidade de parcelas customizada", () => {
+    const pledgeInput = parsePledgeInput({ ...validInput, installmentCount: 3 });
+
+    expect(pledgeInput.installmentCount).toBe(3);
+  });
+
+  it("trata quantidade de parcelas ausente como indefinida (até o fim da campanha)", () => {
+    const pledgeInput = parsePledgeInput(validInput);
+
+    expect(pledgeInput.installmentCount).toBeUndefined();
+  });
+
+  it("rejeita quantidade de parcelas zero ou negativa", () => {
+    expect(() => parsePledgeInput({ ...validInput, installmentCount: 0 })).toThrow();
+    expect(() => parsePledgeInput({ ...validInput, installmentCount: -1 })).toThrow();
   });
 });
 
@@ -74,6 +93,72 @@ describe("generateInstallments", () => {
     });
 
     expect(installments).toEqual([]);
+  });
+});
+
+describe("countRemainingInstallments", () => {
+  it("conta um mês por cada mês entre o início e o fim da campanha, incluindo os dois", () => {
+    const count = countRemainingInstallments(new Date("2026-03-01"), new Date("2026-06-30"));
+
+    expect(count).toBe(4);
+  });
+
+  it("conta 1 quando início e fim caem no mesmo mês", () => {
+    const count = countRemainingInstallments(new Date("2026-03-15"), new Date("2026-03-20"));
+
+    expect(count).toBe(1);
+  });
+
+  it("conta 0 quando a campanha já terminou antes do início informado", () => {
+    const count = countRemainingInstallments(new Date("2026-07-01"), new Date("2026-06-30"));
+
+    expect(count).toBe(0);
+  });
+
+  it("bate com o total gerado por generateInstallments", () => {
+    const startDate = new Date("2026-03-15");
+    const campaignEndDate = new Date("2026-08-01");
+
+    const count = countRemainingInstallments(startDate, campaignEndDate);
+    const installments = generateInstallments({
+      startDate,
+      campaignEndDate,
+      installmentValue: Money.fromReais(100),
+    });
+
+    expect(count).toBe(installments.length);
+  });
+});
+
+describe("selectFirstInstallments", () => {
+  const installments = generateInstallments({
+    startDate: new Date("2026-03-01"),
+    campaignEndDate: new Date("2026-06-30"),
+    installmentValue: Money.fromReais(100),
+  });
+
+  it("seleciona as N primeiras parcelas geradas", () => {
+    const result = selectFirstInstallments(installments, 2);
+
+    expect(result.map((installment) => installment.dueDate.toISOString())).toEqual([
+      new Date("2026-03-01").toISOString(),
+      new Date("2026-04-01").toISOString(),
+    ]);
+  });
+
+  it("aceita a quantidade máxima (igual ao total gerado)", () => {
+    const result = selectFirstInstallments(installments, installments.length);
+
+    expect(result).toHaveLength(installments.length);
+  });
+
+  it("rejeita quantidade maior que o total gerado (ultrapassaria o fim da campanha)", () => {
+    expect(() => selectFirstInstallments(installments, installments.length + 1)).toThrow();
+  });
+
+  it("rejeita quantidade zero ou negativa", () => {
+    expect(() => selectFirstInstallments(installments, 0)).toThrow();
+    expect(() => selectFirstInstallments(installments, -1)).toThrow();
   });
 });
 

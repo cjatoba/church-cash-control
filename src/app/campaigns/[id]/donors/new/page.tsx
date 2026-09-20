@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { createDonor } from "@/server/application/create-donor";
 import { createPledge } from "@/server/application/create-pledge";
 import { createLoosePledge } from "@/server/application/create-loose-pledge";
+import { getCampaign } from "@/server/application/get-campaign";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
+import { countRemainingInstallments } from "@/server/domain/pledge";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDonorRepository } from "@/server/infrastructure/db/donor-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
@@ -23,6 +25,15 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+function formatMonthLabel(date: Date): string {
+  const label = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1).replace(" de ", "/");
+}
+
 export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id]/donors/new">) {
   const session = await auth();
   if (!session?.user.canReceiveFunds) {
@@ -31,8 +42,18 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
 
   const { id: campaignId } = await params;
   const db = createDbClient();
+  const campaignRepository = createCampaignRepository(db);
   const pledgeTypeRepository = createPledgeTypeRepository(db);
-  const pledgeTypes = await listPledgeTypes(pledgeTypeRepository, campaignId);
+  const [campaign, pledgeTypes] = await Promise.all([
+    getCampaign(campaignRepository, campaignId),
+    listPledgeTypes(pledgeTypeRepository, campaignId),
+  ]);
+
+  if (!campaign) {
+    notFound();
+  }
+
+  const maxInstallmentCount = countRemainingInstallments(new Date(), campaign.endDate);
 
   async function create(
     _prevState: CreateDonorState,
@@ -48,6 +69,8 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
     const input = {
       name: formData.get("name"),
       pledgeTypeId: formData.get("pledgeTypeId"),
+      installmentCountMode: formData.get("installmentCountMode"),
+      installmentCount: formData.get("installmentCount"),
     };
 
     try {
@@ -62,13 +85,19 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
       if (pledgeType?.installmentValue) {
         const campaignRepository = createCampaignRepository(db);
         const pledgeRepository = createPledgeRepository(db);
+        const isCustomCount = input.installmentCountMode === "custom";
         await createPledge(
           {
             campaignReader: campaignRepository,
             pledgeTypeReader: pledgeTypeRepository,
             pledgeRepository,
           },
-          { campaignId, donorId, pledgeTypeId },
+          {
+            campaignId,
+            donorId,
+            pledgeTypeId,
+            installmentCount: isCustomCount ? input.installmentCount : undefined,
+          },
         );
       } else {
         const loosePledgeRepository = createLoosePledgeRepository(db);
@@ -86,6 +115,8 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
         values: {
           name: toStringValue(input.name),
           pledgeTypeId: toStringValue(input.pledgeTypeId),
+          installmentCountMode: toStringValue(input.installmentCountMode) || "full",
+          installmentCount: toStringValue(input.installmentCount),
         },
       };
     }
@@ -125,6 +156,8 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
             ? currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)
             : null,
         }))}
+        maxInstallmentCount={maxInstallmentCount}
+        campaignEndMonthLabel={formatMonthLabel(campaign.endDate)}
         action={create}
       />
     </div>

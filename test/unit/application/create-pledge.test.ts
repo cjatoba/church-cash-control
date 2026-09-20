@@ -100,4 +100,30 @@ describe("createPledge", () => {
     await expect(createPledge(dependencies, validInput, new Date("2026-03-15"))).rejects.toThrow();
     expect(dependencies.pledgeRepository.saved).toHaveLength(0);
   });
+
+  it("gera só a quantidade de parcelas customizada quando informada", async () => {
+    const dependencies = createDependencies();
+
+    await createPledge(
+      dependencies,
+      { ...validInput, installmentCount: 2 },
+      new Date("2026-03-15"),
+    );
+
+    const pledge = dependencies.pledgeRepository.saved[0];
+    expect(pledge?.installments).toHaveLength(2);
+    expect(pledge?.installments.map((installment) => installment.dueDate.toISOString())).toEqual([
+      new Date("2026-03-01").toISOString(),
+      new Date("2026-04-01").toISOString(),
+    ]);
+  });
+
+  it("rejeita quantidade customizada maior que o restante até o fim da campanha", async () => {
+    const dependencies = createDependencies();
+
+    await expect(
+      createPledge(dependencies, { ...validInput, installmentCount: 99 }, new Date("2026-03-15")),
+    ).rejects.toThrow();
+    expect(dependencies.pledgeRepository.saved).toHaveLength(0);
+  });
 });
