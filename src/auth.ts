@@ -4,7 +4,7 @@ import { authConfig } from "./auth.config";
 import { parseCredentials } from "./server/domain/credentials";
 import { verifyPassword } from "./server/infrastructure/auth/password";
 import { createDbClient } from "./server/infrastructure/db/client";
-import { findUserByEmail } from "./server/infrastructure/db/user-repository";
+import { findUserByPhone } from "./server/infrastructure/db/user-repository";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -12,7 +12,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: {},
+        phone: {},
         password: {},
       },
       async authorize(rawCredentials) {
@@ -24,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const db = createDbClient();
-        const user = await findUserByEmail(db, credentials.email);
+        const user = await findUserByPhone(db, credentials.phone);
         if (!user?.active) {
           return null;
         }
@@ -36,7 +36,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         return {
           id: user.id,
-          email: user.email,
+          name: user.name,
+          phone: user.phone,
           mustChangePassword: user.mustChangePassword,
           canManageUsers: user.canManageUsers,
           canManageCampaigns: user.canManageCampaigns,

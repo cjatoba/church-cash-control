@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { inviteUser, type InviteUserRepository } from "@/server/application/invite-user";
 
-function createInMemoryRepository(existingEmails: string[] = []): InviteUserRepository & {
-  created: { email: string; phone?: string; passwordHash: string }[];
+function createInMemoryRepository(existingPhones: string[] = []): InviteUserRepository & {
+  created: { name: string; phone?: string; passwordHash?: string }[];
 } {
-  const created: { email: string; phone?: string; passwordHash: string }[] = [];
+  const created: { name: string; phone?: string; passwordHash?: string }[] = [];
   return {
     created,
-    emailInUse(email) {
-      return Promise.resolve(existingEmails.includes(email));
+    phoneInUse(phone) {
+      return Promise.resolve(existingPhones.includes(phone));
     },
     create(input) {
       created.push(input);
@@ -24,11 +24,11 @@ const dependencies = {
 };
 
 describe("inviteUser", () => {
-  it("cria o usuário com senha temporária gerada e hasheada", async () => {
+  it("cria o usuário com senha temporária gerada e hasheada, e gera link do WhatsApp quando há celular", async () => {
     const repository = createInMemoryRepository();
 
     const result = await inviteUser(repository, dependencies, {
-      email: "Voluntario@Igreja.Exemplo",
+      name: "Maria Souza",
       phone: "(11) 91234-5678",
       canManageUsers: undefined,
       canManageCampaigns: undefined,
@@ -37,7 +37,7 @@ describe("inviteUser", () => {
 
     expect(repository.created).toEqual([
       {
-        email: "voluntario@igreja.exemplo",
+        name: "Maria Souza",
         phone: "11912345678",
         canManageUsers: false,
         canManageCampaigns: false,
@@ -50,24 +50,35 @@ describe("inviteUser", () => {
     expect(decodeURIComponent(result.whatsappLink ?? "")).toContain(dependencies.loginUrl);
   });
 
-  it("não gera link do WhatsApp quando o telefone não é informado", async () => {
+  it("cria voluntário sem celular, sem senha nem link do WhatsApp — sem acesso ao sistema", async () => {
     const repository = createInMemoryRepository();
 
     const result = await inviteUser(repository, dependencies, {
-      email: "voluntario@igreja.exemplo",
-      canManageUsers: "on",
+      name: "João Pereira",
+      canManageUsers: undefined,
       canManageCampaigns: undefined,
       canReceiveFunds: undefined,
     });
 
+    expect(repository.created).toEqual([
+      {
+        name: "João Pereira",
+        canManageUsers: false,
+        canManageCampaigns: false,
+        canReceiveFunds: false,
+      },
+    ]);
+    expect(result.temporaryPassword).toBeUndefined();
     expect(result.whatsappLink).toBeUndefined();
+    expect(result.phone).toBeUndefined();
   });
 
   it("aceita convite sem nenhuma capacidade marcada (acesso de só visualização)", async () => {
     const repository = createInMemoryRepository();
 
     const result = await inviteUser(repository, dependencies, {
-      email: "voluntario@igreja.exemplo",
+      name: "Maria Souza",
+      phone: "11912345678",
       canManageUsers: undefined,
       canManageCampaigns: undefined,
       canReceiveFunds: undefined,
@@ -78,12 +89,13 @@ describe("inviteUser", () => {
     expect(result.canReceiveFunds).toBe(false);
   });
 
-  it("rejeita convite para e-mail já cadastrado sem criar nada", async () => {
-    const repository = createInMemoryRepository(["voluntario@igreja.exemplo"]);
+  it("rejeita convite para celular já cadastrado sem criar nada", async () => {
+    const repository = createInMemoryRepository(["11912345678"]);
 
     await expect(
       inviteUser(repository, dependencies, {
-        email: "voluntario@igreja.exemplo",
+        name: "Maria Souza",
+        phone: "11912345678",
         canManageUsers: "on",
         canManageCampaigns: undefined,
         canReceiveFunds: undefined,

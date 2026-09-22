@@ -177,8 +177,8 @@ export function createPledgeRepository(
           paidAt: installments.paidAt,
           paidAmountCents: installments.paidAmountCents,
           paymentMethod: installments.paymentMethod,
-          receivedByEmail: receivedByUser.email,
-          registeredByEmail: registeredByUser.email,
+          receivedByName: receivedByUser.name,
+          registeredByName: registeredByUser.name,
         })
         .from(installments)
         .leftJoin(receivedByUser, eq(installments.receivedByUserId, receivedByUser.id))
@@ -200,8 +200,8 @@ export function createPledgeRepository(
             paidAt: row.paidAt,
             paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
             paymentMethod: toPaymentMethod(row.paymentMethod),
-            receivedByLabel: row.receivedByEmail,
-            registeredByLabel: row.registeredByEmail,
+            receivedByLabel: row.receivedByName,
+            registeredByLabel: row.registeredByName,
           }))
           .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()),
       };

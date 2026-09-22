@@ -6,17 +6,19 @@ import { users } from "./schema";
 
 export interface UserRecord extends UserCapabilities {
   id: string;
-  email: string;
+  name: string;
+  phone: string;
   passwordHash: string;
   mustChangePassword: boolean;
   active: boolean;
 }
 
-export async function findUserByEmail(db: DbClient, email: string): Promise<UserRecord | null> {
+export async function findUserByPhone(db: DbClient, phone: string): Promise<UserRecord | null> {
   const rows = await db
     .select({
       id: users.id,
-      email: users.email,
+      name: users.name,
+      phone: users.phone,
       passwordHash: users.passwordHash,
       mustChangePassword: users.mustChangePassword,
       canManageUsers: users.canManageUsers,
@@ -25,10 +27,17 @@ export async function findUserByEmail(db: DbClient, email: string): Promise<User
       active: users.active,
     })
     .from(users)
-    .where(eq(users.email, email))
+    .where(eq(users.phone, phone))
     .limit(1);
 
-  return rows[0] ?? null;
+  const row = rows[0];
+  // Quem tem celular sempre tem senha (definidos juntos, no convite ou na
+  // ativação de acesso) — passwordHash nulo aqui seria um estado
+  // inconsistente, tratado como "não encontrado" em vez de quebrar o login.
+  if (!row?.phone || !row.passwordHash) {
+    return null;
+  }
+  return { ...row, phone: row.phone, passwordHash: row.passwordHash };
 }
 
 export async function findPasswordHashById(db: DbClient, userId: string): Promise<string | null> {
@@ -55,7 +64,7 @@ export async function completeUserPasswordChange(
 export function createUserListRepository(db: DbClient): UserListRepository {
   return {
     async findAll() {
-      return db.select({ id: users.id, email: users.email }).from(users);
+      return db.select({ id: users.id, name: users.name }).from(users);
     },
   };
 }

@@ -3,12 +3,12 @@ import { parseInvite } from "../domain/user-invite";
 import type { UserCapabilities } from "../domain/user-capabilities";
 
 export interface InviteUserRepository {
-  emailInUse(email: string): Promise<boolean>;
+  phoneInUse(phone: string): Promise<boolean>;
   create(
     input: {
-      email: string;
+      name: string;
       phone?: string;
-      passwordHash: string;
+      passwordHash?: string;
     } & UserCapabilities,
   ): Promise<{ id: string }>;
 }
@@ -21,9 +21,9 @@ export interface InviteUserDependencies {
 
 export interface InvitedUser extends UserCapabilities {
   id: string;
-  email: string;
+  name: string;
   phone?: string;
-  temporaryPassword: string;
+  temporaryPassword?: string;
   whatsappLink?: string;
 }
 
@@ -34,8 +34,19 @@ export async function inviteUser(
 ): Promise<InvitedUser> {
   const invite = parseInvite(input);
 
-  if (await repository.emailInUse(invite.email)) {
-    throw new Error("E-mail já cadastrado");
+  if (invite.phone && (await repository.phoneInUse(invite.phone))) {
+    throw new Error("Celular já cadastrado");
+  }
+
+  if (!invite.phone) {
+    const { id } = await repository.create(invite);
+    return {
+      id,
+      name: invite.name,
+      canManageUsers: false,
+      canManageCampaigns: false,
+      canReceiveFunds: false,
+    };
   }
 
   const temporaryPassword = dependencies.generateTemporaryPassword();
@@ -44,19 +55,16 @@ export async function inviteUser(
 
   return {
     id,
-    email: invite.email,
+    name: invite.name,
     phone: invite.phone,
     canManageUsers: invite.canManageUsers,
     canManageCampaigns: invite.canManageCampaigns,
     canReceiveFunds: invite.canReceiveFunds,
     temporaryPassword,
-    whatsappLink: invite.phone
-      ? buildTemporaryPasswordWhatsAppLink(
-          invite.phone,
-          invite.email,
-          temporaryPassword,
-          dependencies.loginUrl,
-        )
-      : undefined,
+    whatsappLink: buildTemporaryPasswordWhatsAppLink(
+      invite.phone,
+      temporaryPassword,
+      dependencies.loginUrl,
+    ),
   };
 }

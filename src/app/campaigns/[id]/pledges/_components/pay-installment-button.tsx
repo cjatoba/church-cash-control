@@ -20,7 +20,7 @@ export function PayInstallmentButton({
   monthLabel: string;
   amountLabel: string;
   todayIso: string;
-  users: { id: string; email: string }[];
+  users: { id: string; name: string }[];
   currentUserId: string;
   action: (formData: FormData) => Promise<void>;
 }) {
@@ -82,7 +82,7 @@ export function PayInstallmentButton({
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.id === currentUserId ? `Eu mesmo (${user.email})` : user.email}
+                  {user.id === currentUserId ? `Eu mesmo (${user.name})` : user.name}
                 </option>
               ))}
             </select>

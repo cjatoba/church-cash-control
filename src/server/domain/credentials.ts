@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { passwordSchema } from "./password-policy";
+import { phoneSchema } from "./phone";
 
 const credentialsSchema = z.object({
-  email: z.email().transform((email) => email.toLowerCase()),
+  phone: phoneSchema,
   password: passwordSchema,
 });
 

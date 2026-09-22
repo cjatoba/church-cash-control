@@ -21,7 +21,7 @@ function ReceivedBySelect({
   currentUserId,
   defaultReceivedByUserId,
 }: {
-  users: { id: string; email: string }[];
+  users: { id: string; name: string }[];
   currentUserId: string;
   defaultReceivedByUserId: string;
 }) {
@@ -41,7 +41,7 @@ function ReceivedBySelect({
         >
           {users.map((user) => (
             <option key={user.id} value={user.id}>
-              {user.id === currentUserId ? `Eu mesmo (${user.email})` : user.email}
+              {user.id === currentUserId ? `Eu mesmo (${user.name})` : user.name}
             </option>
           ))}
         </select>
@@ -60,7 +60,7 @@ export function OneOffDonationForm({
   currentUserId,
   action,
 }: {
-  users: { id: string; email: string }[];
+  users: { id: string; name: string }[];
   currentUserId: string;
   action: (
     prevState: CreateOneOffDonationState,

@@ -5,9 +5,9 @@ import { SubmitButton } from "@/app/_components/submit-button";
 
 export interface LoginState {
   error?: string;
-  // Nunca inclui a senha aqui: só o e-mail é preservado em caso de erro,
+  // Nunca inclui a senha aqui: só o celular é preservado em caso de erro,
   // por boa prática de segurança (nunca repopular campo de senha).
-  values?: { email: string };
+  values?: { phone: string };
 }
 
 export function LoginForm({
@@ -35,12 +35,13 @@ export function LoginForm({
       ) : null}
       <input type="hidden" name="redirectTo" value={redirectTo} />
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        Email
+        Celular
         <input
-          name="email"
-          type="email"
+          name="phone"
+          type="tel"
+          placeholder="(11) 91234-5678"
           required
-          defaultValue={state.values?.email ?? ""}
+          defaultValue={state.values?.phone ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />
       </label>

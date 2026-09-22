@@ -44,6 +44,12 @@ export const authConfig = {
       if (user?.id) {
         token.id = user.id;
       }
+      if (typeof user?.name === "string") {
+        token.name = user.name;
+      }
+      if (typeof user?.phone === "string") {
+        token.phone = user.phone;
+      }
       if (typeof user?.mustChangePassword === "boolean") {
         token.mustChangePassword = user.mustChangePassword;
       }
@@ -61,6 +67,12 @@ export const authConfig = {
     session({ session, token }) {
       if (typeof token.id === "string") {
         session.user.id = token.id;
+      }
+      if (typeof token.name === "string") {
+        session.user.name = token.name;
+      }
+      if (typeof token.phone === "string") {
+        session.user.phone = token.phone;
       }
       if (typeof token.mustChangePassword === "boolean") {
         session.user.mustChangePassword = token.mustChangePassword;

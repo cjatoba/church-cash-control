@@ -112,8 +112,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               Trocar senha
             </Link>
           ) : null}
-          {session?.user.email ? (
-            <span className="hidden sm:inline">{session.user.email}</span>
+          {session?.user.name ? (
+            <span className="hidden sm:inline">{session.user.name}</span>
           ) : null}
           <LogoutButton action={logout} />
         </div>
