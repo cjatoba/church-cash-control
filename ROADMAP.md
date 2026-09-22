@@ -634,7 +634,22 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Celular como chave de acesso (substitui e-mail)**: hoje `email` é só
+  um identificador de login sem nenhum uso funcional (o app nunca envia
+  nada por e-mail), enquanto `phone` já tem uso real (link de convite via
+  WhatsApp). `email` é removido do modelo de usuário; `phone` vira
+  obrigatório, único e a chave de login — formato brasileiro (DDD + 8/9
+  dígitos, sem código de país). Decisão tomada com o usuário: corte
+  direto (sem período de transição aceitando os dois). Todo lugar que
+  exibia o e-mail como identificador de "quem" (recebido por, registrado
+  por, cabeçalho do painel, log de atividades) passa a exibir o celular
+  formatado — consequência necessária da remoção do e-mail, não um pedido
+  novo. Como `phone` vira `NOT NULL UNIQUE`, o usuário existente em
+  produção e preview foi migrado manualmente (celular real informado pelo
+  usuário, aplicado direto no banco — nunca commitado em migration, commit
+  ou log, por LGPD); usuários de teste acumulados no preview (sem celular
+  ou com celular duplicado) foram removidos do banco antes da migration,
+  com autorização do usuário.
 
 ## Backlog (próximas fatias, em ordem)
 
