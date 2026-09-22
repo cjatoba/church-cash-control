@@ -28,7 +28,6 @@ export default async function NewUserPage() {
     }
 
     const input = {
-      email: formData.get("email"),
       phone: formData.get("phone"),
       canManageUsers: formData.get("canManageUsers"),
       canManageCampaigns: formData.get("canManageCampaigns"),
@@ -47,7 +46,7 @@ export default async function NewUserPage() {
 
       return {
         result: {
-          email: result.email,
+          phone: result.phone,
           canManageUsers: result.canManageUsers,
           canManageCampaigns: result.canManageCampaigns,
           canReceiveFunds: result.canReceiveFunds,
@@ -62,7 +61,6 @@ export default async function NewUserPage() {
           "Não foi possível convidar o usuário. Confira os dados informados.",
         ),
         values: {
-          email: toStringValue(input.email),
           phone: toStringValue(input.phone),
           canManageUsers: Boolean(input.canManageUsers),
           canManageCampaigns: Boolean(input.canManageCampaigns),

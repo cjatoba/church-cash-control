@@ -4,8 +4,7 @@ import { canRegenerateTemporaryPassword } from "../domain/temporary-password-res
 export interface RegenerateTemporaryPasswordRepository {
   findById(userId: string): Promise<{
     id: string;
-    email: string;
-    phone: string | null;
+    phone: string;
     active: boolean;
   } | null>;
   updatePasswordHash(userId: string, passwordHash: string): Promise<void>;
@@ -18,10 +17,9 @@ export interface RegenerateTemporaryPasswordDependencies {
 }
 
 export interface RegeneratedTemporaryPassword {
-  email: string;
-  phone: string | null;
+  phone: string;
   temporaryPassword: string;
-  whatsappLink?: string;
+  whatsappLink: string;
 }
 
 export async function regenerateTemporaryPassword(
@@ -42,16 +40,12 @@ export async function regenerateTemporaryPassword(
   await repository.updatePasswordHash(userId, passwordHash);
 
   return {
-    email: user.email,
     phone: user.phone,
     temporaryPassword,
-    whatsappLink: user.phone
-      ? buildTemporaryPasswordWhatsAppLink(
-          user.phone,
-          user.email,
-          temporaryPassword,
-          dependencies.loginUrl,
-        )
-      : undefined,
+    whatsappLink: buildTemporaryPasswordWhatsAppLink(
+      user.phone,
+      temporaryPassword,
+      dependencies.loginUrl,
+    ),
   };
 }

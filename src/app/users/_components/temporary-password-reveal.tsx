@@ -11,7 +11,7 @@ export function TemporaryPasswordReveal({
   title: string;
   message: string;
   temporaryPassword: string;
-  whatsappLink?: string;
+  whatsappLink: string;
   backHref: string;
   secondaryAction?: { onClick: () => void; label: string };
 }) {
@@ -34,20 +34,14 @@ export function TemporaryPasswordReveal({
         </span>
       </div>
 
-      {whatsappLink ? (
-        <a
-          href={whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1ebe57]"
-        >
-          Abrir WhatsApp com o convite
-        </a>
-      ) : (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Nenhum celular cadastrado — repasse a senha pelo canal de sua preferência.
-        </p>
-      )}
+      <a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1ebe57]"
+      >
+        Abrir WhatsApp com o convite
+      </a>
 
       <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
         {secondaryAction ? (

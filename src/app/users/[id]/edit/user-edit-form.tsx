@@ -7,7 +7,6 @@ import { BackLink } from "@/app/_components/back-link";
 export interface UserEditState {
   error?: string;
   values?: {
-    email: string;
     phone: string;
     canManageUsers: boolean;
     canManageCampaigns: boolean;
@@ -22,8 +21,7 @@ export function UserEditForm({
 }: {
   action: (prevState: UserEditState, formData: FormData) => Promise<UserEditState>;
   defaultValues: {
-    email: string;
-    phone: string | null;
+    phone: string;
     canManageUsers: boolean;
     canManageCampaigns: boolean;
     canReceiveFunds: boolean;
@@ -32,8 +30,7 @@ export function UserEditForm({
 }) {
   const [state, formAction] = useActionState<UserEditState, FormData>(action, {});
 
-  const email = state.values?.email ?? defaultValues.email;
-  const phone = state.values?.phone ?? defaultValues.phone ?? "";
+  const phone = state.values?.phone ?? defaultValues.phone;
   const canManageUsers = state.values?.canManageUsers ?? defaultValues.canManageUsers;
   const canManageCampaigns = state.values?.canManageCampaigns ?? defaultValues.canManageCampaigns;
   const canReceiveFunds = state.values?.canReceiveFunds ?? defaultValues.canReceiveFunds;
@@ -47,21 +44,12 @@ export function UserEditForm({
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Editar usuário</h1>
       {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        E-mail
-        <input
-          name="email"
-          type="email"
-          required
-          defaultValue={email}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
-        />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        Celular (opcional)
+        Celular
         <input
           name="phone"
           type="tel"
           placeholder="(11) 91234-5678"
+          required
           defaultValue={phone}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />

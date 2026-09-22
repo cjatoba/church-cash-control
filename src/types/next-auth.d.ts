@@ -2,6 +2,7 @@ import type { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
   interface User {
+    phone?: string;
     mustChangePassword?: boolean;
     canManageUsers?: boolean;
     canManageCampaigns?: boolean;
@@ -11,6 +12,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      phone: string;
       mustChangePassword: boolean;
       canManageUsers: boolean;
       canManageCampaigns: boolean;

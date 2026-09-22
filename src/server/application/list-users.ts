@@ -1,6 +1,6 @@
 export interface UserOption {
   id: string;
-  email: string;
+  phone: string;
 }
 
 export interface UserListRepository {

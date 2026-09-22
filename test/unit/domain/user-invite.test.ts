@@ -2,75 +2,41 @@ import { describe, expect, it } from "vitest";
 import { parseInvite } from "@/server/domain/user-invite";
 
 describe("parseInvite", () => {
-  it("normaliza e-mail para minúsculas e telefone para só dígitos", () => {
+  it("normaliza celular para só dígitos", () => {
     const invite = parseInvite({
-      email: "Voluntario@Igreja.Exemplo",
-      phone: "(11) 91234-5678",
+      phone: "(11) 95555-4444",
       canManageUsers: "on",
       canManageCampaigns: undefined,
       canReceiveFunds: "on",
     });
 
     expect(invite).toEqual({
-      email: "voluntario@igreja.exemplo",
-      phone: "11912345678",
+      phone: "11955554444",
       canManageUsers: true,
       canManageCampaigns: false,
       canReceiveFunds: true,
     });
   });
 
-  it("trata telefone em branco (form vazio) como convite sem telefone", () => {
-    const invite = parseInvite({
-      email: "voluntario@igreja.exemplo",
-      phone: "  ",
-      canManageUsers: "on",
-      canManageCampaigns: undefined,
-      canReceiveFunds: undefined,
-    });
-
-    expect(invite.phone).toBeUndefined();
-  });
-
-  it("aceita convite sem telefone", () => {
-    const invite = parseInvite({
-      email: "voluntario@igreja.exemplo",
-      canManageUsers: "on",
-      canManageCampaigns: undefined,
-      canReceiveFunds: undefined,
-    });
-
-    expect(invite).toEqual({
-      email: "voluntario@igreja.exemplo",
-      phone: undefined,
-      canManageUsers: true,
-      canManageCampaigns: false,
-      canReceiveFunds: false,
-    });
-  });
-
   it("aceita convite sem nenhuma capacidade marcada (acesso de só visualização)", () => {
     const invite = parseInvite({
-      email: "voluntario@igreja.exemplo",
+      phone: "11955554444",
       canManageUsers: undefined,
       canManageCampaigns: undefined,
       canReceiveFunds: undefined,
     });
 
     expect(invite).toEqual({
-      email: "voluntario@igreja.exemplo",
-      phone: undefined,
+      phone: "11955554444",
       canManageUsers: false,
       canManageCampaigns: false,
       canReceiveFunds: false,
     });
   });
 
-  it("rejeita telefone com menos de 10 dígitos", () => {
+  it("rejeita convite sem celular", () => {
     expect(() =>
       parseInvite({
-        email: "voluntario@igreja.exemplo",
-        phone: "123456789",
         canManageUsers: undefined,
         canManageCampaigns: undefined,
         canReceiveFunds: undefined,
@@ -78,10 +44,10 @@ describe("parseInvite", () => {
     ).toThrow();
   });
 
-  it("rejeita e-mail inválido", () => {
+  it("rejeita celular com menos de 10 dígitos", () => {
     expect(() =>
       parseInvite({
-        email: "não-é-email",
+        phone: "123456789",
         canManageUsers: undefined,
         canManageCampaigns: undefined,
         canReceiveFunds: undefined,

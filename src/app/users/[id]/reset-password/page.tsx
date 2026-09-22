@@ -48,7 +48,7 @@ export default async function ResetPasswordPage({
 
       return {
         result: {
-          email: result.email,
+          phone: result.phone,
           temporaryPassword: result.temporaryPassword,
           whatsappLink: result.whatsappLink,
         },
@@ -67,7 +67,7 @@ export default async function ResetPasswordPage({
           <BackLink href="/users" />
           <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Usuário desativado</h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {user.email} está desativado — reative o usuário antes de gerar uma nova senha.
+            {user.phone} está desativado — reative o usuário antes de gerar uma nova senha.
           </p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default async function ResetPasswordPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
-      <ResetPasswordForm action={regenerate} email={user.email} />
+      <ResetPasswordForm action={regenerate} phone={user.phone} />
     </div>
   );
 }

@@ -127,6 +127,13 @@
       "when": 1789611596777,
       "tag": "0017_panoramic_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790068002113,
+      "tag": "0018_rare_santa_claus",
+      "breakpoints": true
     }
   ]
 }

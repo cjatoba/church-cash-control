@@ -14,11 +14,10 @@ function createInMemoryRepository(users: ManagedUser[]): ManagedUserListReposito
 }
 
 describe("listManagedUsers", () => {
-  it("retorna os usuários cadastrados com capacidades e telefone", async () => {
+  it("retorna os usuários cadastrados com capacidades e celular", async () => {
     const user: ManagedUser = {
       id: "user-1",
-      email: "admin@igreja.exemplo",
-      phone: null,
+      phone: "11955554444",
       canManageUsers: true,
       canManageCampaigns: true,
       canReceiveFunds: true,

@@ -34,7 +34,6 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
     }
 
     const input = {
-      email: formData.get("email"),
       phone: formData.get("phone"),
       canManageUsers: formData.get("canManageUsers"),
       canManageCampaigns: formData.get("canManageCampaigns"),
@@ -52,7 +51,6 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
           "Não foi possível salvar o usuário. Confira os dados informados.",
         ),
         values: {
-          email: toStringValue(input.email),
           phone: toStringValue(input.phone),
           canManageUsers: Boolean(input.canManageUsers),
           canManageCampaigns: Boolean(input.canManageCampaigns),
@@ -69,7 +67,6 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
       <UserEditForm
         action={update}
         defaultValues={{
-          email: user.email,
           phone: user.phone,
           canManageUsers: user.canManageUsers,
           canManageCampaigns: user.canManageCampaigns,

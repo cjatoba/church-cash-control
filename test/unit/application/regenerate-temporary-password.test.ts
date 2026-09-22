@@ -5,7 +5,7 @@ import {
 } from "@/server/application/regenerate-temporary-password";
 
 function createInMemoryRepository(
-  user: { id: string; email: string; phone: string | null; active: boolean } | null,
+  user: { id: string; phone: string; active: boolean } | null,
 ): RegenerateTemporaryPasswordRepository & { updates: { userId: string; passwordHash: string }[] } {
   const updates: { userId: string; passwordHash: string }[] = [];
   return {
@@ -27,10 +27,9 @@ const dependencies = {
 };
 
 describe("regenerateTemporaryPassword", () => {
-  it("gera e persiste uma nova senha temporária para usuário ativo", async () => {
+  it("gera e persiste uma nova senha temporária para usuário ativo, sempre com link do WhatsApp", async () => {
     const repository = createInMemoryRepository({
       id: "user-1",
-      email: "voluntario@igreja.exemplo",
       phone: "11912345678",
       active: true,
     });
@@ -42,24 +41,10 @@ describe("regenerateTemporaryPassword", () => {
     expect(result.whatsappLink).toContain("https://wa.me/5511912345678?text=");
   });
 
-  it("não gera link do WhatsApp quando o usuário não tem telefone cadastrado", async () => {
-    const repository = createInMemoryRepository({
-      id: "user-1",
-      email: "voluntario@igreja.exemplo",
-      phone: null,
-      active: true,
-    });
-
-    const result = await regenerateTemporaryPassword(repository, dependencies, "user-1");
-
-    expect(result.whatsappLink).toBeUndefined();
-  });
-
   it("gera nova senha temporária mesmo para quem já trocou a senha antes, desde que esteja ativo", async () => {
     const repository = createInMemoryRepository({
       id: "user-1",
-      email: "voluntario@igreja.exemplo",
-      phone: null,
+      phone: "11912345678",
       active: true,
     });
 
@@ -72,8 +57,7 @@ describe("regenerateTemporaryPassword", () => {
   it("rejeita gerar senha temporária para usuário desativado", async () => {
     const repository = createInMemoryRepository({
       id: "user-1",
-      email: "voluntario@igreja.exemplo",
-      phone: null,
+      phone: "11912345678",
       active: false,
     });
 

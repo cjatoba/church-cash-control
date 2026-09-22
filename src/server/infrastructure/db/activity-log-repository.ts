@@ -3,6 +3,7 @@ import type { ActivityLogRepository } from "@/server/application/record-activity
 import type { ActivityLogListRepository } from "@/server/application/list-activity-log";
 import type { ActivityLogAction } from "@/server/domain/activity-log";
 import { Money } from "@/server/domain/money";
+import { formatPhoneLabel } from "@/server/domain/phone";
 import type { DbClient } from "./client";
 import { activityLog, users } from "./schema";
 
@@ -41,7 +42,7 @@ export function createActivityLogRepository(
     async findAll() {
       const rows = await db
         .select({
-          actorLabel: users.email,
+          actorPhone: users.phone,
           action: activityLog.action,
           subjectName: activityLog.subjectName,
           amountCents: activityLog.amountCents,
@@ -53,7 +54,7 @@ export function createActivityLogRepository(
         .limit(ACTIVITY_LOG_LIST_LIMIT);
 
       return rows.map((row) => ({
-        actorLabel: row.actorLabel,
+        actorLabel: formatPhoneLabel(row.actorPhone),
         action: toActivityLogAction(row.action),
         subjectName: row.subjectName,
         amount: row.amountCents === null ? null : Money.fromCents(row.amountCents),

@@ -5,6 +5,7 @@ import type { PledgeListRepository } from "@/server/application/list-pledges";
 import type { PledgeDetailReader } from "@/server/application/get-pledge-detail";
 import type { DonorPledgeListRepository } from "@/server/application/list-donor-pledges";
 import { Money } from "@/server/domain/money";
+import { formatPhoneLabel } from "@/server/domain/phone";
 import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
 import { campaigns, donors, installments, pledges, pledgeTypes, users } from "./schema";
@@ -177,8 +178,8 @@ export function createPledgeRepository(
           paidAt: installments.paidAt,
           paidAmountCents: installments.paidAmountCents,
           paymentMethod: installments.paymentMethod,
-          receivedByEmail: receivedByUser.email,
-          registeredByEmail: registeredByUser.email,
+          receivedByPhone: receivedByUser.phone,
+          registeredByPhone: registeredByUser.phone,
         })
         .from(installments)
         .leftJoin(receivedByUser, eq(installments.receivedByUserId, receivedByUser.id))
@@ -200,8 +201,10 @@ export function createPledgeRepository(
             paidAt: row.paidAt,
             paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
             paymentMethod: toPaymentMethod(row.paymentMethod),
-            receivedByLabel: row.receivedByEmail,
-            registeredByLabel: row.registeredByEmail,
+            receivedByLabel: row.receivedByPhone ? formatPhoneLabel(row.receivedByPhone) : null,
+            registeredByLabel: row.registeredByPhone
+              ? formatPhoneLabel(row.registeredByPhone)
+              : null,
           }))
           .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()),
       };

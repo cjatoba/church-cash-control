@@ -2,8 +2,7 @@ import type { UserCapabilities } from "../domain/user-capabilities";
 
 export interface ManagedUser extends UserCapabilities {
   id: string;
-  email: string;
-  phone: string | null;
+  phone: string;
   mustChangePassword: boolean;
   active: boolean;
 }

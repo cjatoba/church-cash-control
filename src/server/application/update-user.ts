@@ -6,16 +6,12 @@ export interface UpdateUserRepository {
   findUserForEdit(userId: string): Promise<
     | ({
         id: string;
-        email: string;
-        phone: string | null;
+        phone: string;
       } & UserCapabilities)
     | null
   >;
-  emailInUseByAnotherUser(email: string, userId: string): Promise<boolean>;
-  update(
-    userId: string,
-    input: { email: string; phone?: string } & UserCapabilities,
-  ): Promise<void>;
+  phoneInUseByAnotherUser(phone: string, userId: string): Promise<boolean>;
+  update(userId: string, input: { phone: string } & UserCapabilities): Promise<void>;
 }
 
 export async function updateUser(
@@ -32,13 +28,13 @@ export async function updateUser(
   const edit = parseUserEdit(input);
 
   if (
-    edit.email !== current.email &&
-    (await repository.emailInUseByAnotherUser(edit.email, targetUserId))
+    edit.phone !== current.phone &&
+    (await repository.phoneInUseByAnotherUser(edit.phone, targetUserId))
   ) {
-    throw new Error("E-mail já cadastrado");
+    throw new Error("Celular já cadastrado");
   }
 
   const capabilities = resolveCapabilitiesForUpdate(actingUserId, targetUserId, current, edit);
 
-  await repository.update(targetUserId, { email: edit.email, phone: edit.phone, ...capabilities });
+  await repository.update(targetUserId, { phone: edit.phone, ...capabilities });
 }

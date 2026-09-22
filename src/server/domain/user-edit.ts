@@ -1,10 +1,9 @@
 import { z } from "zod";
-import { phoneSchema } from "./user-invite";
+import { phoneSchema } from "./phone";
 import { userCapabilitiesSchema } from "./user-capabilities";
 
 const userEditSchema = z
   .object({
-    email: z.email().transform((email) => email.toLowerCase()),
     phone: phoneSchema,
   })
   .and(userCapabilitiesSchema);

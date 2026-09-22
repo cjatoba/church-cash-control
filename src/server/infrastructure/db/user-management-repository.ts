@@ -4,6 +4,7 @@ import type { InviteUserRepository } from "@/server/application/invite-user";
 import type { ManagedUserListRepository } from "@/server/application/list-managed-users";
 import type { RegenerateTemporaryPasswordRepository } from "@/server/application/regenerate-temporary-password";
 import type { UpdateUserRepository } from "@/server/application/update-user";
+import { formatPhoneLabel } from "@/server/domain/phone";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
@@ -15,11 +16,11 @@ export function createUserManagementRepository(
   UserActiveRepository &
   UpdateUserRepository {
   return {
-    async emailInUse(email) {
+    async phoneInUse(phone) {
       const rows = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.email, email))
+        .where(eq(users.phone, phone))
         .limit(1);
       return rows.length > 0;
     },
@@ -28,7 +29,6 @@ export function createUserManagementRepository(
       const [row] = await db
         .insert(users)
         .values({
-          email: input.email,
           phone: input.phone,
           canManageUsers: input.canManageUsers,
           canManageCampaigns: input.canManageCampaigns,
@@ -44,10 +44,9 @@ export function createUserManagementRepository(
     },
 
     async findAll() {
-      return db
+      const rows = await db
         .select({
           id: users.id,
-          email: users.email,
           phone: users.phone,
           canManageUsers: users.canManageUsers,
           canManageCampaigns: users.canManageCampaigns,
@@ -56,13 +55,14 @@ export function createUserManagementRepository(
           active: users.active,
         })
         .from(users);
+
+      return rows.map((row) => ({ ...row, phone: formatPhoneLabel(row.phone) }));
     },
 
     async findById(userId) {
       const [row] = await db
         .select({
           id: users.id,
-          email: users.email,
           phone: users.phone,
           active: users.active,
         })
@@ -70,7 +70,7 @@ export function createUserManagementRepository(
         .where(eq(users.id, userId))
         .limit(1);
 
-      return row ?? null;
+      return row ? { ...row, phone: formatPhoneLabel(row.phone) } : null;
     },
 
     async updatePasswordHash(userId, passwordHash) {
@@ -91,7 +91,6 @@ export function createUserManagementRepository(
       const [row] = await db
         .select({
           id: users.id,
-          email: users.email,
           phone: users.phone,
           canManageUsers: users.canManageUsers,
           canManageCampaigns: users.canManageCampaigns,
@@ -104,11 +103,11 @@ export function createUserManagementRepository(
       return row ?? null;
     },
 
-    async emailInUseByAnotherUser(email, userId) {
+    async phoneInUseByAnotherUser(phone, userId) {
       const rows = await db
         .select({ id: users.id })
         .from(users)
-        .where(and(eq(users.email, email), ne(users.id, userId)))
+        .where(and(eq(users.phone, phone), ne(users.id, userId)))
         .limit(1);
       return rows.length > 0;
     },
@@ -117,8 +116,7 @@ export function createUserManagementRepository(
       await db
         .update(users)
         .set({
-          email: input.email,
-          phone: input.phone ?? null,
+          phone: input.phone,
           canManageUsers: input.canManageUsers,
           canManageCampaigns: input.canManageCampaigns,
           canReceiveFunds: input.canReceiveFunds,

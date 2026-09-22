@@ -8,18 +8,18 @@ import { TemporaryPasswordReveal } from "../../_components/temporary-password-re
 export interface ResetPasswordState {
   error?: string;
   result?: {
-    email: string;
+    phone: string;
     temporaryPassword: string;
-    whatsappLink?: string;
+    whatsappLink: string;
   };
 }
 
 export function ResetPasswordForm({
   action,
-  email,
+  phone,
 }: {
   action: (prevState: ResetPasswordState, formData: FormData) => Promise<ResetPasswordState>;
-  email: string;
+  phone: string;
 }) {
   const [state, formAction] = useActionState<ResetPasswordState, FormData>(action, {});
 
@@ -27,7 +27,7 @@ export function ResetPasswordForm({
     return (
       <TemporaryPasswordReveal
         title="Nova senha gerada"
-        message={`Uma nova senha temporária foi gerada para ${state.result.email}.`}
+        message={`Uma nova senha temporária foi gerada para ${state.result.phone}.`}
         temporaryPassword={state.result.temporaryPassword}
         whatsappLink={state.result.whatsappLink}
         backHref="/users"
@@ -45,7 +45,7 @@ export function ResetPasswordForm({
         Gerar nova senha temporária
       </h1>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        Isso substitui a senha atual de {email} por uma nova senha temporária — a antiga deixa de
+        Isso substitui a senha atual de {phone} por uma nova senha temporária — a antiga deixa de
         funcionar, e a pessoa vai precisar definir uma senha nova no próximo login.
       </p>
       {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}

@@ -91,10 +91,7 @@ export default async function UsersPage() {
               className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
             >
               <div className="flex flex-col">
-                <span className="font-medium text-black dark:text-zinc-50">{user.email}</span>
-                {user.phone ? (
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">{user.phone}</span>
-                ) : null}
+                <span className="font-medium text-black dark:text-zinc-50">{user.phone}</span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {user.mustChangePassword ? (
@@ -148,7 +145,7 @@ export default async function UsersPage() {
                   key={user.id}
                   className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm text-zinc-500 dark:border-white/[.16] dark:text-zinc-400"
                 >
-                  <span>{user.email}</span>
+                  <span>{user.phone}</span>
                   <form action={reactivate}>
                     <input type="hidden" name="userId" value={user.id} />
                     <SubmitButton pendingLabel="Reativando…" variant="text">

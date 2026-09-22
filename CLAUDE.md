@@ -268,7 +268,7 @@ tabela `users`, sessão JWT — sem tabelas de conta/sessão do adapter):
 - `src/proxy.ts`: Proxy do Next.js (renomeado de `middleware` na v16) que
   protege todas as rotas exceto `/login` e assets, via `NextAuth(authConfig).auth`.
 - Não há tela de cadastro de usuário — o primeiro usuário é criado com
-  `pnpm user:create <email> <senha>` (`scripts/create-user.ts`). Uma feature
+  `pnpm user:create <celular> <senha>` (`scripts/create-user.ts`). Uma feature
   de convite/cadastro fica para quando houver papéis definidos.
 - `token`/`session` do Auth.js são tipados como `Record<string, unknown>`
   internamente; sempre estreite com `typeof x === "..."` antes de atribuir

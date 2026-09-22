@@ -26,12 +26,12 @@ para o estado atual da implementação (o que já existe e o que falta).
 pnpm install
 cp .env.example .env.local   # preencha DATABASE_URL e AUTH_SECRET
 pnpm db:migrate               # cria a tabela de usuários
-pnpm user:create voce@exemplo.com "senha-com-8-ou-mais-caracteres"
+pnpm user:create 11912345678 "senha-com-8-ou-mais-caracteres"
 pnpm dev
 ```
 
 Abra [http://localhost:3000](http://localhost:3000) — a aplicação exige login;
-use o e-mail/senha criados acima.
+use o celular/senha criados acima.
 
 ## Banco de dados (Neon)
 
@@ -55,7 +55,7 @@ use o e-mail/senha criados acima.
 | `pnpm db:generate`                           | Gera migrations Drizzle a partir do schema                 |
 | `pnpm db:migrate`                            | Aplica migrations pendentes no banco configurado           |
 | `pnpm db:studio`                             | Abre o Drizzle Studio para inspecionar o banco             |
-| `pnpm user:create <email> <senha>`           | Cria um usuário para login (não há tela de cadastro ainda) |
+| `pnpm user:create <celular> <senha>`         | Cria um usuário para login (não há tela de cadastro ainda) |
 
 ## Fluxo de contribuição
 

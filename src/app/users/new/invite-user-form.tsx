@@ -20,19 +20,18 @@ function grantedCapabilityLabels(capabilities: {
 export interface InviteUserState {
   error?: string;
   values?: {
-    email: string;
     phone: string;
     canManageUsers: boolean;
     canManageCampaigns: boolean;
     canReceiveFunds: boolean;
   };
   result?: {
-    email: string;
+    phone: string;
     canManageUsers: boolean;
     canManageCampaigns: boolean;
     canReceiveFunds: boolean;
     temporaryPassword: string;
-    whatsappLink?: string;
+    whatsappLink: string;
   };
 }
 
@@ -65,7 +64,7 @@ function InviteUserFormFields({
     return (
       <TemporaryPasswordReveal
         title="Usuário convidado"
-        message={`${state.result.email} foi cadastrado com acesso de ${grantedCapabilityLabels(state.result)}.`}
+        message={`${state.result.phone} foi cadastrado com acesso de ${grantedCapabilityLabels(state.result)}.`}
         temporaryPassword={state.result.temporaryPassword}
         whatsappLink={state.result.whatsappLink}
         backHref="/users"
@@ -82,26 +81,17 @@ function InviteUserFormFields({
       <BackLink href="/users" />
       <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Convidar usuário</h1>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        Uma senha temporária será gerada. Se informar o celular, você também vai poder enviar o
-        convite pelo WhatsApp na próxima tela.
+        Uma senha temporária será gerada e você vai poder enviar o convite pelo WhatsApp na próxima
+        tela.
       </p>
       {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
       <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        E-mail
-        <input
-          name="email"
-          type="email"
-          required
-          defaultValue={state.values?.email ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
-        />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-        Celular (opcional)
+        Celular
         <input
           name="phone"
           type="tel"
           placeholder="(11) 91234-5678"
+          required
           defaultValue={state.values?.phone ?? ""}
           className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
         />

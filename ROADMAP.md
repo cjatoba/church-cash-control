@@ -640,16 +640,37 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   WhatsApp). `email` é removido do modelo de usuário; `phone` vira
   obrigatório, único e a chave de login — formato brasileiro (DDD + 8/9
   dígitos, sem código de país). Decisão tomada com o usuário: corte
-  direto (sem período de transição aceitando os dois). Todo lugar que
-  exibia o e-mail como identificador de "quem" (recebido por, registrado
-  por, cabeçalho do painel, log de atividades) passa a exibir o celular
-  formatado — consequência necessária da remoção do e-mail, não um pedido
-  novo. Como `phone` vira `NOT NULL UNIQUE`, o usuário existente em
-  produção e preview foi migrado manualmente (celular real informado pelo
-  usuário, aplicado direto no banco — nunca commitado em migration, commit
-  ou log, por LGPD); usuários de teste acumulados no preview (sem celular
-  ou com celular duplicado) foram removidos do banco antes da migration,
-  com autorização do usuário.
+  direto (sem período de transição aceitando os dois).
+  - Todo lugar que exibia o e-mail como identificador de "quem" (recebido
+    por, registrado por em parcela/doação avulsa/carnê avulso/repasse,
+    cabeçalho do painel, log de atividades, lista de usuários) passa a
+    exibir o celular formatado (`formatPhoneLabel`, novo domínio
+    `phone.ts`) — consequência necessária da remoção do e-mail, não um
+    pedido novo, então implementada como parte desta mesma fatia.
+  - Como todo usuário passa a ter celular obrigatório, o link de convite
+    por WhatsApp (antes condicional a informar celular) agora é sempre
+    gerado — simplifica `InvitedUser`/`RegeneratedTemporaryPassword`
+    (campo deixa de ser opcional) e remove o texto alternativo "nenhum
+    celular cadastrado" da tela de revelação de senha temporária.
+  - Como `phone` vira `NOT NULL UNIQUE`, o usuário existente em produção
+    e preview foi migrado manualmente (celular real informado pelo
+    usuário, aplicado direto no banco antes da migration — nunca
+    commitado em migration, commit ou log, por LGPD). O banco de preview
+    tinha 8 usuários de teste acumulados de validações anteriores, a
+    maioria sem celular e dois com celular duplicado — quebraria a
+    constraint única; removidos do banco (com autorização do usuário),
+    reatribuindo ao usuário real as 2 referências de parcela/repasse que
+    apontavam para um deles, para não violar FK.
+  - **Lição aprendida durante a implementação**: os testes de domínio
+    (`credentials`, `user-invite`, `user-edit`, `phone`) e de aplicação
+    (`list-managed-users`) foram escritos usando o celular real informado
+    pelo usuário como dado de fixture — só percebido numa varredura final
+    do diff antes do commit, o que teria commitado um dado pessoal real
+    em teste, contra a regra de LGPD do `CLAUDE.md`. Corrigido trocando
+    para um número obviamente fictício em todas as fixtures antes de
+    qualquer commit. Reforça a importância de nunca copiar um dado
+    pessoal real recebido do usuário (mesmo para uso legítimo, como o
+    backfill da migration) direto para dentro de um arquivo versionado.
 
 ## Backlog (próximas fatias, em ordem)
 
