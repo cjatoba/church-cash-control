@@ -15,7 +15,7 @@ function createInMemoryUserListRepository(users: UserOption[]): UserListReposito
 
 describe("listUsers", () => {
   it("retorna os usuários cadastrados", async () => {
-    const user: UserOption = { id: "user-1", phone: "(11) 95555-4444" };
+    const user: UserOption = { id: "user-1", name: "Maria Souza" };
     const repository = createInMemoryUserListRepository([user]);
 
     const result = await listUsers(repository);

@@ -7,9 +7,16 @@ import { users } from "../src/server/infrastructure/db/schema";
 loadEnvConfig(process.cwd());
 
 async function main(): Promise<void> {
-  const [, , phoneArg, passwordArg] = process.argv;
-  if (!phoneArg || !passwordArg) {
-    console.error("Uso: pnpm user:create <celular> <senha>");
+  const [, , phoneArg, nameArg, passwordArg] = process.argv;
+  if (!phoneArg || !nameArg || !passwordArg) {
+    console.error("Uso: pnpm user:create <celular> <nome> <senha>");
+    process.exitCode = 1;
+    return;
+  }
+
+  const name = nameArg.trim();
+  if (!name) {
+    console.error("Nome é obrigatório");
     process.exitCode = 1;
     return;
   }
@@ -19,6 +26,7 @@ async function main(): Promise<void> {
 
   const db = createDbClient();
   await db.insert(users).values({
+    name,
     phone,
     passwordHash,
     canManageUsers: true,

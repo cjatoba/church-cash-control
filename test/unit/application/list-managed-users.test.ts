@@ -14,13 +14,32 @@ function createInMemoryRepository(users: ManagedUser[]): ManagedUserListReposito
 }
 
 describe("listManagedUsers", () => {
-  it("retorna os usuários cadastrados com capacidades e celular", async () => {
+  it("retorna os usuários cadastrados com nome, capacidades e celular", async () => {
     const user: ManagedUser = {
       id: "user-1",
+      name: "Admin",
       phone: "11955554444",
       canManageUsers: true,
       canManageCampaigns: true,
       canReceiveFunds: true,
+      mustChangePassword: false,
+      active: true,
+    };
+    const repository = createInMemoryRepository([user]);
+
+    const result = await listManagedUsers(repository);
+
+    expect(result).toEqual([user]);
+  });
+
+  it("retorna voluntário sem acesso ao sistema (sem celular)", async () => {
+    const user: ManagedUser = {
+      id: "user-2",
+      name: "Voluntário sem acesso",
+      phone: null,
+      canManageUsers: false,
+      canManageCampaigns: false,
+      canReceiveFunds: false,
       mustChangePassword: false,
       active: true,
     };

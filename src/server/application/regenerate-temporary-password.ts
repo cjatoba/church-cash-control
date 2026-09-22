@@ -4,7 +4,8 @@ import { canRegenerateTemporaryPassword } from "../domain/temporary-password-res
 export interface RegenerateTemporaryPasswordRepository {
   findById(userId: string): Promise<{
     id: string;
-    phone: string;
+    name: string;
+    phone: string | null;
     active: boolean;
   } | null>;
   updatePasswordHash(userId: string, passwordHash: string): Promise<void>;
@@ -17,6 +18,7 @@ export interface RegenerateTemporaryPasswordDependencies {
 }
 
 export interface RegeneratedTemporaryPassword {
+  name: string;
   phone: string;
   temporaryPassword: string;
   whatsappLink: string;
@@ -32,7 +34,9 @@ export async function regenerateTemporaryPassword(
     throw new Error("Usuário não encontrado");
   }
   if (!canRegenerateTemporaryPassword(user)) {
-    throw new Error("Usuário desativado; não é possível gerar uma nova senha temporária");
+    throw new Error(
+      "Usuário desativado ou sem acesso ao sistema; não é possível gerar uma nova senha temporária",
+    );
   }
 
   const temporaryPassword = dependencies.generateTemporaryPassword();
@@ -40,6 +44,7 @@ export async function regenerateTemporaryPassword(
   await repository.updatePasswordHash(userId, passwordHash);
 
   return {
+    name: user.name,
     phone: user.phone,
     temporaryPassword,
     whatsappLink: buildTemporaryPasswordWhatsAppLink(

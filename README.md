@@ -26,7 +26,7 @@ para o estado atual da implementação (o que já existe e o que falta).
 pnpm install
 cp .env.example .env.local   # preencha DATABASE_URL e AUTH_SECRET
 pnpm db:migrate               # cria a tabela de usuários
-pnpm user:create 11912345678 "senha-com-8-ou-mais-caracteres"
+pnpm user:create 11912345678 "Nome do usuário" "senha-com-8-ou-mais-caracteres"
 pnpm dev
 ```
 
@@ -44,18 +44,18 @@ use o celular/senha criados acima.
 
 ## Scripts
 
-| Script                                       | Descrição                                                  |
-| -------------------------------------------- | ---------------------------------------------------------- |
-| `pnpm dev`                                   | Sobe o servidor de desenvolvimento                         |
-| `pnpm build`                                 | Build de produção                                          |
-| `pnpm lint`                                  | ESLint                                                     |
-| `pnpm format` / `format:check`               | Prettier (aplica / apenas verifica)                        |
-| `pnpm typecheck`                             | `tsc --noEmit`                                             |
-| `pnpm test` / `test:watch` / `test:coverage` | Vitest (uma vez / watch / com cobertura)                   |
-| `pnpm db:generate`                           | Gera migrations Drizzle a partir do schema                 |
-| `pnpm db:migrate`                            | Aplica migrations pendentes no banco configurado           |
-| `pnpm db:studio`                             | Abre o Drizzle Studio para inspecionar o banco             |
-| `pnpm user:create <celular> <senha>`         | Cria um usuário para login (não há tela de cadastro ainda) |
+| Script                                       | Descrição                                                    |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| `pnpm dev`                                   | Sobe o servidor de desenvolvimento                           |
+| `pnpm build`                                 | Build de produção                                            |
+| `pnpm lint`                                  | ESLint                                                       |
+| `pnpm format` / `format:check`               | Prettier (aplica / apenas verifica)                          |
+| `pnpm typecheck`                             | `tsc --noEmit`                                               |
+| `pnpm test` / `test:watch` / `test:coverage` | Vitest (uma vez / watch / com cobertura)                     |
+| `pnpm db:generate`                           | Gera migrations Drizzle a partir do schema                   |
+| `pnpm db:migrate`                            | Aplica migrations pendentes no banco configurado             |
+| `pnpm db:studio`                             | Abre o Drizzle Studio para inspecionar o banco               |
+| `pnpm user:create <celular> <nome> <senha>`  | Cria o primeiro usuário do sistema (com as três capacidades) |
 
 ## Fluxo de contribuição
 

@@ -634,33 +634,66 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Celular como chave de acesso (substitui e-mail)**: hoje `email` é só
-  um identificador de login sem nenhum uso funcional (o app nunca envia
-  nada por e-mail), enquanto `phone` já tem uso real (link de convite via
-  WhatsApp). `email` é removido do modelo de usuário; `phone` vira
-  obrigatório, único e a chave de login — formato brasileiro (DDD + 8/9
-  dígitos, sem código de país). Decisão tomada com o usuário: corte
-  direto (sem período de transição aceitando os dois).
-  - Todo lugar que exibia o e-mail como identificador de "quem" (recebido
-    por, registrado por em parcela/doação avulsa/carnê avulso/repasse,
-    cabeçalho do painel, log de atividades, lista de usuários) passa a
-    exibir o celular formatado (`formatPhoneLabel`, novo domínio
-    `phone.ts`) — consequência necessária da remoção do e-mail, não um
-    pedido novo, então implementada como parte desta mesma fatia.
-  - Como todo usuário passa a ter celular obrigatório, o link de convite
-    por WhatsApp (antes condicional a informar celular) agora é sempre
-    gerado — simplifica `InvitedUser`/`RegeneratedTemporaryPassword`
-    (campo deixa de ser opcional) e remove o texto alternativo "nenhum
-    celular cadastrado" da tela de revelação de senha temporária.
-  - Como `phone` vira `NOT NULL UNIQUE`, o usuário existente em produção
-    e preview foi migrado manualmente (celular real informado pelo
-    usuário, aplicado direto no banco antes da migration — nunca
-    commitado em migration, commit ou log, por LGPD). O banco de preview
-    tinha 8 usuários de teste acumulados de validações anteriores, a
-    maioria sem celular e dois com celular duplicado — quebraria a
-    constraint única; removidos do banco (com autorização do usuário),
-    reatribuindo ao usuário real as 2 referências de parcela/repasse que
-    apontavam para um deles, para não violar FK.
+- **Celular como chave de acesso (substitui e-mail) + nome obrigatório +
+  voluntário sem acesso ao sistema**: hoje `email` é só um identificador
+  de login sem nenhum uso funcional (o app nunca envia nada por e-mail),
+  enquanto `phone` já tem uso real (link de convite via WhatsApp).
+  `email` é removido do modelo de usuário; `phone` vira a chave de login
+  — formato brasileiro (DDD + 8/9 dígitos, sem código de país). Decisão
+  tomada com o usuário: corte direto (sem período de transição aceitando
+  os dois).
+  - Durante a implementação, surgiu um cenário real não coberto: um
+    voluntário (ex.: pessoa mais idosa) pode precisar aparecer como
+    "Recebido por"/"Registrado por" sem nunca ter acesso ao sistema —
+    inclusive sem ter celular algum. Como `phone` seria o único campo de
+    identificação do usuário, isso tornaria essa pessoa impossível de
+    cadastrar. Decisão tomada com o usuário (aplicada nesta mesma fatia,
+    não adiada para o backlog): usuário ganha um campo `name` (nome,
+    sempre obrigatório) e `phone` volta a ser **opcional** — só quem tem
+    celular consegue logar (capacidades são sempre zeradas sem celular,
+    mesmo que marcadas no formulário; `passwordHash` também fica
+    opcional). `/users/new` ganha um checkbox ("Este voluntário vai
+    acessar o sistema (fazer login)?") que alterna a visibilidade do
+    campo celular e das capacidades. `/users/[id]/edit` permite editar o
+    nome de qualquer usuário; para quem ainda não tem celular, uma seção
+    separada "Ativar acesso ao sistema" (`activateUserAccess`, novo caso
+    de uso) permite dar celular + capacidades depois, gerando senha
+    temporária — o único caminho para adicionar celular a alguém (nunca
+    pelo formulário de edição comum); remover celular de quem já tem
+    continua não permitido (usar "Desativar" em vez disso).
+  - Todo lugar que exibia "quem" fez uma ação (recebido por, registrado
+    por em parcela/doação avulsa/carnê avulso/repasse, cabeçalho do
+    painel, log de atividades, lista de usuários) passa a exibir o
+    **nome** em vez do celular formatado — mais simples que o
+    `formatPhoneLabel` cogitado inicialmente (célula ainda existe, usado
+    só para exibir o próprio celular cadastrado em `/users`).
+  - `/users` lista o nome como identificador primário; usuário sem
+    celular ganha um selo "Sem acesso ao sistema" e não mostra o link
+    "Gerar nova senha" (`canRegenerateTemporaryPassword` passa a checar
+    `active && phone !== null`).
+  - Como todo usuário com celular sempre tem senha (definidos juntos, no
+    convite ou na ativação de acesso), o link de convite por WhatsApp
+    deixa de ser condicional nesse caso — simplifica
+    `InvitedUser`/`RegeneratedTemporaryPassword`.
+  - `pnpm user:create` (script do primeiro usuário) ganha um argumento de
+    nome: `pnpm user:create <celular> <nome> <senha>`.
+  - Como `name` é `NOT NULL` numa tabela já populada (usuário real em
+    produção/preview), a migration usa um valor temporário (`DEFAULT
+''`, removido logo em seguida com `DROP DEFAULT`) em vez de deixar a
+    coluna nula — evita qualquer necessidade de coordenar a ordem entre
+    migration automática e backfill manual, diferente do que foi feito
+    para `phone` (ver item abaixo). O nome real do usuário existente é
+    aplicado depois, via SQL direto (nunca commitado).
+  - Como `phone` vira `UNIQUE` obrigatório para quem loga, o usuário
+    existente em produção e preview foi migrado manualmente (celular
+    real informado pelo usuário, aplicado direto no banco antes da
+    migration — nunca commitado em migration, commit ou log, por LGPD).
+    O banco de preview tinha 8 usuários de teste acumulados de
+    validações anteriores, a maioria sem celular e dois com celular
+    duplicado — quebraria a constraint única; removidos do banco (com
+    autorização do usuário), reatribuindo ao usuário real as 2
+    referências de parcela/repasse que apontavam para um deles, para não
+    violar FK.
   - **Lição aprendida durante a implementação**: os testes de domínio
     (`credentials`, `user-invite`, `user-edit`, `phone`) e de aplicação
     (`list-managed-users`) foram escritos usando o celular real informado

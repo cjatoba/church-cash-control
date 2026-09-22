@@ -5,6 +5,7 @@ import { deactivateUser, reactivateUser } from "@/server/application/deactivate-
 import { listManagedUsers, type ManagedUser } from "@/server/application/list-managed-users";
 import { createUserManagementRepository } from "@/server/infrastructure/db/user-management-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { formatPhoneLabel } from "@/server/domain/phone";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { BackLink } from "@/app/_components/back-link";
 import { ArrowPathIcon, PencilIcon, TrashIcon } from "@/app/_components/icons";
@@ -91,20 +92,32 @@ export default async function UsersPage() {
               className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
             >
               <div className="flex flex-col">
-                <span className="font-medium text-black dark:text-zinc-50">{user.phone}</span>
+                <span className="font-medium text-black dark:text-zinc-50">{user.name}</span>
+                {user.phone ? (
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {formatPhoneLabel(user.phone)}
+                  </span>
+                ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                {user.phone === null ? (
+                  <span className="rounded-full border border-black/[.14] px-2.5 py-1 text-[11px] font-medium text-zinc-600 dark:border-white/[.22] dark:text-zinc-400">
+                    Sem acesso ao sistema
+                  </span>
+                ) : null}
                 {user.mustChangePassword ? (
                   <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
                     Troca pendente
                   </span>
                 ) : null}
-                <Link
-                  href={`/users/${user.id}/reset-password`}
-                  className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-                >
-                  Gerar nova senha
-                </Link>
+                {user.phone !== null ? (
+                  <Link
+                    href={`/users/${user.id}/reset-password`}
+                    className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                  >
+                    Gerar nova senha
+                  </Link>
+                ) : null}
                 {capabilityLabels(user).map((label) => (
                   <span
                     key={label}
@@ -145,7 +158,7 @@ export default async function UsersPage() {
                   key={user.id}
                   className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm text-zinc-500 dark:border-white/[.16] dark:text-zinc-400"
                 >
-                  <span>{user.phone}</span>
+                  <span>{user.name}</span>
                   <form action={reactivate}>
                     <input type="hidden" name="userId" value={user.id} />
                     <SubmitButton pendingLabel="Reativando…" variant="text">

@@ -14,7 +14,7 @@ export function AddContributionButton({
   todayIso,
   action,
 }: {
-  users: { id: string; phone: string }[];
+  users: { id: string; name: string }[];
   currentUserId: string;
   todayIso: string;
   action: (prevState: AddContributionState, formData: FormData) => Promise<AddContributionState>;
@@ -93,7 +93,7 @@ export function AddContributionButton({
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.id === currentUserId ? `Eu mesmo (${user.phone})` : user.phone}
+                  {user.id === currentUserId ? `Eu mesmo (${user.name})` : user.name}
                 </option>
               ))}
             </select>

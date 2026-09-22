@@ -6,12 +6,13 @@ export interface UpdateUserRepository {
   findUserForEdit(userId: string): Promise<
     | ({
         id: string;
-        phone: string;
+        name: string;
+        phone: string | null;
       } & UserCapabilities)
     | null
   >;
   phoneInUseByAnotherUser(phone: string, userId: string): Promise<boolean>;
-  update(userId: string, input: { phone: string } & UserCapabilities): Promise<void>;
+  update(userId: string, input: { name: string; phone?: string } & UserCapabilities): Promise<void>;
 }
 
 export async function updateUser(
@@ -27,7 +28,16 @@ export async function updateUser(
 
   const edit = parseUserEdit(input);
 
+  if (current.phone && !edit.phone) {
+    throw new Error(
+      "Não é possível remover o acesso ao sistema por aqui — desative o usuário em vez disso",
+    );
+  }
+  if (!current.phone && edit.phone) {
+    throw new Error("Use a ativação de acesso para dar celular a um usuário que ainda não tem");
+  }
   if (
+    edit.phone &&
     edit.phone !== current.phone &&
     (await repository.phoneInUseByAnotherUser(edit.phone, targetUserId))
   ) {
@@ -36,5 +46,5 @@ export async function updateUser(
 
   const capabilities = resolveCapabilitiesForUpdate(actingUserId, targetUserId, current, edit);
 
-  await repository.update(targetUserId, { phone: edit.phone, ...capabilities });
+  await repository.update(targetUserId, { name: edit.name, phone: edit.phone, ...capabilities });
 }

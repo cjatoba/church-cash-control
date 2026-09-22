@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatPhoneLabel, phoneSchema } from "@/server/domain/phone";
+import { formatPhoneLabel, optionalPhoneSchema, phoneSchema } from "@/server/domain/phone";
 
 describe("phoneSchema", () => {
   it("aceita celular formatado e normaliza para só dígitos", () => {
@@ -15,11 +15,29 @@ describe("phoneSchema", () => {
   });
 
   it("rejeita telefone com código de país (mais de 11 dígitos)", () => {
-    expect(() => phoneSchema.parse("+55 13 98815-7820")).toThrow();
+    expect(() => phoneSchema.parse("+55 11 95555-4444")).toThrow();
   });
 
   it("rejeita string vazia", () => {
     expect(() => phoneSchema.parse("")).toThrow();
+  });
+});
+
+describe("optionalPhoneSchema", () => {
+  it("aceita ausência de celular como indefinido (voluntário sem acesso ao sistema)", () => {
+    expect(optionalPhoneSchema.parse(undefined)).toBeUndefined();
+  });
+
+  it("trata celular em branco (form vazio) como indefinido", () => {
+    expect(optionalPhoneSchema.parse("  ")).toBeUndefined();
+  });
+
+  it("valida e normaliza celular quando informado", () => {
+    expect(optionalPhoneSchema.parse("(11) 95555-4444")).toBe("11955554444");
+  });
+
+  it("rejeita celular inválido quando informado", () => {
+    expect(() => optionalPhoneSchema.parse("123456789")).toThrow();
   });
 });
 

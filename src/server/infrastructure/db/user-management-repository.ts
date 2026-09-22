@@ -1,16 +1,17 @@
 import { and, eq, ne } from "drizzle-orm";
+import type { ActivateUserAccessRepository } from "@/server/application/activate-user-access";
 import type { UserActiveRepository } from "@/server/application/deactivate-user";
 import type { InviteUserRepository } from "@/server/application/invite-user";
 import type { ManagedUserListRepository } from "@/server/application/list-managed-users";
 import type { RegenerateTemporaryPasswordRepository } from "@/server/application/regenerate-temporary-password";
 import type { UpdateUserRepository } from "@/server/application/update-user";
-import { formatPhoneLabel } from "@/server/domain/phone";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
 export function createUserManagementRepository(
   db: DbClient,
-): InviteUserRepository &
+): ActivateUserAccessRepository &
+  InviteUserRepository &
   ManagedUserListRepository &
   RegenerateTemporaryPasswordRepository &
   UserActiveRepository &
@@ -29,6 +30,7 @@ export function createUserManagementRepository(
       const [row] = await db
         .insert(users)
         .values({
+          name: input.name,
           phone: input.phone,
           canManageUsers: input.canManageUsers,
           canManageCampaigns: input.canManageCampaigns,
@@ -47,6 +49,7 @@ export function createUserManagementRepository(
       const rows = await db
         .select({
           id: users.id,
+          name: users.name,
           phone: users.phone,
           canManageUsers: users.canManageUsers,
           canManageCampaigns: users.canManageCampaigns,
@@ -56,13 +59,14 @@ export function createUserManagementRepository(
         })
         .from(users);
 
-      return rows.map((row) => ({ ...row, phone: formatPhoneLabel(row.phone) }));
+      return rows;
     },
 
     async findById(userId) {
       const [row] = await db
         .select({
           id: users.id,
+          name: users.name,
           phone: users.phone,
           active: users.active,
         })
@@ -70,7 +74,7 @@ export function createUserManagementRepository(
         .where(eq(users.id, userId))
         .limit(1);
 
-      return row ? { ...row, phone: formatPhoneLabel(row.phone) } : null;
+      return row ?? null;
     },
 
     async updatePasswordHash(userId, passwordHash) {
@@ -91,6 +95,7 @@ export function createUserManagementRepository(
       const [row] = await db
         .select({
           id: users.id,
+          name: users.name,
           phone: users.phone,
           canManageUsers: users.canManageUsers,
           canManageCampaigns: users.canManageCampaigns,
@@ -116,7 +121,21 @@ export function createUserManagementRepository(
       await db
         .update(users)
         .set({
+          name: input.name,
           phone: input.phone,
+          canManageUsers: input.canManageUsers,
+          canManageCampaigns: input.canManageCampaigns,
+          canReceiveFunds: input.canReceiveFunds,
+        })
+        .where(eq(users.id, userId));
+    },
+
+    async activate(userId, input) {
+      await db
+        .update(users)
+        .set({
+          phone: input.phone,
+          passwordHash: input.passwordHash,
           canManageUsers: input.canManageUsers,
           canManageCampaigns: input.canManageCampaigns,
           canReceiveFunds: input.canReceiveFunds,

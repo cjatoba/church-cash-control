@@ -7,7 +7,6 @@ import type { LoosePledgeListRepository } from "@/server/application/list-loose-
 import type { LoosePledgeDetailReader } from "@/server/application/get-loose-pledge-detail";
 import type { DonorLoosePledgeListRepository } from "@/server/application/list-donor-loose-pledges";
 import { Money } from "@/server/domain/money";
-import { formatPhoneLabel } from "@/server/domain/phone";
 import type { DbClient } from "./client";
 import {
   campaigns,
@@ -157,8 +156,8 @@ export function createLoosePledgeRepository(
           amountCents: loosePledgeContributions.amountCents,
           date: loosePledgeContributions.date,
           paymentMethod: loosePledgeContributions.paymentMethod,
-          receivedByPhone: receivedByUser.phone,
-          registeredByPhone: registeredByUser.phone,
+          receivedByName: receivedByUser.name,
+          registeredByName: registeredByUser.name,
         })
         .from(loosePledgeContributions)
         .innerJoin(receivedByUser, eq(loosePledgeContributions.receivedByUserId, receivedByUser.id))
@@ -179,8 +178,8 @@ export function createLoosePledgeRepository(
             amount: Money.fromCents(row.amountCents),
             date: row.date,
             paymentMethod: row.paymentMethod,
-            receivedByLabel: formatPhoneLabel(row.receivedByPhone),
-            registeredByLabel: formatPhoneLabel(row.registeredByPhone),
+            receivedByLabel: row.receivedByName,
+            registeredByLabel: row.registeredByName,
           }))
           .sort((a, b) => b.date.getTime() - a.date.getTime()),
       };

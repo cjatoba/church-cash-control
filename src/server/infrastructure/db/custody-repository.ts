@@ -7,7 +7,6 @@ import type {
 import type { MoneyInHandReader } from "@/server/application/get-money-in-hand";
 import type { CustodyTransferListReader } from "@/server/application/list-custody-transfers";
 import { Money } from "@/server/domain/money";
-import { formatPhoneLabel } from "@/server/domain/phone";
 import type { DbClient } from "./client";
 import {
   custodyTransfers,
@@ -122,14 +121,14 @@ export function createCustodyRepository(
 
     async getTotalsByCampaign(campaignId) {
       const [allUsers, received, transferred] = await Promise.all([
-        db.select({ id: users.id, phone: users.phone }).from(users),
+        db.select({ id: users.id, name: users.name }).from(users),
         sumReceivedByUser(db, campaignId),
         sumTransferredByUser(db, campaignId),
       ]);
 
       return allUsers.map((user) => ({
         userId: user.id,
-        userLabel: formatPhoneLabel(user.phone),
+        userLabel: user.name,
         receivedCents: received.get(user.id) ?? 0,
         transferredCents: transferred.get(user.id) ?? 0,
       }));
@@ -142,8 +141,8 @@ export function createCustodyRepository(
           recipientName: custodyTransfers.recipientName,
           amountCents: custodyTransfers.amountCents,
           transferDate: custodyTransfers.transferDate,
-          fromUserPhone: fromUser.phone,
-          registeredByUserPhone: registeredByUser.phone,
+          fromUserName: fromUser.name,
+          registeredByUserName: registeredByUser.name,
         })
         .from(custodyTransfers)
         .innerJoin(fromUser, eq(custodyTransfers.fromUserId, fromUser.id))
@@ -153,11 +152,11 @@ export function createCustodyRepository(
       return rows
         .map((row) => ({
           id: row.id,
-          fromUserLabel: formatPhoneLabel(row.fromUserPhone),
+          fromUserLabel: row.fromUserName,
           recipientName: row.recipientName,
           amount: Money.fromCents(row.amountCents),
           transferDate: row.transferDate,
-          registeredByUserLabel: formatPhoneLabel(row.registeredByUserPhone),
+          registeredByUserLabel: row.registeredByUserName,
         }))
         .sort((a, b) => b.transferDate.getTime() - a.transferDate.getTime());
     },

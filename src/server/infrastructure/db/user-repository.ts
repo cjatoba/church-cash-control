@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
 import type { UserListRepository } from "@/server/application/list-users";
 import type { UserCapabilities } from "@/server/domain/user-capabilities";
-import { formatPhoneLabel } from "@/server/domain/phone";
 import type { DbClient } from "./client";
 import { users } from "./schema";
 
 export interface UserRecord extends UserCapabilities {
   id: string;
+  name: string;
   phone: string;
   passwordHash: string;
   mustChangePassword: boolean;
@@ -17,6 +17,7 @@ export async function findUserByPhone(db: DbClient, phone: string): Promise<User
   const rows = await db
     .select({
       id: users.id,
+      name: users.name,
       phone: users.phone,
       passwordHash: users.passwordHash,
       mustChangePassword: users.mustChangePassword,
@@ -29,7 +30,14 @@ export async function findUserByPhone(db: DbClient, phone: string): Promise<User
     .where(eq(users.phone, phone))
     .limit(1);
 
-  return rows[0] ?? null;
+  const row = rows[0];
+  // Quem tem celular sempre tem senha (definidos juntos, no convite ou na
+  // ativação de acesso) — passwordHash nulo aqui seria um estado
+  // inconsistente, tratado como "não encontrado" em vez de quebrar o login.
+  if (!row?.phone || !row.passwordHash) {
+    return null;
+  }
+  return { ...row, phone: row.phone, passwordHash: row.passwordHash };
 }
 
 export async function findPasswordHashById(db: DbClient, userId: string): Promise<string | null> {
@@ -56,8 +64,7 @@ export async function completeUserPasswordChange(
 export function createUserListRepository(db: DbClient): UserListRepository {
   return {
     async findAll() {
-      const rows = await db.select({ id: users.id, phone: users.phone }).from(users);
-      return rows.map((row) => ({ id: row.id, phone: formatPhoneLabel(row.phone) }));
+      return db.select({ id: users.id, name: users.name }).from(users);
     },
   };
 }

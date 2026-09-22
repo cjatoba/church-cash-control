@@ -9,7 +9,7 @@ import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { InviteUserForm, type InviteUserState } from "./invite-user-form";
 
-function toStringValue(value: FormDataEntryValue | null): string {
+function toStringValue(value: FormDataEntryValue | null | undefined): string {
   return typeof value === "string" ? value : "";
 }
 
@@ -27,8 +27,10 @@ export default async function NewUserPage() {
       redirect("/");
     }
 
+    const hasAccess = formData.get("hasAccess") != null;
     const input = {
-      phone: formData.get("phone"),
+      name: formData.get("name"),
+      phone: hasAccess ? formData.get("phone") : undefined,
       canManageUsers: formData.get("canManageUsers"),
       canManageCampaigns: formData.get("canManageCampaigns"),
       canReceiveFunds: formData.get("canReceiveFunds"),
@@ -46,6 +48,7 @@ export default async function NewUserPage() {
 
       return {
         result: {
+          name: result.name,
           phone: result.phone,
           canManageUsers: result.canManageUsers,
           canManageCampaigns: result.canManageCampaigns,
@@ -61,6 +64,8 @@ export default async function NewUserPage() {
           "Não foi possível convidar o usuário. Confira os dados informados.",
         ),
         values: {
+          name: toStringValue(input.name),
+          hasAccess,
           phone: toStringValue(input.phone),
           canManageUsers: Boolean(input.canManageUsers),
           canManageCampaigns: Boolean(input.canManageCampaigns),

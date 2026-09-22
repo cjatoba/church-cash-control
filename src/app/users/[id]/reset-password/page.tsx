@@ -48,7 +48,7 @@ export default async function ResetPasswordPage({
 
       return {
         result: {
-          phone: result.phone,
+          name: result.name,
           temporaryPassword: result.temporaryPassword,
           whatsappLink: result.whatsappLink,
         },
@@ -61,14 +61,17 @@ export default async function ResetPasswordPage({
   }
 
   if (!canRegenerateTemporaryPassword(user)) {
+    const reason = user.active
+      ? `${user.name} não tem acesso ao sistema (sem celular cadastrado) — ative o acesso antes de gerar uma nova senha.`
+      : `${user.name} está desativado — reative o usuário antes de gerar uma nova senha.`;
     return (
       <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
         <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
           <BackLink href="/users" />
-          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Usuário desativado</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {user.phone} está desativado — reative o usuário antes de gerar uma nova senha.
-          </p>
+          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
+            Não é possível gerar senha
+          </h1>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">{reason}</p>
         </div>
       </div>
     );
@@ -76,7 +79,7 @@ export default async function ResetPasswordPage({
 
   return (
     <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
-      <ResetPasswordForm action={regenerate} phone={user.phone} />
+      <ResetPasswordForm action={regenerate} name={user.name} />
     </div>
   );
 }

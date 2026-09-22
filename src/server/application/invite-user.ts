@@ -6,8 +6,9 @@ export interface InviteUserRepository {
   phoneInUse(phone: string): Promise<boolean>;
   create(
     input: {
-      phone: string;
-      passwordHash: string;
+      name: string;
+      phone?: string;
+      passwordHash?: string;
     } & UserCapabilities,
   ): Promise<{ id: string }>;
 }
@@ -20,9 +21,10 @@ export interface InviteUserDependencies {
 
 export interface InvitedUser extends UserCapabilities {
   id: string;
-  phone: string;
-  temporaryPassword: string;
-  whatsappLink: string;
+  name: string;
+  phone?: string;
+  temporaryPassword?: string;
+  whatsappLink?: string;
 }
 
 export async function inviteUser(
@@ -32,8 +34,19 @@ export async function inviteUser(
 ): Promise<InvitedUser> {
   const invite = parseInvite(input);
 
-  if (await repository.phoneInUse(invite.phone)) {
+  if (invite.phone && (await repository.phoneInUse(invite.phone))) {
     throw new Error("Celular já cadastrado");
+  }
+
+  if (!invite.phone) {
+    const { id } = await repository.create(invite);
+    return {
+      id,
+      name: invite.name,
+      canManageUsers: false,
+      canManageCampaigns: false,
+      canReceiveFunds: false,
+    };
   }
 
   const temporaryPassword = dependencies.generateTemporaryPassword();
@@ -42,6 +55,7 @@ export async function inviteUser(
 
   return {
     id,
+    name: invite.name,
     phone: invite.phone,
     canManageUsers: invite.canManageUsers,
     canManageCampaigns: invite.canManageCampaigns,
