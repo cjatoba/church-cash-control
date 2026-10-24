@@ -742,7 +742,14 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Instalar o app no celular (PWA)**: permitir salvar o app na tela
+  inicial do celular, com ícone próprio e abrindo em tela cheia, sem a
+  barra do navegador — sem loja de aplicativos. Manifesto do app
+  (`src/app/manifest.ts`, suporte nativo do Next.js) + ícones nos
+  tamanhos exigidos por Android/iPhone + item "Instalar no celular" no
+  menu com o passo a passo (no iPhone a instalação é só manual, pelo
+  Safari). Funcionar sem internet fica fora do escopo (o app depende do
+  banco para tudo).
 
 ## Backlog (próximas fatias, em ordem)
 
