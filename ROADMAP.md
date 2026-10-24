@@ -801,8 +801,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     trocando os radios por botões (`aria-pressed`) com o valor em campos
     ocultos ligados ao estado. Campos de texto não tinham o problema.
 
-## Em andamento (PRs abertas)
-
 - **Tutorial de primeiro acesso + Ajuda** — PR #68: hoje quem entra
   no app pela primeira vez não tem nenhuma orientação de como ele
   funciona, nem onde consultar depois. Mockup aprovado pelo usuário:
@@ -826,6 +824,15 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   - Regra nova no `CLAUDE.md` ("Ajuda, tutorial e documentação: revisar a
     cada ajuste"): todo ajuste no app revisa, na mesma PR, os textos da
     Ajuda/tutorial e a documentação do repositório.
+  - Decisão registrada com o usuário depois da validação: a Ajuda fica
+    só em texto, sem imagens das telas — cada imagem teria que ser
+    refeita a cada ajuste de tela (e nos modos claro e escuro), pesaria
+    no celular e precisaria de dados fictícios por causa da LGPD. O botão
+    de atalho de cada tópico, que leva direto à tela, cumpre esse papel.
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
