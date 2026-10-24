@@ -740,8 +740,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   - Lacuna corrigida junto: o `body` forçava `Arial`, então a fonte
     Geist carregada no layout nunca era usada de fato.
 
-## Em andamento (PRs abertas)
-
 - **Instalar o app no celular (PWA)** — PR #63: permitir salvar o app na tela
   inicial do celular, com ícone próprio e abrindo em tela cheia, sem a
   barra do navegador — sem loja de aplicativos. Manifesto do app
@@ -762,6 +760,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     `manifest.webmanifest`, `icon.svg`, `apple-icon.png` e `icons/`
     (efeito colateral positivo: o ícone da aba deixa de falhar na tela
     de login).
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
