@@ -206,7 +206,7 @@ export const helpTopics: HelpTopic[] = [
       'Toque no botão de menu e depois em "Voluntários e acessos".',
       'Toque em "Cadastrar voluntário" e informe o nome.',
       "Se a pessoa for usar o app, marque a opção de acesso, informe o celular e o que ela pode fazer.",
-      "Envie a senha temporária pelo WhatsApp. No primeiro acesso, a pessoa define a própria senha.",
+      'Toque em "Enviar pelo WhatsApp" e envie a mensagem pronta, que já leva o link, o celular e a senha temporária. No primeiro acesso, a pessoa cria a própria senha.',
     ],
     tip: 'Quem não usa o app (sem celular, por exemplo) pode ser cadastrado só com o nome, para aparecer em "Recebido por".',
     action: { href: "/users", label: "Ver voluntários" },

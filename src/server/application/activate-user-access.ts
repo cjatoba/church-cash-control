@@ -1,4 +1,4 @@
-import { buildTemporaryPasswordWhatsAppLink } from "../domain/invite-message";
+import { buildAccessWhatsAppLink } from "../domain/invite-message";
 import { parseUserActivation } from "../domain/user-activation";
 import type { UserCapabilities } from "../domain/user-capabilities";
 
@@ -22,6 +22,7 @@ export interface ActivateUserAccessDependencies {
   generateTemporaryPassword: () => string;
   hashPassword: (password: string) => Promise<string>;
   loginUrl: string;
+  appName: string;
 }
 
 export interface ActivatedUserAccess {
@@ -56,10 +57,13 @@ export async function activateUserAccess(
   return {
     phone: activation.phone,
     temporaryPassword,
-    whatsappLink: buildTemporaryPasswordWhatsAppLink(
-      activation.phone,
-      temporaryPassword,
-      dependencies.loginUrl,
-    ),
+    whatsappLink: buildAccessWhatsAppLink({
+      kind: "invite",
+      name: current.name,
+      phone: activation.phone,
+      appName: dependencies.appName,
+      temporaryPassword: temporaryPassword,
+      loginUrl: dependencies.loginUrl,
+    }),
   };
 }

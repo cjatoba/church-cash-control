@@ -2,19 +2,8 @@
 
 import { useActionState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { describeAccess } from "@/app/users/_lib/access-summary";
 import { TemporaryPasswordReveal } from "@/app/users/_components/temporary-password-reveal";
-
-function grantedCapabilityLabels(capabilities: {
-  canManageUsers: boolean;
-  canManageCampaigns: boolean;
-  canReceiveFunds: boolean;
-}): string {
-  const labels: string[] = [];
-  if (capabilities.canManageUsers) labels.push("gerenciar usuários");
-  if (capabilities.canManageCampaigns) labels.push("gerenciar campanhas");
-  if (capabilities.canReceiveFunds) labels.push("receber arrecadação");
-  return labels.length > 0 ? labels.join(", ") : "só visualização";
-}
 
 export interface ActivateAccessState {
   error?: string;
@@ -44,11 +33,16 @@ export function ActivateAccessForm({
     return (
       <TemporaryPasswordReveal
         title="Acesso ativado"
-        message={`${userName} agora tem acesso ao sistema, com ${grantedCapabilityLabels({
-          canManageUsers: state.values?.canManageUsers ?? false,
-          canManageCampaigns: state.values?.canManageCampaigns ?? false,
-          canReceiveFunds: state.values?.canReceiveFunds ?? false,
-        })}.`}
+        message={
+          <>
+            <strong>{userName}</strong> já pode entrar no app.{" "}
+            {describeAccess({
+              canManageUsers: state.values?.canManageUsers ?? false,
+              canManageCampaigns: state.values?.canManageCampaigns ?? false,
+              canReceiveFunds: state.values?.canReceiveFunds ?? false,
+            })}
+          </>
+        }
         temporaryPassword={state.result.temporaryPassword}
         whatsappLink={state.result.whatsappLink}
         backHref="/users"

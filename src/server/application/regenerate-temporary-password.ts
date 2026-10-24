@@ -1,4 +1,4 @@
-import { buildTemporaryPasswordWhatsAppLink } from "../domain/invite-message";
+import { buildAccessWhatsAppLink } from "../domain/invite-message";
 import { canRegenerateTemporaryPassword } from "../domain/temporary-password-reset";
 
 export interface RegenerateTemporaryPasswordRepository {
@@ -15,6 +15,7 @@ export interface RegenerateTemporaryPasswordDependencies {
   generateTemporaryPassword: () => string;
   hashPassword: (password: string) => Promise<string>;
   loginUrl: string;
+  appName: string;
 }
 
 export interface RegeneratedTemporaryPassword {
@@ -47,10 +48,13 @@ export async function regenerateTemporaryPassword(
     name: user.name,
     phone: user.phone,
     temporaryPassword,
-    whatsappLink: buildTemporaryPasswordWhatsAppLink(
-      user.phone,
-      temporaryPassword,
-      dependencies.loginUrl,
-    ),
+    whatsappLink: buildAccessWhatsAppLink({
+      kind: "password-reset",
+      name: user.name,
+      phone: user.phone,
+      appName: dependencies.appName,
+      temporaryPassword: temporaryPassword,
+      loginUrl: dependencies.loginUrl,
+    }),
   };
 }

@@ -1,4 +1,5 @@
 import { BackLink } from "@/app/_components/back-link";
+import { getCachedAppBranding } from "@/app/_lib/app-branding";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { regenerateTemporaryPassword } from "@/server/application/regenerate-temporary-password";
@@ -40,9 +41,10 @@ export default async function ResetPasswordPage({
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
       const loginUrl = await getLoginUrl();
+      const { name: appName } = await getCachedAppBranding();
       const result = await regenerateTemporaryPassword(
         repository,
-        { generateTemporaryPassword, hashPassword, loginUrl },
+        { generateTemporaryPassword, hashPassword, loginUrl, appName },
         userId,
       );
 

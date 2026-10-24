@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { getCachedAppBranding } from "@/app/_lib/app-branding";
 import { auth } from "@/auth";
 import { updateUser } from "@/server/application/update-user";
 import { activateUserAccess } from "@/server/application/activate-user-access";
@@ -92,9 +93,10 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
       const loginUrl = await getLoginUrl();
+      const { name: appName } = await getCachedAppBranding();
       const result = await activateUserAccess(
         repository,
-        { generateTemporaryPassword, hashPassword, loginUrl },
+        { generateTemporaryPassword, hashPassword, loginUrl, appName },
         userId,
         input,
       );

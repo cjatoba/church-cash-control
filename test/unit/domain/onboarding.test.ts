@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { selectAvailableGuideItems, tutorialGreeting } from "@/server/domain/onboarding";
+import { selectAvailableGuideItems } from "@/server/domain/onboarding";
 
 const viewOnly = { canManageUsers: false, canManageCampaigns: false, canReceiveFunds: false };
 
@@ -30,15 +30,5 @@ describe("selectAvailableGuideItems", () => {
     });
 
     expect(available.map((item) => item.id)).toEqual(["overview", "receive", "invite"]);
-  });
-});
-
-describe("tutorialGreeting", () => {
-  it("cumprimenta pelo primeiro nome", () => {
-    expect(tutorialGreeting("  Maria   da Silva ")).toBe("Olá, Maria!");
-  });
-
-  it("cumprimenta sem nome quando ele está em branco", () => {
-    expect(tutorialGreeting("   ")).toBe("Olá!");
   });
 });
