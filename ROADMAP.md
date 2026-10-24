@@ -866,7 +866,20 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Cadastro retroativo de carnê (mês da primeira parcela)** — PR a abrir
+  (achado pelo usuário ao cadastrar em produção doadores que pegaram o
+  carnê antes): o carnê de valor fixo sempre começava no mês do cadastro,
+  então um carnê de 5 parcelas cadastrado com atraso só aceitava 4.
+  Mockup aprovado: o cadastro de doador ganha "Mês da primeira parcela"
+  (padrão: mês atual; opções do início da campanha até o mês atual, sem
+  meses futuros), e a quantidade de parcelas se ajusta ao mês escolhido
+  (`listFirstInstallmentMonths`, domínio `pledge.ts`; `createPledge`
+  rejeita mês fora desse intervalo — TDD). As parcelas dos meses que já
+  passaram nascem pendentes e recebem baixa com a data real, mantendo
+  "Dinheiro em mãos" e "Quem pagou no mês" corretos. Ajuda: tópico
+  "Cadastrar um doador e o carnê" atualizado. Decisão registrada: marcar
+  de uma vez as parcelas passadas como pagas fica de fora até aparecer
+  necessidade concreta.
 
 ## Backlog (próximas fatias, em ordem)
 

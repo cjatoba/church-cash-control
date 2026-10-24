@@ -11,19 +11,22 @@ export interface CreateDonorState {
     pledgeTypeId: string;
     installmentCountMode: string;
     installmentCount: string;
+    firstInstallmentMonth: string;
   };
 }
 
 export function DonorForm({
   campaignId,
   pledgeTypes,
-  maxInstallmentCount,
+  maxInstallmentCount: maxForCurrentMonth,
+  firstMonthOptions,
   campaignEndMonthLabel,
   action,
 }: {
   campaignId: string;
   pledgeTypes: { id: string; name: string; installmentValueLabel: string | null }[];
   maxInstallmentCount: number;
+  firstMonthOptions: { value: string; label: string; maxInstallmentCount: number }[];
   campaignEndMonthLabel: string;
   action: (prevState: CreateDonorState, formData: FormData) => Promise<CreateDonorState>;
 }) {
@@ -32,6 +35,13 @@ export function DonorForm({
   const [installmentCountMode, setInstallmentCountMode] = useState(
     state.values?.installmentCountMode ?? "full",
   );
+
+  const [firstInstallmentMonth, setFirstInstallmentMonth] = useState(
+    state.values?.firstInstallmentMonth ?? firstMonthOptions.at(-1)?.value ?? "",
+  );
+  const maxInstallmentCount =
+    firstMonthOptions.find((option) => option.value === firstInstallmentMonth)
+      ?.maxInstallmentCount ?? maxForCurrentMonth;
 
   const selectedPledgeType = pledgeTypes.find((pledgeType) => pledgeType.id === pledgeTypeId);
   const isFixedValueType = Boolean(selectedPledgeType?.installmentValueLabel);
@@ -83,6 +93,30 @@ export function DonorForm({
         </select>
       </label>
 
+      {isFixedValueType && firstMonthOptions.length > 0 ? (
+        <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
+          Mês da primeira parcela
+          <select
+            name="firstInstallmentMonth"
+            value={firstInstallmentMonth}
+            onChange={(event) => {
+              setFirstInstallmentMonth(event.target.value);
+            }}
+            className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+          >
+            {firstMonthOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
+            Cadastrando um carnê que a pessoa pegou antes? Escolha o mês em que ele começou. Os
+            meses que já passaram ficam em &quot;A pagar&quot; para você dar baixa com a data certa.
+          </span>
+        </label>
+      ) : null}
+
       {isFixedValueType ? (
         <div className="flex flex-col gap-2 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
           <span className="font-medium text-black dark:text-zinc-50">Quantidade de parcelas</span>
@@ -126,9 +160,9 @@ export function DonorForm({
       ) : null}
 
       <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
-        Carnê com valor fixo: as parcelas mensais são geradas automaticamente a partir do mês atual.
-        Carnê avulso: sem parcela — o doador arrecada com quem quiser e entrega o valor depois, em
-        uma ou mais vezes.
+        Carnê com valor fixo: uma parcela por mês, a partir do mês da primeira parcela. Carnê
+        avulso: sem parcela — o doador arrecada com quem quiser e entrega o valor depois, em uma ou
+        mais vezes.
       </p>
       <SubmitButton pendingLabel="Cadastrando…">Cadastrar doador e gerar carnê</SubmitButton>
     </form>

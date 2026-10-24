@@ -6,6 +6,7 @@ import {
   parsePledgeInput,
   selectFirstInstallments,
   selectInstallmentsOutsidePeriod,
+  listFirstInstallmentMonths,
 } from "@/server/domain/pledge";
 import { Money } from "@/server/domain/money";
 import type { PendingInstallmentCandidate, PledgeSummary } from "@/server/domain/pledge";
@@ -228,5 +229,41 @@ describe("selectInstallmentsOutsidePeriod", () => {
     const result = selectInstallmentsOutsidePeriod(installments, new Date("2026-01-31"));
 
     expect(result).toEqual([]);
+  });
+});
+
+describe("listFirstInstallmentMonths", () => {
+  function labels(months: Date[]): string[] {
+    return months.map((month) => month.toISOString().slice(0, 7));
+  }
+
+  it("vai do mês de início da campanha até o mês atual, para cadastrar carnê retroativo", () => {
+    const months = listFirstInstallmentMonths(
+      new Date("2026-06-01"),
+      new Date("2026-12-31"),
+      new Date("2026-10-24"),
+    );
+
+    expect(labels(months)).toEqual(["2026-06", "2026-07", "2026-08", "2026-09", "2026-10"]);
+  });
+
+  it("para no último mês da campanha quando ela já terminou", () => {
+    const months = listFirstInstallmentMonths(
+      new Date("2026-01-01"),
+      new Date("2026-03-31"),
+      new Date("2026-10-24"),
+    );
+
+    expect(labels(months)).toEqual(["2026-01", "2026-02", "2026-03"]);
+  });
+
+  it("fica vazio quando a campanha ainda não começou", () => {
+    const months = listFirstInstallmentMonths(
+      new Date("2026-11-01"),
+      new Date("2026-12-31"),
+      new Date("2026-10-24"),
+    );
+
+    expect(months).toEqual([]);
   });
 });

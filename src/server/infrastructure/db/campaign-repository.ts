@@ -109,7 +109,7 @@ export function createCampaignRepository(
 
     async findPeriodById(campaignId) {
       const [row] = await db
-        .select({ endDate: campaigns.endDate })
+        .select({ startDate: campaigns.startDate, endDate: campaigns.endDate })
         .from(campaigns)
         .where(eq(campaigns.id, campaignId))
         .limit(1);
