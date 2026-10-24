@@ -18,18 +18,18 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
       <button
         type="button"
         onClick={openDialog}
-        className="flex items-center gap-1.5 self-start rounded-full border border-red-300 px-4 py-2.5 text-sm text-red-700 hover:border-red-400 dark:border-red-900 dark:text-red-400 dark:hover:border-red-800"
+        className="flex items-center gap-1.5 self-start inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-red-300 bg-white px-5 text-base font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-950/40"
       >
         <TrashIcon className="h-4 w-4" />
         Excluir dados do doador
       </button>
       <dialog
         ref={dialogRef}
-        className="w-72 rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-50"
+        className="w-[min(92vw,24rem)] rounded-2xl border border-zinc-200 bg-white p-6 text-base text-zinc-900 shadow-xl backdrop:bg-black/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
       >
         {!confirming ? (
           <div className="flex flex-col gap-4">
-            <p className="font-semibold">Excluir dados do doador</p>
+            <p className="text-lg font-semibold">Excluir dados do doador</p>
             <p className="text-zinc-700 dark:text-zinc-300">
               O nome será removido permanentemente. O histórico de carnês e parcelas pagas é
               mantido, mas sem vínculo com o nome. Essa ação não pode ser desfeita.
@@ -38,7 +38,7 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
               <button
                 type="button"
                 onClick={() => dialogRef.current?.close()}
-                className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-base font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
               >
                 Cancelar
               </button>
@@ -47,7 +47,7 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
                 onClick={() => {
                   setConfirming(true);
                 }}
-                className="rounded-full border border-red-300 px-4 py-2.5 text-sm text-red-700 hover:border-red-400 dark:border-red-900 dark:text-red-400 dark:hover:border-red-800"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-red-300 bg-white px-5 text-base font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-950/40"
               >
                 Continuar
               </button>
@@ -64,7 +64,7 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
                 onClick={() => {
                   setConfirming(false);
                 }}
-                className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-base font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
               >
                 Cancelar
               </button>

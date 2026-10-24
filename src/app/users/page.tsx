@@ -7,8 +7,11 @@ import { createUserManagementRepository } from "@/server/infrastructure/db/user-
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { formatPhoneLabel } from "@/server/domain/phone";
 import { SubmitButton } from "@/app/_components/submit-button";
-import { BackLink } from "@/app/_components/back-link";
-import { ArrowPathIcon, PencilIcon, TrashIcon } from "@/app/_components/icons";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { Tabs } from "@/app/_components/tabs";
+import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
+import { ArrowPathIcon, LockIcon, PencilIcon, PlusIcon, TrashIcon } from "@/app/_components/icons";
 
 function capabilityLabels(user: ManagedUser): string[] {
   const labels: string[] = [];
@@ -71,107 +74,119 @@ export default async function UsersPage() {
     redirect("/users");
   }
 
-  return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 py-10 dark:bg-black">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href="/" />
-        <div className="flex items-baseline justify-between gap-4">
-          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Usuários</h1>
-          <Link
-            href="/users/new"
-            className="rounded px-2 py-1.5 text-sm font-medium text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
-          >
-            + Convidar usuário
-          </Link>
-        </div>
-
-        <ul className="flex flex-col gap-2">
-          {activeUsers.map((user) => (
-            <li
-              key={user.id}
-              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
-            >
-              <div className="flex flex-col">
-                <span className="font-medium text-black dark:text-zinc-50">{user.name}</span>
-                {user.phone ? (
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {formatPhoneLabel(user.phone)}
-                  </span>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {user.phone === null ? (
-                  <span className="rounded-full border border-black/[.14] px-2.5 py-1 text-[11px] font-medium text-zinc-600 dark:border-white/[.22] dark:text-zinc-400">
-                    Sem acesso ao sistema
-                  </span>
-                ) : null}
-                {user.mustChangePassword ? (
-                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
-                    Troca pendente
-                  </span>
-                ) : null}
-                {user.phone !== null ? (
-                  <Link
-                    href={`/users/${user.id}/reset-password`}
-                    className="rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-                  >
-                    Gerar nova senha
-                  </Link>
-                ) : null}
-                {capabilityLabels(user).map((label) => (
+  const activeList = (
+    <ul className="flex flex-col gap-3">
+      {activeUsers.map((user) => (
+        <li
+          key={user.id}
+          className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[17px] font-semibold">
+              {user.id === currentUserId ? `${user.name} (você)` : user.name}
+            </span>
+            <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+              {user.phone ? formatPhoneLabel(user.phone) : "Sem acesso ao sistema"}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {user.mustChangePassword ? (
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                Ainda não trocou a senha
+              </span>
+            ) : null}
+            {user.phone !== null
+              ? capabilityLabels(user).map((label) => (
                   <span
                     key={label}
-                    className="rounded-full border border-black/[.14] px-3 py-1 text-xs font-medium text-zinc-700 dark:border-white/[.22] dark:text-zinc-300"
+                    className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
                   >
                     {label}
                   </span>
-                ))}
-                <Link
-                  href={`/users/${user.id}/edit`}
-                  className="flex items-center gap-1 rounded px-1.5 py-1 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
-                >
-                  <PencilIcon className="h-3.5 w-3.5" />
-                  Editar
-                </Link>
-                {user.id !== currentUserId ? (
-                  <form action={deactivate}>
-                    <input type="hidden" name="userId" value={user.id} />
-                    <SubmitButton pendingLabel="Desativando…" variant="text">
-                      <TrashIcon className="h-3.5 w-3.5" />
-                      Desativar
-                    </SubmitButton>
-                  </form>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
-
-        {inactiveUsers.length > 0 ? (
-          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
-            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
-              Usuários desativados
-            </h2>
-            <ul className="flex flex-col gap-2">
-              {inactiveUsers.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm text-zinc-500 dark:border-white/[.16] dark:text-zinc-400"
-                >
-                  <span>{user.name}</span>
-                  <form action={reactivate}>
-                    <input type="hidden" name="userId" value={user.id} />
-                    <SubmitButton pendingLabel="Reativando…" variant="text">
-                      <ArrowPathIcon className="h-3.5 w-3.5" />
-                      Reativar
-                    </SubmitButton>
-                  </form>
-                </li>
-              ))}
-            </ul>
+                ))
+              : null}
           </div>
-        ) : null}
-      </div>
-    </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+            <Link
+              href={`/users/${user.id}/edit`}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-zinc-300 bg-white px-4 text-[15px] font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              <PencilIcon className="h-4 w-4" />
+              Editar
+            </Link>
+            {user.phone !== null ? (
+              <Link
+                href={`/users/${user.id}/reset-password`}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-zinc-300 bg-white px-4 text-[15px] font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              >
+                <LockIcon className="h-4 w-4" />
+                Gerar nova senha
+              </Link>
+            ) : null}
+            {user.id !== currentUserId ? (
+              <form action={deactivate}>
+                <input type="hidden" name="userId" value={user.id} />
+                <SubmitButton pendingLabel="Desativando…" variant="text">
+                  <TrashIcon className="h-4 w-4" />
+                  Desativar
+                </SubmitButton>
+              </form>
+            ) : null}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const inactiveList =
+    inactiveUsers.length === 0 ? (
+      <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+        Nenhum voluntário desativado.
+      </p>
+    ) : (
+      <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+        {inactiveUsers.map((user) => (
+          <li
+            key={user.id}
+            className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-3"
+          >
+            <span className="text-[17px] text-zinc-600 dark:text-zinc-400">{user.name}</span>
+            <form action={reactivate}>
+              <input type="hidden" name="userId" value={user.id} />
+              <SubmitButton pendingLabel="Reativando…" variant="outline">
+                <ArrowPathIcon className="h-5 w-5" />
+                Reativar
+              </SubmitButton>
+            </form>
+          </li>
+        ))}
+      </ul>
+    );
+
+  return (
+    <PageShell>
+      <PageHeader backHref="/menu" title="Voluntários e acessos" />
+
+      <Link
+        href="/users/new"
+        className={`${buttonBaseClassName} ${buttonClassNames.primary} w-full`}
+      >
+        <PlusIcon />
+        Cadastrar voluntário
+      </Link>
+
+      <Tabs
+        label="Voluntários"
+        initialTabId="active"
+        tabs={[
+          { id: "active", label: `Ativos (${String(activeUsers.length)})`, content: activeList },
+          {
+            id: "inactive",
+            label: `Desativados (${String(inactiveUsers.length)})`,
+            content: inactiveList,
+          },
+        ]}
+      />
+    </PageShell>
   );
 }

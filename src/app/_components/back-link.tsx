@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { ArrowLeftIcon } from "./icons";
+import { ChevronLeftIcon } from "./icons";
 
 export function BackLink({ href, label = "Voltar" }: { href: string; label?: string }) {
   return (
     <Link
       href={href}
-      className="flex w-fit flex-col items-center gap-0.5 self-start rounded px-2 py-1.5 text-zinc-600 transition-colors hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+      className="inline-flex min-h-12 w-fit items-center gap-1.5 self-start rounded-full border border-zinc-200 bg-white py-2 pr-5 pl-3 text-base font-medium text-zinc-800 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
     >
-      <ArrowLeftIcon className="h-5 w-5" />
-      <span className="text-xs font-medium">{label}</span>
+      <ChevronLeftIcon className="h-5 w-5" />
+      {label}
     </Link>
   );
 }

@@ -6,13 +6,27 @@ import { isPledgeClosed } from "@/server/domain/pledge";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createLoosePledgeRepository } from "@/server/infrastructure/db/loose-pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { CheckCircleIcon, ClockIcon, EyeIcon } from "@/app/_components/icons";
-import { BackLink } from "@/app/_components/back-link";
+import {
+  CheckCircleIcon,
+  ChevronRightIcon,
+  ClockIcon,
+  EyeIcon,
+  PlusIcon,
+} from "@/app/_components/icons";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
+import { formatCurrency } from "@/app/_lib/format";
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+type PledgeKindFilter = "fixed" | "loose";
+
+function parsePledgeKindFilter(value: string | string[] | undefined): PledgeKindFilter | null {
+  return value === "fixed" || value === "loose" ? value : null;
+}
 
 interface DonorPledgeRow {
   key: string;
+  kind: PledgeKindFilter;
   donorId: string;
   donorName: string;
   subtitle: string;
@@ -20,106 +34,128 @@ interface DonorPledgeRow {
   href: string;
 }
 
-export default async function DonorsPage({ params }: PageProps<"/campaigns/[id]/donors">) {
+export default async function DonorsPage({
+  params,
+  searchParams,
+}: PageProps<"/campaigns/[id]/donors">) {
   const session = await auth();
   const { id: campaignId } = await params;
+  const kindFilter = parsePledgeKindFilter((await searchParams).show);
   const db = createDbClient();
   const pledgeRepository = createPledgeRepository(db);
   const loosePledgeRepository = createLoosePledgeRepository(db);
   const [pledges, loosePledges] = await Promise.all([
-    listPledges(pledgeRepository, campaignId),
-    listLoosePledges(loosePledgeRepository, campaignId),
+    kindFilter === "loose" ? [] : listPledges(pledgeRepository, campaignId),
+    kindFilter === "fixed" ? [] : listLoosePledges(loosePledgeRepository, campaignId),
   ]);
 
   const rows: DonorPledgeRow[] = [
     ...pledges.map((pledge) => ({
       key: `pledge-${pledge.id}`,
+      kind: "fixed" as const,
       donorId: pledge.donorId,
       donorName: pledge.donorName,
-      subtitle: `Carnê ${pledge.pledgeTypeName} · pago ${String(pledge.paidInstallments)} de ${String(pledge.totalInstallments)}`,
+      subtitle: `Carnê ${pledge.pledgeTypeName} · pagou ${String(pledge.paidInstallments)} de ${String(pledge.totalInstallments)}`,
       closed: isPledgeClosed(pledge),
       href: `/campaigns/${campaignId}/pledges/${pledge.id}`,
     })),
     ...loosePledges.map((loosePledge) => ({
       key: `loose-pledge-${loosePledge.id}`,
+      kind: "loose" as const,
       donorId: loosePledge.donorId,
       donorName: loosePledge.donorName,
-      subtitle: `Carnê ${loosePledge.pledgeTypeName} · arrecadado ${currencyFormatter.format(loosePledge.totalContributed.toCents() / 100)}`,
+      subtitle: `Carnê ${loosePledge.pledgeTypeName} · entregou ${formatCurrency(loosePledge.totalContributed)}`,
       closed: loosePledge.status === "closed",
       href: `/campaigns/${campaignId}/loose-pledges/${loosePledge.id}`,
     })),
-  ].sort((a, b) => a.donorName.localeCompare(b.donorName, "pt-BR"));
+  ]
+    .filter((row) => kindFilter === null || !row.closed)
+    .sort((a, b) => a.donorName.localeCompare(b.donorName, "pt-BR"));
+
+  const choosingForPayment = kindFilter !== null;
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-md flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href="/" />
-        <div className="flex items-baseline justify-between gap-2">
-          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Doadores</h1>
-          {session?.user.canReceiveFunds ? (
-            <Link
-              href={`/campaigns/${campaignId}/donors/new`}
-              className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
-            >
-              + Doador
-            </Link>
-          ) : null}
-        </div>
+    <PageShell>
+      <PageHeader
+        backHref={
+          choosingForPayment ? `/campaigns/${campaignId}/receive` : `/campaigns/${campaignId}`
+        }
+        title={choosingForPayment ? "Escolha o doador" : "Doadores e carnês"}
+        subtitle={
+          kindFilter === "fixed"
+            ? "Carnês de valor fixo em aberto"
+            : kindFilter === "loose"
+              ? "Carnês avulsos em aberto"
+              : undefined
+        }
+      />
 
-        {rows.length === 0 ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Nenhum doador com carnê cadastrado ainda nesta campanha.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {rows.map((row) => (
-              <li
-                key={row.key}
-                className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
+      {!choosingForPayment && session?.user.canReceiveFunds ? (
+        <Link
+          href={`/campaigns/${campaignId}/donors/new`}
+          className={`${buttonBaseClassName} ${buttonClassNames.primary} w-full`}
+        >
+          <PlusIcon />
+          Cadastrar doador
+        </Link>
+      ) : null}
+
+      {rows.length === 0 ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          {choosingForPayment
+            ? "Nenhum carnê desse tipo em aberto nesta campanha."
+            : "Nenhum doador com carnê cadastrado ainda nesta campanha."}
+        </div>
+      ) : (
+        <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+          {rows.map((row) => (
+            <li key={row.key} className="flex flex-col">
+              <Link
+                href={row.href}
+                className="flex min-h-16 items-center gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
               >
-                <Link
-                  href={row.href}
-                  className="flex flex-1 items-center justify-between gap-2 transition-colors hover:text-black dark:hover:text-zinc-50"
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="text-[17px] font-semibold">{row.donorName}</span>
+                  <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+                    {row.subtitle}
+                  </span>
+                </span>
+                <span
+                  className={
+                    row.closed
+                      ? "flex shrink-0 items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-950 dark:text-green-300"
+                      : "flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                  }
                 >
-                  <span>
-                    <span className="block font-medium text-zinc-900 dark:text-zinc-100">
-                      {row.donorName}
-                    </span>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">{row.subtitle}</span>
-                  </span>
-                  <span
-                    className={
-                      row.closed
-                        ? "flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                        : "flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                    }
-                  >
-                    {row.closed ? (
-                      <CheckCircleIcon className="h-3.5 w-3.5 shrink-0" />
-                    ) : (
-                      <ClockIcon className="h-3.5 w-3.5 shrink-0" />
-                    )}
-                    {row.closed ? "Fechado" : "Em aberto"}
-                  </span>
-                </Link>
+                  {row.closed ? (
+                    <CheckCircleIcon className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <ClockIcon className="h-4 w-4 shrink-0" />
+                  )}
+                  {row.closed ? "Fechado" : "Em aberto"}
+                </span>
+                <ChevronRightIcon className="h-5 w-5 shrink-0 text-zinc-500" />
+              </Link>
+              {choosingForPayment ? null : (
                 <Link
                   href={`/campaigns/${campaignId}/donors/${row.donorId}`}
-                  className="flex items-center gap-1 rounded px-2 py-1.5 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+                  className="mx-4 mb-3 flex min-h-10 w-fit items-center gap-1.5 text-[15px] text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
                 >
-                  <EyeIcon className="h-3.5 w-3.5" />
-                  Ver dados
+                  <EyeIcon className="h-4 w-4" />
+                  Ver dados do doador
                 </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
 
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          &quot;Fechado&quot; = todas as parcelas do carnê já foram pagas (carnê com valor fixo) ou
-          o carnê avulso foi marcado como encerrado — não entra mais nas cobranças dos próximos
-          meses.
+      {choosingForPayment ? null : (
+        <p className="mx-1 text-[15px] text-zinc-600 dark:text-zinc-400">
+          &quot;Fechado&quot; quer dizer que todas as parcelas já foram pagas (carnê de valor fixo)
+          ou que o carnê avulso foi encerrado.
         </p>
-      </div>
-    </div>
+      )}
+    </PageShell>
   );
 }

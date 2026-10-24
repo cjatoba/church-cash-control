@@ -21,26 +21,30 @@ export function PledgeTypeForm({
     <form
       key={state.success ?? "form"}
       action={formAction}
-      className="flex flex-col gap-3 border-t border-black/[.08] pt-4 dark:border-white/[.16]"
+      className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <h2 className="text-sm font-semibold text-black dark:text-zinc-50">Novo tipo de carnê</h2>
-      {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
+      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Novo tipo de carnê</h2>
+      {state.error ? (
+        <p className="rounded-xl bg-red-50 p-3 text-[15px] text-red-800 dark:bg-red-950/50 dark:text-red-300">
+          {state.error}
+        </p>
+      ) : null}
       {state.success ? (
-        <p className="rounded bg-green-50 p-3 text-sm text-green-600 dark:bg-green-950/30 dark:text-green-400">
+        <p className="rounded-xl bg-green-50 p-3 text-[15px] text-green-800 dark:bg-green-950/50 dark:text-green-300">
           Tipo de carnê criado com sucesso.
         </p>
       ) : null}
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
         Nome
         <input
           name="name"
           type="text"
           required
           defaultValue={state.values?.name ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
       </label>
-      <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex min-h-11 items-center gap-3 text-base text-zinc-700 dark:text-zinc-300">
         <input
           name="isLoose"
           type="checkbox"
@@ -52,7 +56,7 @@ export function PledgeTypeForm({
         Carnê avulso (sem valor fixo — a pessoa arrecada e entrega o quanto conseguir)
       </label>
       {!isLoose ? (
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
           Valor da parcela (R$/mês)
           <input
             name="installmentValue"
@@ -61,7 +65,7 @@ export function PledgeTypeForm({
             min="0.01"
             required
             defaultValue={state.values?.installmentValue ?? ""}
-            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+            className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
           />
         </label>
       ) : null}

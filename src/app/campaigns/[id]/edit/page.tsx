@@ -92,14 +92,19 @@ export default async function EditCampaignPage({ params }: PageProps<"/campaigns
       });
     }
 
-    redirect(outcome.periodExtended ? "/?campaignExtended=1" : "/");
+    redirect(
+      outcome.periodExtended
+        ? `/campaigns/${campaignId}?campaignExtended=1`
+        : `/campaigns/${campaignId}`,
+    );
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+    <div className="flex flex-1 justify-center bg-zinc-100 px-4 py-6 sm:items-center sm:py-10 dark:bg-black">
       <CampaignForm
         action={update}
         heading="Editar campanha"
+        backHref={`/campaigns/${campaignId}`}
         submitLabel="Salvar campanha"
         pendingLabel="Salvando…"
         defaultValues={{

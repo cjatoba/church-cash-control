@@ -24,6 +24,7 @@ export function CampaignForm({
   pendingLabel = "Criando…",
   defaultValues,
   pendingInstallments,
+  backHref = "/",
 }: {
   action: (prevState: CreateCampaignState, formData: FormData) => Promise<CreateCampaignState>;
   heading?: string;
@@ -31,6 +32,7 @@ export function CampaignForm({
   pendingLabel?: string;
   defaultValues?: { name: string; goal: number; startDate: Date; endDate: Date };
   pendingInstallments?: PendingInstallmentCandidate[];
+  backHref?: string;
 }) {
   const [state, formAction] = useActionState<CreateCampaignState, FormData>(action, {});
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -76,24 +78,26 @@ export function CampaignForm({
       <form
         action={formAction}
         onSubmit={handleSubmit}
-        className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950"
+        className="flex w-full max-w-md flex-col gap-5 self-start rounded-2xl border border-zinc-200 bg-white p-6 text-zinc-900 sm:self-auto sm:p-8 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
       >
-        <BackLink href="/" />
-        <h1 className="text-xl font-semibold text-black dark:text-zinc-50">{heading}</h1>
+        <BackLink href={backHref} />
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{heading}</h1>
         {state.error ? (
-          <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+          <p className="rounded-xl bg-red-50 p-3 text-[15px] text-red-800 dark:bg-red-950/50 dark:text-red-300">
+            {state.error}
+          </p>
         ) : null}
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
           Nome
           <input
             name="name"
             type="text"
             required
             defaultValue={name}
-            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+            className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
           Meta (R$)
           <input
             name="goal"
@@ -102,27 +106,27 @@ export function CampaignForm({
             min="0.01"
             required
             defaultValue={goal}
-            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+            className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
           Início
           <input
             name="startDate"
             type="date"
             required
             defaultValue={startDate}
-            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+            className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+        <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
           Término
           <input
             name="endDate"
             type="date"
             required
             defaultValue={endDate}
-            className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+            className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
           />
         </label>
         <SubmitButton pendingLabel={pendingLabel}>{submitLabel}</SubmitButton>
@@ -131,7 +135,7 @@ export function CampaignForm({
       {pendingInstallments ? (
         <dialog
           ref={dialogRef}
-          className="w-72 rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-50"
+          className="w-[min(92vw,24rem)] rounded-2xl border border-zinc-200 bg-white p-6 text-base text-zinc-900 shadow-xl backdrop:bg-black/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
         >
           <p className="mb-1 font-semibold">Confirmar alteração de período</p>
           <p className="mb-4 text-zinc-600 dark:text-zinc-400">
@@ -144,14 +148,14 @@ export function CampaignForm({
             <button
               type="button"
               onClick={confirmSubmit}
-              className="rounded-full bg-foreground px-4 py-2.5 text-sm text-background"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-900 px-6 text-base font-semibold text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
             >
               Remover parcelas e salvar
             </button>
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-base font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               Cancelar
             </button>

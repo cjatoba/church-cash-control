@@ -41,7 +41,7 @@ export default async function ChangePasswordPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+    <div className="flex flex-1 justify-center bg-zinc-100 px-4 py-6 sm:items-center sm:py-10 dark:bg-black">
       <ChangePasswordForm action={submit} />
     </div>
   );

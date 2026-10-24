@@ -1,5 +1,4 @@
 import { notFound, redirect } from "next/navigation";
-import { BackLink } from "@/app/_components/back-link";
 import { auth } from "@/auth";
 import { getCampaign } from "@/server/application/get-campaign";
 import { getMoneyInHand } from "@/server/application/get-money-in-hand";
@@ -9,9 +8,14 @@ import { createCampaignRepository } from "@/server/infrastructure/db/campaign-re
 import { createCustodyRepository } from "@/server/infrastructure/db/custody-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { formatCurrency } from "@/app/_lib/format";
+import { Money } from "@/server/domain/money";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { Card } from "@/app/_components/card";
+import { Tabs } from "@/app/_components/tabs";
 import { TransferButton, type TransferState } from "./_components/transfer-button";
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -87,85 +91,104 @@ export default async function MoneyInHandPage({
   }
 
   const todayIso = new Date().toISOString().slice(0, 10);
+  const totalInHands = balances.reduce(
+    (sum, balance) => sum.add(balance.balance),
+    Money.fromCents(0),
+  );
+
+  const balancesList =
+    balances.length === 0 ? (
+      <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+        Ninguém recebeu dinheiro nesta campanha ainda.
+      </p>
+    ) : (
+      <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+        {balances.map((balance) => {
+          const isCurrentUser = balance.userId === session.user.id;
+          return (
+            <li
+              key={balance.userId}
+              className="flex min-h-14 items-center justify-between gap-3 px-4 py-3"
+            >
+              <span className={isCurrentUser ? "text-[17px] font-semibold" : "text-[17px]"}>
+                {isCurrentUser ? `${balance.userLabel} (você)` : balance.userLabel}
+              </span>
+              <span className="text-[17px] font-semibold">{formatCurrency(balance.balance)}</span>
+            </li>
+          );
+        })}
+      </ul>
+    );
+
+  const transfersList =
+    transfers.length === 0 ? (
+      <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+        Nenhum repasse registrado.
+      </p>
+    ) : (
+      <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+        {transfers.map((transfer) => (
+          <li key={transfer.id} className="flex flex-col gap-1 px-4 py-3.5">
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-[17px]">
+                {transfer.fromUserLabel} → {transfer.recipientName}
+              </span>
+              <span className="text-[17px] font-semibold">{formatCurrency(transfer.amount)}</span>
+            </div>
+            <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+              {dateFormatter.format(transfer.transferDate)}
+            </span>
+            {transfer.registeredByUserLabel !== transfer.fromUserLabel ? (
+              <span className="text-[15px] text-amber-800 dark:text-amber-300">
+                Registrado por {transfer.registeredByUserLabel}
+              </span>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    );
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-6 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href="/" />
-        <div>
-          <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Dinheiro em mãos</h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{campaign.name}</p>
-        </div>
+    <PageShell>
+      <PageHeader
+        backHref={`/campaigns/${campaignId}`}
+        title="Dinheiro em mãos"
+        subtitle={campaign.name}
+      />
 
-        <ul className="flex flex-col gap-2">
-          {balances.map((balance) => {
-            const isCurrentUser = balance.userId === session.user.id;
-            return (
-              <li
-                key={balance.userId}
-                className={
-                  isCurrentUser
-                    ? "flex items-center justify-between rounded border border-black/[.14] bg-zinc-50 px-3 py-3 text-sm dark:border-white/[.22] dark:bg-zinc-900"
-                    : "flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
-                }
-              >
-                <span className={isCurrentUser ? "font-medium" : undefined}>
-                  {isCurrentUser ? `${balance.userLabel} (você)` : balance.userLabel}
-                </span>
-                <span className="text-base font-semibold text-black dark:text-zinc-50">
-                  {currencyFormatter.format(balance.balance.toCents() / 100)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+      <Card>
+        <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Total com as pessoas</span>
+        <span className="text-3xl font-bold">{formatCurrency(totalInHands)}</span>
+        <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+          Recebido e ainda não repassado
+        </span>
+      </Card>
 
-        {session.user.canReceiveFunds ? (
-          <TransferButton
-            balances={balances.map((balance) => ({
-              userId: balance.userId,
-              userLabel: balance.userLabel,
-              balanceCents: balance.balance.toCents(),
-            }))}
-            currentUserId={session.user.id}
-            todayIso={todayIso}
-            action={transfer}
-          />
-        ) : null}
+      {session.user.canReceiveFunds ? (
+        <TransferButton
+          balances={balances.map((balance) => ({
+            userId: balance.userId,
+            userLabel: balance.userLabel,
+            balanceCents: balance.balance.toCents(),
+          }))}
+          currentUserId={session.user.id}
+          todayIso={todayIso}
+          action={transfer}
+        />
+      ) : null}
 
-        <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
-          <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
-            Histórico de repasses
-          </h2>
-          {transfers.length === 0 ? (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Nenhum repasse registrado.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {transfers.map((transfer) => (
-                <li
-                  key={transfer.id}
-                  className="flex flex-col gap-1 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
-                >
-                  <div className="flex items-center justify-between">
-                    <span>
-                      {dateFormatter.format(transfer.transferDate)} · {transfer.fromUserLabel} →{" "}
-                      {transfer.recipientName}
-                    </span>
-                    <span className="text-base font-semibold text-black dark:text-zinc-50">
-                      {currencyFormatter.format(transfer.amount.toCents() / 100)}
-                    </span>
-                  </div>
-                  {transfer.registeredByUserLabel !== transfer.fromUserLabel ? (
-                    <span className="text-xs text-amber-700 dark:text-amber-400">
-                      ⚠ Registrado por {transfer.registeredByUserLabel}
-                    </span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </div>
+      <Tabs
+        label="Dinheiro em mãos"
+        initialTabId="balances"
+        tabs={[
+          { id: "balances", label: "Com quem está", content: balancesList },
+          {
+            id: "transfers",
+            label: `Repasses (${String(transfers.length)})`,
+            content: transfersList,
+          },
+        ]}
+      />
+    </PageShell>
   );
 }

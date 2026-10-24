@@ -30,6 +30,10 @@ export function calculateCampaignProgressPercentage(raisedTotal: Money, goal: Mo
   return Math.min(100, Math.round((raisedTotal.toCents() / goal.toCents()) * 100));
 }
 
+export function calculateAmountLeftToGoal(raisedTotal: Money, goal: Money): Money {
+  return raisedTotal.toCents() >= goal.toCents() ? Money.fromCents(0) : goal.subtract(raisedTotal);
+}
+
 export function parseCampaign(input: unknown): Campaign {
   const data = campaignInputSchema.parse(input);
   return {

@@ -722,6 +722,25 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   escolhida pelo usuário (automático/claro/escuro), não só o do sistema.
   Implementado em lotes numa mesma PR (lote 1: as telas do mockup; lotes
   seguintes: aplicar o mesmo padrão às demais telas).
+  - Modo escuro: preferência gravada num cookie (`theme`) e lida no
+    layout raiz, que marca `data-theme` no `<html>` já no HTML do
+    servidor — sem "piscar" no carregamento e sem script no cliente. A
+    variante `dark:` do Tailwind foi redefinida (`globals.css`) para
+    valer tanto para o escuro escolhido quanto para o do sistema quando
+    a opção é "Automático".
+  - "Registrar recebimento" leva à lista de doadores já filtrada
+    (`?show=fixed` ou `?show=loose`, só carnês em aberto) em vez de criar
+    um fluxo novo de busca de doador.
+  - Decisão de desempenho: os itens da tela da campanha mostram uma
+    descrição fixa ("Pagamentos e pendências de cada mês") em vez de
+    números ao vivo como no mockup ("18 pagaram, 6 faltam", "24
+    doadores") — evita 2 consultas extras ao banco a cada abertura da
+    tela; os números continuam a um toque de distância.
+  - Nomes ajustados para linguagem mais simples: "Painel mensal" → "Quem
+    pagou no mês", "Usuários" → "Voluntários e acessos", "Doação avulsa"
+    → "Doação sem carnê", "contribuição" de carnê avulso → "entrega".
+  - Lacuna corrigida junto: o `body` forçava `Arial`, então a fonte
+    Geist carregada no layout nunca era usada de fato.
 
 ## Backlog (próximas fatias, em ordem)
 
