@@ -763,7 +763,17 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Personalizar nome e ícone do app**: hoje nome ("Controle de Caixa",
+  curto "Caixa") e ícone ("R$" verde) são fixos no código, iguais para
+  qualquer igreja que use o sistema — contra a regra de que dado de uma
+  instância vive no banco. Tela "Personalizar app" (menu →
+  Administração, só para quem gerencia usuários) para escolher nome
+  completo, nome curto (embaixo do ícone no celular), um ícone de uma
+  lista pronta e uma cor de fundo — sem upload de imagem nem serviço
+  externo. Manifesto e ícones passam a ser gerados a partir dessa
+  configuração. Limitação conhecida: no iPhone, quem já instalou precisa
+  reinstalar para ver a mudança; no Android o Chrome atualiza sozinho
+  com o tempo.
 
 ## Backlog (próximas fatias, em ordem)
 
