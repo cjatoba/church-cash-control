@@ -101,6 +101,23 @@ novas quanto para revisão de telas existentes (ver backlog do
 implementada, ajuste-o como parte da fatia em andamento em vez de deixar
 para depois, já que é um ajuste pequeno e localizado.
 
+## Ajuda, tutorial e documentação: revisar a cada ajuste
+
+O app tem uma Ajuda (`/help`, textos em
+`src/app/help/_content/help-topics.ts`) e um tutorial de primeiro acesso
+(`/tutorial`, textos em `src/app/tutorial/_content/tutorial-steps.tsx`)
+que explicam passo a passo como usar cada tela. **Todo ajuste na
+aplicação** — tela nova, botão ou campo renomeado, fluxo alterado,
+permissão nova, funcionalidade removida — precisa, na mesma PR, revisar
+se algum desses textos (e também `README.md`, `CLAUDE.md` e
+`ROADMAP.md`) ficou desatualizado, e corrigi-los junto. Nunca abrir a PR
+com a Ajuda descrevendo um botão, nome ou caminho que não existe mais.
+Funcionalidade nova que a pessoa usa no dia a dia ganha um tópico na
+Ajuda; se exigir uma capacidade (`canManageUsers`,
+`canManageCampaigns`, `canReceiveFunds`), o tópico declara isso em
+`requires`, para só aparecer a quem consegue usar a tela. Na descrição
+da PR, diga o que foi revisado na documentação (ou por que nada mudou).
+
 ## Escopo de uma fatia em andamento
 
 Se, durante a implementação de uma fatia, o usuário pedir algo novo que

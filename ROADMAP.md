@@ -803,7 +803,29 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Tutorial de primeiro acesso + Ajuda** — PR a abrir: hoje quem entra
+  no app pela primeira vez não tem nenhuma orientação de como ele
+  funciona, nem onde consultar depois. Mockup aprovado pelo usuário:
+  - Tutorial (`/tutorial`) em telas curtas, com "Pular" sempre visível,
+    abrindo sozinho ao entrar na tela inicial enquanto a pessoa não o
+    concluiu nem pulou. A primeira tela cumprimenta pelo primeiro nome de
+    quem entrou (forma neutra: "Olá, Maria!"), nunca um nome fixo.
+  - Ajuda (`/help`, item "Ajuda" no menu): botão "Ver o tutorial de
+    novo" e tópicos agrupados (Primeiros passos, Recebimentos,
+    Acompanhar, Conta e administração), cada um com passo a passo, dica,
+    atalho para a tela e "Veja também".
+  - Tutorial e Ajuda só mostram o que a pessoa tem permissão de fazer
+    (`selectAvailableGuideItems`, domínio `onboarding.ts`).
+  - "Já viu o tutorial" fica no cadastro do usuário (coluna
+    `tutorial_completed`), não só no aparelho — não reaparece ao entrar
+    por outro celular. É lido junto com o login (vai no JWT), sem
+    consulta extra ao banco por página; ao concluir, a sessão é
+    atualizada com `unstable_update` do Auth.js (só esse campo pode ser
+    alterado por essa via). Usuários que já existiam veem o tutorial uma
+    vez no próximo acesso.
+  - Regra nova no `CLAUDE.md` ("Ajuda, tutorial e documentação: revisar a
+    cada ajuste"): todo ajuste no app revisa, na mesma PR, os textos da
+    Ajuda/tutorial e a documentação do repositório.
 
 ## Backlog (próximas fatias, em ordem)
 
