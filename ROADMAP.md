@@ -632,10 +632,8 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   pendente fora do período é removida ao editar a campanha). Carnê avulso
   não é afetado (não tem parcela).
 
-## Em andamento (PRs abertas)
-
 - **Celular como chave de acesso (substitui e-mail) + nome obrigatório +
-  voluntário sem acesso ao sistema**: hoje `email` é só um identificador
+  voluntário sem acesso ao sistema** — PR #59: antes, `email` era só um identificador
   de login sem nenhum uso funcional (o app nunca envia nada por e-mail),
   enquanto `phone` já tem uso real (link de convite via WhatsApp).
   `email` é removido do modelo de usuário; `phone` vira a chave de login
@@ -704,6 +702,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     qualquer commit. Reforça a importância de nunca copiar um dado
     pessoal real recebido do usuário (mesmo para uso legítimo, como o
     backfill da migration) direto para dentro de um arquivo versionado.
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
