@@ -742,7 +742,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Instalar o app no celular (PWA)**: permitir salvar o app na tela
+- **Instalar o app no celular (PWA)** — PR #63: permitir salvar o app na tela
   inicial do celular, com ícone próprio e abrindo em tela cheia, sem a
   barra do navegador — sem loja de aplicativos. Manifesto do app
   (`src/app/manifest.ts`, suporte nativo do Next.js) + ícones nos
