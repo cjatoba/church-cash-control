@@ -11,7 +11,10 @@ import { createDonorRepository } from "@/server/infrastructure/db/donor-reposito
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createLoosePledgeRepository } from "@/server/infrastructure/db/loose-pledge-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { BackLink } from "@/app/_components/back-link";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { Card, SectionTitle } from "@/app/_components/card";
+import { ChevronRightIcon } from "@/app/_components/icons";
 import { AnonymizeDonorButton } from "./_components/anonymize-donor-button";
 import { EditDonorNameButton } from "./_components/edit-donor-name-button";
 
@@ -106,69 +109,69 @@ export default async function DonorDetailPage({
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href={`/campaigns/${campaignId}/donors`} />
-        <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Dados do doador</h1>
+    <PageShell>
+      <PageHeader backHref={`/campaigns/${campaignId}/donors`} title="Dados do doador" />
 
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-zinc-900 dark:text-zinc-100">{donor.name}</span>
+      <Card>
+        <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Nome</span>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xl font-semibold break-words">{donor.name}</span>
           {session.user.canReceiveFunds && !donor.anonymizedAt ? (
             <EditDonorNameButton currentName={donor.name} action={saveName} />
           ) : null}
         </div>
+      </Card>
 
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
-            Carnês deste doador
-          </h2>
-          {pledgeRows.length === 0 ? (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Nenhum carnê cadastrado.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {pledgeRows.map((row) => (
-                <li key={row.key}>
-                  <Link
-                    href={row.href}
-                    className="flex items-center justify-between gap-2 rounded border border-black/[.08] px-3 py-2 text-sm transition-colors hover:border-black/[.14] dark:border-white/[.16] dark:hover:border-white/[.22]"
+      <section className="flex flex-col gap-2">
+        <SectionTitle>Carnês deste doador</SectionTitle>
+        {pledgeRows.length === 0 ? (
+          <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            Nenhum carnê cadastrado.
+          </p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+            {pledgeRows.map((row) => (
+              <li key={row.key}>
+                <Link
+                  href={row.href}
+                  className="flex min-h-16 items-center gap-3 px-4 py-3.5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                >
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="text-[17px] font-semibold">
+                      {row.campaignName} · {row.pledgeTypeName}
+                    </span>
+                    <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+                      {row.subtitle}
+                    </span>
+                  </span>
+                  <span
+                    className={
+                      row.closed
+                        ? "shrink-0 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-950 dark:text-green-300"
+                        : "shrink-0 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                    }
                   >
-                    <span>
-                      <span className="block text-zinc-900 dark:text-zinc-100">
-                        {row.campaignName} · {row.pledgeTypeName}
-                      </span>
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {row.subtitle}
-                      </span>
-                    </span>
-                    <span
-                      className={
-                        row.closed
-                          ? "rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                          : "rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                      }
-                    >
-                      {row.closed ? "Fechado" : "Em aberto"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                    {row.closed ? "Fechado" : "Em aberto"}
+                  </span>
+                  <ChevronRightIcon className="h-5 w-5 shrink-0 text-zinc-500" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-        {session.user.canReceiveFunds && !donor.anonymizedAt ? (
-          <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
-            <h2 className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">
-              Excluir dados deste doador
-            </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              O nome é removido permanentemente. O histórico de parcelas pagas é mantido, sem
-              vínculo com o nome.
+      {session.user.canReceiveFunds && !donor.anonymizedAt ? (
+        <section className="flex flex-col gap-2">
+          <SectionTitle>Excluir dados deste doador</SectionTitle>
+          <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+              O nome é removido para sempre. O histórico de parcelas pagas continua, mas sem o nome.
             </p>
             <AnonymizeDonorButton action={removeData} />
           </div>
-        ) : null}
-      </div>
-    </div>
+        </section>
+      ) : null}
+    </PageShell>
   );
 }

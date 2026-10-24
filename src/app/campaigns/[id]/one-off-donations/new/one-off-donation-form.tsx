@@ -29,7 +29,7 @@ function ReceivedBySelect({
 
   return (
     <>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
         Recebido por
         <select
           name="receivedByUserId"
@@ -37,7 +37,7 @@ function ReceivedBySelect({
           onChange={(event) => {
             setReceivedByUserId(event.target.value);
           }}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         >
           {users.map((user) => (
             <option key={user.id} value={user.id}>
@@ -47,7 +47,7 @@ function ReceivedBySelect({
         </select>
       </label>
       {receivedByUserId !== currentUserId ? (
-        <p className="rounded bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+        <p className="rounded-xl bg-amber-50 p-3 text-[15px] text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
           ⚠ Registrando em nome de outra pessoa
         </p>
       ) : null}
@@ -58,9 +58,11 @@ function ReceivedBySelect({
 export function OneOffDonationForm({
   users,
   currentUserId,
+  backHref,
   action,
 }: {
   users: { id: string; name: string }[];
+  backHref: string;
   currentUserId: string;
   action: (
     prevState: CreateOneOffDonationState,
@@ -80,30 +82,34 @@ export function OneOffDonationForm({
     <form
       ref={formRef}
       action={formAction}
-      className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950"
+      className="flex w-full max-w-md flex-col gap-5 self-start rounded-2xl border border-zinc-200 bg-white p-6 text-zinc-900 sm:self-auto sm:p-8 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
     >
-      <BackLink href="/" />
-      <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Doação avulsa</h1>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <BackLink href={backHref} />
+      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Doação sem carnê</h1>
+      <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
         Para quem contribui sem ter um carnê.
       </p>
-      {state.error ? <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
-      {state.success ? (
-        <p className="rounded bg-green-50 p-3 text-sm text-green-600 dark:bg-green-950/30 dark:text-green-400">
-          Doação registrada com sucesso.
+      {state.error ? (
+        <p className="rounded-xl bg-red-50 p-3 text-[15px] text-red-800 dark:bg-red-950/50 dark:text-red-300">
+          {state.error}
         </p>
       ) : null}
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+      {state.success ? (
+        <p className="rounded-xl bg-green-50 p-3 text-[15px] text-green-800 dark:bg-green-950/50 dark:text-green-300">
+          Doação registrada com sucesso. Preencha de novo para registrar outra, ou toque em Voltar.
+        </p>
+      ) : null}
+      <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
         Nome do doador
         <input
           name="donorName"
           type="text"
           placeholder="Nome (ou deixe em branco p/ anônimo)"
           defaultValue={state.values?.donorName ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
         Valor (R$)
         <input
           name="amount"
@@ -112,23 +118,23 @@ export function OneOffDonationForm({
           min="0.01"
           required
           defaultValue={state.values?.amount ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
         Data
         <input
           name="date"
           type="date"
           required
           defaultValue={state.values?.date ?? ""}
-          className="rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16] dark:bg-black"
+          className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+      <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
         Forma de pagamento
         <div className="flex gap-4 pt-1">
-          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16]">
+          <label className="flex min-h-12 flex-1 items-center gap-3 rounded-xl border border-zinc-300 px-4 text-base dark:border-zinc-700">
             <input
               type="radio"
               name="paymentMethod"
@@ -139,7 +145,7 @@ export function OneOffDonationForm({
             />
             Pix
           </label>
-          <label className="flex items-center gap-2 rounded border border-black/[.08] px-3 py-2.5 text-base dark:border-white/[.16]">
+          <label className="flex min-h-12 flex-1 items-center gap-3 rounded-xl border border-zinc-300 px-4 text-base dark:border-zinc-700">
             <input
               type="radio"
               name="paymentMethod"

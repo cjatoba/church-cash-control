@@ -32,21 +32,23 @@ export function AddContributionButton({
       <button
         type="button"
         onClick={openDialog}
-        className="self-start rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+        className="inline-flex min-h-16 w-full items-center justify-center gap-2 rounded-full bg-zinc-900 px-6 text-lg font-semibold text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
       >
-        + Registrar contribuição
+        + Registrar entrega
       </button>
       <dialog
         ref={dialogRef}
-        className="rounded-lg border border-black/[.08] bg-white p-6 text-sm text-black shadow-lg backdrop:bg-black/40 dark:border-white/[.16] dark:bg-zinc-950 dark:text-zinc-50"
+        className="w-[min(92vw,24rem)] rounded-2xl border border-zinc-200 bg-white p-6 text-base text-zinc-900 shadow-xl backdrop:bg-black/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
       >
-        <form action={formAction} className="flex w-72 flex-col gap-4">
-          <p className="font-semibold">Registrar contribuição</p>
+        <form action={formAction} className="flex flex-col gap-4">
+          <p className="text-lg font-semibold">Registrar entrega</p>
           {state.error ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+            <p className="rounded-xl bg-red-50 p-3 text-[15px] text-red-800 dark:bg-red-950/50 dark:text-red-300">
+              {state.error}
+            </p>
           ) : null}
 
-          <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+          <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
             Valor (R$)
             <input
               name="amount"
@@ -55,11 +57,11 @@ export function AddContributionButton({
               min="0.01"
               required
               defaultValue={state.values?.amount ?? ""}
-              className="rounded border border-black/[.08] px-3 py-2 text-base dark:border-white/[.16] dark:bg-black"
+              className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+          <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
             Forma de pagamento
             <div className="flex gap-4 pt-1">
               <label className="flex items-center gap-2">
@@ -84,12 +86,12 @@ export function AddContributionButton({
             </div>
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+          <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
             Recebido por
             <select
               name="receivedByUserId"
               defaultValue={receivedByUserId}
-              className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
+              className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
@@ -99,7 +101,7 @@ export function AddContributionButton({
             </select>
           </label>
 
-          <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+          <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
             Data
             <input
               name="date"
@@ -107,7 +109,7 @@ export function AddContributionButton({
               defaultValue={state.values?.date ?? todayIso}
               max={todayIso}
               required
-              className="rounded border border-black/[.08] px-3 py-2 dark:border-white/[.16] dark:bg-black"
+              className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
           </label>
 
@@ -115,7 +117,7 @@ export function AddContributionButton({
             <button
               type="button"
               onClick={() => dialogRef.current?.close()}
-              className="rounded-full border border-black/[.08] px-4 py-2.5 text-sm text-zinc-700 dark:border-white/[.16] dark:text-zinc-300"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-base font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               Cancelar
             </button>

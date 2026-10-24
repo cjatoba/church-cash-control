@@ -2,14 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
-
-const variantClasses = {
-  primary:
-    "rounded-full bg-foreground px-5 py-2.5 font-medium text-background hover:bg-[#383838] dark:hover:bg-[#ccc]",
-  outline:
-    "rounded-full border border-black/[.08] px-3 py-2 text-sm text-zinc-700 hover:border-black/[.14] dark:border-white/[.16] dark:text-zinc-300 dark:hover:border-white/[.22]",
-  text: "rounded px-2 py-1.5 text-xs text-zinc-600 underline hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50",
-} as const;
+import { buttonBaseClassName, buttonClassNames, type ButtonVariant } from "./button-styles";
 
 export function SubmitButton({
   children,
@@ -18,7 +11,7 @@ export function SubmitButton({
 }: {
   children: ReactNode;
   pendingLabel: string;
-  variant?: keyof typeof variantClasses;
+  variant?: ButtonVariant;
 }) {
   const { pending } = useFormStatus();
 
@@ -26,7 +19,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={pending}
-      className={`flex items-center justify-center gap-2 transition-colors disabled:opacity-60 ${variantClasses[variant]}`}
+      className={`${buttonBaseClassName} ${buttonClassNames[variant]}`}
     >
       {pending ? (
         <>

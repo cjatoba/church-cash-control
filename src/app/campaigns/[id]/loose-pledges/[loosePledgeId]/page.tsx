@@ -9,7 +9,11 @@ import { createLoosePledgeContributionRepository } from "@/server/infrastructure
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
-import { BackLink } from "@/app/_components/back-link";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { Card, SectionTitle } from "@/app/_components/card";
+import { formatCurrency } from "@/app/_lib/format";
+import { Money } from "@/server/domain/money";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { ArchiveBoxIcon, ArrowPathIcon } from "@/app/_components/icons";
 import {
@@ -17,7 +21,6 @@ import {
   type AddContributionState,
 } from "./_components/add-contribution-button";
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
 const paymentMethodLabels: Record<string, string> = {
@@ -131,91 +134,101 @@ export default async function LoosePledgeDetailPage({
   const todayIso = new Date().toISOString().slice(0, 10);
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href={`/campaigns/${campaignId}/donors`} />
-        <div className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-2">
-            <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
-              {loosePledge.donorName}
-            </h1>
-            <span
-              className={
-                closed
-                  ? "shrink-0 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-400"
-                  : "shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-              }
-            >
-              {closed ? "Fechado" : "Em aberto"}
-            </span>
-          </div>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Carnê {loosePledge.pledgeTypeName} (avulso) · arrecadado{" "}
-            <span className="font-semibold text-black dark:text-zinc-50">
-              {currencyFormatter.format(totalCents / 100)}
-            </span>
-          </p>
-        </div>
+    <PageShell>
+      <PageHeader
+        backHref={`/campaigns/${campaignId}/donors`}
+        title={loosePledge.donorName}
+        subtitle={`Carnê ${loosePledge.pledgeTypeName} · valor livre`}
+      />
 
-        <ul className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
-          {loosePledge.contributions.length === 0 ? (
-            <li className="text-sm text-zinc-600 dark:text-zinc-400">
-              Nenhuma contribuição registrada ainda.
-            </li>
-          ) : (
-            loosePledge.contributions.map((contribution) => (
-              <li
-                key={contribution.id}
-                className="flex flex-col gap-1 rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
-              >
-                <div className="flex items-center justify-between">
-                  <span>{dateFormatter.format(contribution.date)}</span>
-                  <span className="text-base font-semibold text-black dark:text-zinc-50">
-                    {currencyFormatter.format(contribution.amount.toCents() / 100)}
+      <Card>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Já entregou</span>
+          <span
+            className={
+              closed
+                ? "rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-950 dark:text-green-300"
+                : "rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+            }
+          >
+            {closed ? "Fechado" : "Em aberto"}
+          </span>
+        </div>
+        <span className="text-3xl font-bold">{formatCurrency(Money.fromCents(totalCents))}</span>
+        <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+          {loosePledge.contributions.length === 1
+            ? "1 entrega"
+            : `${String(loosePledge.contributions.length)} entregas`}
+        </span>
+      </Card>
+
+      {session.user.canReceiveFunds && !closed ? (
+        <AddContributionButton
+          users={users}
+          currentUserId={session.user.id}
+          todayIso={todayIso}
+          action={addContribution}
+        />
+      ) : null}
+
+      <section className="flex flex-col gap-2">
+        <SectionTitle>Entregas</SectionTitle>
+        {loosePledge.contributions.length === 0 ? (
+          <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            Nenhuma entrega registrada ainda.
+          </p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+            {loosePledge.contributions.map((contribution) => (
+              <li key={contribution.id} className="flex flex-col gap-1 px-4 py-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[17px]">{dateFormatter.format(contribution.date)}</span>
+                  <span className="text-[17px] font-semibold">
+                    {formatCurrency(contribution.amount)}
                   </span>
                 </div>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
                   {paymentMethodLabels[contribution.paymentMethod] ?? contribution.paymentMethod} ·
-                  Recebido por {contribution.receivedByLabel}
+                  recebido por {contribution.receivedByLabel}
                 </span>
                 {contribution.registeredByLabel !== contribution.receivedByLabel ? (
-                  <span className="text-xs text-amber-700 dark:text-amber-400">
-                    ⚠ Registrado por {contribution.registeredByLabel}
+                  <span className="text-[15px] text-amber-800 dark:text-amber-300">
+                    Registrado por {contribution.registeredByLabel}
                   </span>
                 ) : null}
               </li>
-            ))
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
+      </section>
 
-        {session.user.canReceiveFunds ? (
-          <div className="flex flex-wrap items-center gap-3 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
-            {!closed ? (
-              <>
-                <AddContributionButton
-                  users={users}
-                  currentUserId={session.user.id}
-                  todayIso={todayIso}
-                  action={addContribution}
-                />
-                <form action={close}>
-                  <SubmitButton pendingLabel="Encerrando…" variant="outline">
-                    <ArchiveBoxIcon className="h-4 w-4" />
-                    Encerrar
-                  </SubmitButton>
-                </form>
-              </>
-            ) : (
+      {session.user.canReceiveFunds ? (
+        <section className="flex flex-col gap-2">
+          <SectionTitle>Situação do carnê</SectionTitle>
+          <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+              {closed
+                ? "Este carnê foi encerrado. Reabra se o doador voltar a entregar valores."
+                : "Encerre quando o doador não for entregar mais nada neste carnê."}
+            </p>
+            {closed ? (
               <form action={reopen}>
                 <SubmitButton pendingLabel="Reabrindo…" variant="outline">
-                  <ArrowPathIcon className="h-4 w-4" />
-                  Reabrir
+                  <ArrowPathIcon className="h-5 w-5" />
+                  Reabrir carnê
+                </SubmitButton>
+              </form>
+            ) : (
+              <form action={close}>
+                <SubmitButton pendingLabel="Encerrando…" variant="outline">
+                  <ArchiveBoxIcon className="h-5 w-5" />
+                  Encerrar carnê
                 </SubmitButton>
               </form>
             )}
           </div>
-        ) : null}
-      </div>
-    </div>
+        </section>
+      ) : null}
+    </PageShell>
   );
 }

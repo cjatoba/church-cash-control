@@ -1,4 +1,4 @@
-import { eq, isNotNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import type { CampaignRepository } from "@/server/application/create-campaign";
 import type { CampaignListRepository } from "@/server/application/list-campaigns";
 import type { CampaignPeriodReader } from "@/server/application/create-pledge";
@@ -6,6 +6,7 @@ import type { CampaignGoalPeriodReader } from "@/server/application/get-monthly-
 import type { CampaignUpdateRepository } from "@/server/application/update-campaign";
 import type { CampaignArchiveRepository } from "@/server/application/archive-campaign";
 import type { CampaignDetailRepository } from "@/server/application/get-campaign";
+import type { CampaignOverviewRepository } from "@/server/application/get-campaign-overview";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
 import {
@@ -17,7 +18,10 @@ import {
   pledges,
 } from "./schema";
 
-async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
+async function sumRaisedByCampaign(
+  db: DbClient,
+  onlyCampaignId?: string,
+): Promise<Map<string, number>> {
   const installmentRows = await db
     .select({
       campaignId: pledges.campaignId,
@@ -25,7 +29,12 @@ async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
     })
     .from(installments)
     .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
-    .where(isNotNull(installments.paidAt))
+    .where(
+      and(
+        isNotNull(installments.paidAt),
+        onlyCampaignId ? eq(pledges.campaignId, onlyCampaignId) : undefined,
+      ),
+    )
     .groupBy(pledges.campaignId);
 
   const donationRows = await db
@@ -34,6 +43,7 @@ async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
       totalCents: sql<number>`coalesce(sum(${oneOffDonations.amountCents}), 0)::int`,
     })
     .from(oneOffDonations)
+    .where(onlyCampaignId ? eq(oneOffDonations.campaignId, onlyCampaignId) : undefined)
     .groupBy(oneOffDonations.campaignId);
 
   const loosePledgeContributionRows = await db
@@ -43,6 +53,7 @@ async function sumRaisedByCampaign(db: DbClient): Promise<Map<string, number>> {
     })
     .from(loosePledgeContributions)
     .innerJoin(loosePledges, eq(loosePledgeContributions.loosePledgeId, loosePledges.id))
+    .where(onlyCampaignId ? eq(loosePledges.campaignId, onlyCampaignId) : undefined)
     .groupBy(loosePledges.campaignId);
 
   const totals = new Map<string, number>();
@@ -60,7 +71,8 @@ export function createCampaignRepository(
   CampaignGoalPeriodReader &
   CampaignUpdateRepository &
   CampaignArchiveRepository &
-  CampaignDetailRepository {
+  CampaignDetailRepository &
+  CampaignOverviewRepository {
   return {
     async create(campaign) {
       const [row] = await db
@@ -117,6 +129,26 @@ export function createCampaignRepository(
         startDate: row.startDate,
         endDate: row.endDate,
         active: row.active,
+      };
+    },
+
+    async findSummaryById(campaignId) {
+      const [[row], raisedByCampaign] = await Promise.all([
+        db.select().from(campaigns).where(eq(campaigns.id, campaignId)).limit(1),
+        sumRaisedByCampaign(db, campaignId),
+      ]);
+
+      if (!row) {
+        return null;
+      }
+      return {
+        id: row.id,
+        name: row.name,
+        goal: Money.fromCents(row.goalCents),
+        startDate: row.startDate,
+        endDate: row.endDate,
+        active: row.active,
+        raisedTotal: Money.fromCents(raisedByCampaign.get(row.id) ?? 0),
       };
     },
 

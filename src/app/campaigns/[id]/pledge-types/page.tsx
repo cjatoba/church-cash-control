@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
-import { BackLink } from "@/app/_components/back-link";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { formatCurrency } from "@/app/_lib/format";
 import { auth } from "@/auth";
 import { createPledgeType } from "@/server/application/create-pledge-type";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
@@ -11,11 +13,6 @@ import { PledgeTypeForm, type CreatePledgeTypeState } from "./pledge-type-form";
 function toStringValue(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value : "";
 }
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
 
 export default async function PledgeTypesPage({
   params,
@@ -67,37 +64,32 @@ export default async function PledgeTypesPage({
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href="/" />
-        <h1 className="text-xl font-semibold text-black dark:text-zinc-50">Tipos de carnê</h1>
+    <PageShell>
+      <PageHeader backHref={`/campaigns/${campaignId}`} title="Tipos de carnê" />
 
-        {pledgeTypes.length === 0 ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Nenhum tipo de carnê cadastrado ainda.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {pledgeTypes.map((pledgeType) => (
-              <li
-                key={pledgeType.id}
-                className="flex items-center justify-between rounded border border-black/[.08] px-3 py-3 text-sm dark:border-white/[.16]"
-              >
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {pledgeType.name}
-                </span>
-                <span className="text-sm font-semibold text-black dark:text-zinc-50">
-                  {pledgeType.installmentValue
-                    ? `${currencyFormatter.format(pledgeType.installmentValue.toCents() / 100)}/mês`
-                    : "Avulso (valor livre)"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+      {pledgeTypes.length === 0 ? (
+        <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          Nenhum tipo de carnê cadastrado ainda.
+        </p>
+      ) : (
+        <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+          {pledgeTypes.map((pledgeType) => (
+            <li
+              key={pledgeType.id}
+              className="flex min-h-14 items-center justify-between gap-3 px-4 py-3"
+            >
+              <span className="text-[17px] font-semibold">{pledgeType.name}</span>
+              <span className="text-[17px] text-zinc-700 dark:text-zinc-300">
+                {pledgeType.installmentValue
+                  ? `${formatCurrency(pledgeType.installmentValue)}/mês`
+                  : "Valor livre"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
 
-        {canManageCampaigns ? <PledgeTypeForm action={create} /> : null}
-      </div>
-    </div>
+      {canManageCampaigns ? <PledgeTypeForm action={create} /> : null}
+    </PageShell>
   );
 }

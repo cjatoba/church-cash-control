@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calculateCampaignProgressPercentage, parseCampaign } from "@/server/domain/campaign";
+import {
+  calculateAmountLeftToGoal,
+  calculateCampaignProgressPercentage,
+  parseCampaign,
+} from "@/server/domain/campaign";
 import { Money } from "@/server/domain/money";
 
 describe("parseCampaign", () => {
@@ -77,5 +81,19 @@ describe("calculateCampaignProgressPercentage", () => {
     );
 
     expect(percentage).toBe(100);
+  });
+});
+
+describe("calculateAmountLeftToGoal", () => {
+  it("retorna quanto ainda falta arrecadar para chegar na meta", () => {
+    const left = calculateAmountLeftToGoal(Money.fromReais(300), Money.fromReais(1000));
+
+    expect(left.toCents()).toBe(Money.fromReais(700).toCents());
+  });
+
+  it("retorna zero quando a meta já foi alcançada ou ultrapassada", () => {
+    const left = calculateAmountLeftToGoal(Money.fromReais(1200), Money.fromReais(1000));
+
+    expect(left.toCents()).toBe(0);
   });
 });

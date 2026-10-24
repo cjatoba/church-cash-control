@@ -1,5 +1,4 @@
 import { notFound, redirect } from "next/navigation";
-import { BackLink } from "@/app/_components/back-link";
 import { auth } from "@/auth";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
 import { payInstallment } from "@/server/application/pay-installment";
@@ -10,6 +9,13 @@ import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { CheckCircleIcon, ClockIcon } from "@/app/_components/icons";
+import { PageShell } from "@/app/_components/page-shell";
+import { PageHeader } from "@/app/_components/page-header";
+import { Card } from "@/app/_components/card";
+import { ProgressBar } from "@/app/_components/progress-bar";
+import { Tabs } from "@/app/_components/tabs";
+import { formatCurrency, formatMonthLabel } from "@/app/_lib/format";
+import { Money } from "@/server/domain/money";
 import { createInstallmentRepository } from "@/server/infrastructure/db/installment-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createCustodyRepository } from "@/server/infrastructure/db/custody-repository";
@@ -19,24 +25,10 @@ import { createDbClient } from "@/server/infrastructure/db/client";
 import { PayInstallmentButton } from "../_components/pay-installment-button";
 import { EditPaymentDateButton } from "../_components/edit-payment-date-button";
 
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
 const paymentMethodLabels: Record<string, string> = {
   pix: "Pix",
   cash: "Dinheiro",
 };
-
-function formatMonthLabel(date: Date): string {
-  const label = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(date);
-  return label.charAt(0).toUpperCase() + label.slice(1).replace(" de ", "/");
-}
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
@@ -210,120 +202,148 @@ export default async function PledgeDetailPage({
     (sum, installment) => sum + (installment.paidAmount?.toCents() ?? 0),
     0,
   );
-  const pledgeClosed = pledge.installments.length > 0 && paidCount === pledge.installments.length;
+  const progressPercentage =
+    pledge.installments.length === 0
+      ? 0
+      : Math.round((paidCount / pledge.installments.length) * 100);
+  const pendingInstallments = pledge.installments.filter((installment) => !installment.paidAt);
+  const paidInstallments = pledge.installments
+    .filter((installment) => installment.paidAt)
+    .reverse();
 
-  return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black py-10">
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-        <BackLink href={`/campaigns/${campaignId}/donors`} />
-        <div className="flex flex-col gap-2">
-          <div>
-            <h1 className="text-xl font-semibold text-black dark:text-zinc-50">
-              {pledge.donorName}
-            </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Carnê {pledge.pledgeTypeName} ·{" "}
-              {currencyFormatter.format(pledge.installmentValue.toCents() / 100)}/mês
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-baseline justify-between text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">
-                Pago:{" "}
-                <span className="text-base font-semibold text-black dark:text-zinc-50">
-                  {currencyFormatter.format(paidCents / 100)}
-                </span>{" "}
-                de {currencyFormatter.format(totalCents / 100)}
+  const pendingList =
+    pendingInstallments.length === 0 ? (
+      <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+        Nenhuma parcela a pagar — carnê quitado.
+      </p>
+    ) : (
+      <ul className="flex flex-col gap-3">
+        {pendingInstallments.map((installment) => (
+          <li
+            key={installment.id}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3.5 dark:border-zinc-800 dark:bg-zinc-900"
+          >
+            <span className="flex flex-col gap-0.5">
+              <span className="text-[17px] font-semibold">
+                {formatMonthLabel(installment.dueDate)}
               </span>
-              <span
-                className={
-                  pledgeClosed
-                    ? "font-medium text-green-700 dark:text-green-400"
-                    : "text-zinc-500 dark:text-zinc-400"
-                }
-              >
-                {paidCount} de {pledge.installments.length}
+              <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+                {formatCurrency(installment.amount)}
               </span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-black/[.08] dark:bg-white/[.12]">
-              <div
-                className={
-                  pledgeClosed
-                    ? "h-full rounded-full bg-green-600"
-                    : "h-full rounded-full bg-amber-500"
-                }
-                style={{
-                  width: `${String(Math.round((paidCount / pledge.installments.length) * 100))}%`,
-                }}
+            </span>
+            {session.user.canReceiveFunds ? (
+              <PayInstallmentButton
+                installmentId={installment.id}
+                donorName={pledge.donorName}
+                amountCents={installment.amount.toCents()}
+                monthLabel={formatMonthLabel(installment.dueDate)}
+                amountLabel={formatCurrency(installment.amount)}
+                todayIso={todayIso}
+                users={users}
+                currentUserId={session.user.id}
+                action={markInstallmentAsPaid}
               />
-            </div>
-          </div>
-        </div>
+            ) : (
+              <span className="flex items-center gap-1.5 text-[15px] font-medium text-amber-800 dark:text-amber-300">
+                <ClockIcon className="h-5 w-5 shrink-0" />
+                Pendente
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
+    );
 
-        <ul className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
-          {pledge.installments.map((installment) => (
+  const paidList =
+    paidInstallments.length === 0 ? (
+      <p className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+        Nenhuma parcela paga ainda.
+      </p>
+    ) : (
+      <ul className="flex flex-col gap-3">
+        {paidInstallments.map((installment) =>
+          installment.paidAt ? (
             <li
               key={installment.id}
-              className="flex flex-col gap-2 rounded border border-black/[.08] px-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between dark:border-white/[.16]"
+              className="flex flex-col gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-3.5 dark:border-zinc-800 dark:bg-zinc-900"
             >
-              <span>
-                {formatMonthLabel(installment.dueDate)} ·{" "}
-                {currencyFormatter.format(installment.amount.toCents() / 100)}
+              <span className="flex items-center justify-between gap-3">
+                <span className="text-[17px] font-semibold">
+                  {formatMonthLabel(installment.dueDate)}
+                </span>
+                <span className="flex items-center gap-1.5 text-[15px] font-semibold text-green-700 dark:text-green-400">
+                  <CheckCircleIcon className="h-5 w-5 shrink-0" />
+                  Pago
+                </span>
               </span>
-              {installment.paidAt ? (
-                <div className="flex flex-col gap-1 sm:items-end">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
-                      <CheckCircleIcon className="h-3.5 w-3.5 shrink-0" />
-                      Pago em {dateFormatter.format(installment.paidAt)}
-                      {installment.paymentMethod
-                        ? ` · ${paymentMethodLabels[installment.paymentMethod] ?? installment.paymentMethod}`
-                        : ""}
-                      {installment.receivedByLabel
-                        ? ` · Recebido por ${installment.receivedByLabel}`
-                        : ""}
-                    </span>
-                    {session.user.canReceiveFunds ? (
-                      <EditPaymentDateButton
-                        installmentId={installment.id}
-                        donorName={pledge.donorName}
-                        amountCents={(installment.paidAmount ?? installment.amount).toCents()}
-                        currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
-                        todayIso={todayIso}
-                        correctAction={correctPaymentDate}
-                        revertAction={revertPayment}
-                      />
-                    ) : null}
-                  </div>
-                  {installment.registeredByLabel &&
-                  installment.registeredByLabel !== installment.receivedByLabel ? (
-                    <span className="text-xs text-amber-700 dark:text-amber-400">
-                      ⚠ Registrado por {installment.registeredByLabel}
-                    </span>
-                  ) : null}
-                </div>
-              ) : session.user.canReceiveFunds ? (
-                <PayInstallmentButton
+              <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+                {dateFormatter.format(installment.paidAt)}
+                {installment.paymentMethod
+                  ? ` · ${paymentMethodLabels[installment.paymentMethod] ?? installment.paymentMethod}`
+                  : ""}
+                {installment.receivedByLabel
+                  ? ` · recebido por ${installment.receivedByLabel}`
+                  : ""}
+              </span>
+              {installment.registeredByLabel &&
+              installment.registeredByLabel !== installment.receivedByLabel ? (
+                <span className="text-[15px] text-amber-800 dark:text-amber-300">
+                  Registrado por {installment.registeredByLabel}
+                </span>
+              ) : null}
+              {session.user.canReceiveFunds ? (
+                <EditPaymentDateButton
                   installmentId={installment.id}
                   donorName={pledge.donorName}
-                  amountCents={installment.amount.toCents()}
-                  monthLabel={formatMonthLabel(installment.dueDate)}
-                  amountLabel={currencyFormatter.format(installment.amount.toCents() / 100)}
+                  amountCents={(installment.paidAmount ?? installment.amount).toCents()}
+                  currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
                   todayIso={todayIso}
-                  users={users}
-                  currentUserId={session.user.id}
-                  action={markInstallmentAsPaid}
+                  correctAction={correctPaymentDate}
+                  revertAction={revertPayment}
                 />
-              ) : (
-                <span className="flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-400">
-                  <ClockIcon className="h-3.5 w-3.5 shrink-0" />
-                  Pendente
-                </span>
-              )}
+              ) : null}
             </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+          ) : null,
+        )}
+      </ul>
+    );
+
+  return (
+    <PageShell>
+      <PageHeader
+        backHref={`/campaigns/${campaignId}/donors`}
+        title={pledge.donorName}
+        subtitle={`Carnê ${pledge.pledgeTypeName} · ${formatCurrency(pledge.installmentValue)}/mês`}
+      />
+
+      <Card>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Já pagou</span>
+          <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+            {paidCount} de {pledge.installments.length} parcelas
+          </span>
+        </div>
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <span className="text-3xl font-bold">{formatCurrency(Money.fromCents(paidCents))}</span>
+          <span className="text-[15px] text-zinc-600 dark:text-zinc-400">
+            de {formatCurrency(Money.fromCents(totalCents))}
+          </span>
+        </div>
+        <ProgressBar percentage={progressPercentage} />
+      </Card>
+
+      <Tabs
+        label="Parcelas"
+        initialTabId={pendingInstallments.length > 0 ? "pending" : "paid"}
+        tabs={[
+          {
+            id: "pending",
+            label: `A pagar (${String(pendingInstallments.length)})`,
+            content: pendingList,
+          },
+          { id: "paid", label: `Pagas (${String(paidInstallments.length)})`, content: paidList },
+        ]}
+      />
+    </PageShell>
   );
 }

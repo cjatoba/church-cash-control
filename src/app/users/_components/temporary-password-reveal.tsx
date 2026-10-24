@@ -16,20 +16,20 @@ export function TemporaryPasswordReveal({
   secondaryAction?: { onClick: () => void; label: string };
 }) {
   return (
-    <div className="flex w-full max-w-sm flex-col gap-4 rounded-lg border border-black/[.08] bg-white p-8 dark:border-white/[.16] dark:bg-zinc-950">
-      <h1 className="text-xl font-semibold text-black dark:text-zinc-50">{title}</h1>
-      <p className="rounded bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/30 dark:text-green-400">
+    <div className="flex w-full max-w-md flex-col gap-5 self-start rounded-2xl border border-zinc-200 bg-white p-6 text-zinc-900 sm:self-auto sm:p-8 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{title}</h1>
+      <p className="rounded-xl bg-green-50 p-3 text-[15px] text-green-800 dark:bg-green-950/50 dark:text-green-300">
         {message}
       </p>
 
-      <div className="flex flex-col gap-1 rounded border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/30">
-        <span className="text-xs font-medium tracking-wide text-amber-700 uppercase dark:text-amber-400">
+      <div className="flex flex-col gap-1 rounded-xl border border-amber-300 bg-amber-50 p-4 text-[15px] text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <span className="text-sm font-semibold tracking-wide text-amber-800 uppercase dark:text-amber-300">
           Senha temporária — anote agora
         </span>
         <span className="font-mono text-base text-black dark:text-zinc-50">
           {temporaryPassword}
         </span>
-        <span className="text-xs text-amber-700 dark:text-amber-400">
+        <span className="text-[15px] text-amber-800 dark:text-amber-300">
           Ela só aparece aqui uma vez. A pessoa será obrigada a trocar no primeiro acesso.
         </span>
       </div>
@@ -38,17 +38,17 @@ export function TemporaryPasswordReveal({
         href={whatsappLink}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1ebe57]"
+        className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 text-base font-semibold text-zinc-950 transition-colors hover:bg-[#1ebe57]"
       >
         Abrir WhatsApp com o convite
       </a>
 
-      <div className="flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.16]">
+      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
         {secondaryAction ? (
           <button
             type="button"
             onClick={secondaryAction.onClick}
-            className="text-left text-sm text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
+            className="min-h-11 text-left text-[15px] text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50"
           >
             {secondaryAction.label}
           </button>
