@@ -761,8 +761,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     (efeito colateral positivo: o ícone da aba deixa de falhar na tela
     de login).
 
-## Em andamento (PRs abertas)
-
 - **Personalizar nome e ícone do app** — PR #65: hoje nome ("Controle de Caixa",
   curto "Caixa") e ícone ("R$" verde) são fixos no código, iguais para
   qualquer igreja que use o sistema — contra a regra de que dado de uma
@@ -794,6 +792,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     `unstable_cache` no Next 16, exigiria ligar `cacheComponents` no app
     inteiro. O manifesto passou a ser dinâmico (`force-dynamic`), senão o
     build tentaria ler o banco (que não existe no CI).
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
