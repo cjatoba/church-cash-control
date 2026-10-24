@@ -763,7 +763,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Personalizar nome e ícone do app**: hoje nome ("Controle de Caixa",
+- **Personalizar nome e ícone do app** — PR #65: hoje nome ("Controle de Caixa",
   curto "Caixa") e ícone ("R$" verde) são fixos no código, iguais para
   qualquer igreja que use o sistema — contra a regra de que dado de uma
   instância vive no banco. Tela "Personalizar app" (menu →
