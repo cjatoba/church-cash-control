@@ -705,8 +705,8 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Redesign das telas (navegação por seções + modo escuro opcional)**:
-  hoje o card de cada campanha no painel inicial junta 7 ações (tipos de
+- **Redesign das telas (navegação por seções + modo escuro opcional)** —
+  PR #61: hoje o card de cada campanha no painel inicial junta 7 ações (tipos de
   carnê, doadores, doação avulsa, painel mensal, dinheiro em mãos,
   editar, arquivar) e o cabeçalho junta 5 links — tudo na tela ao mesmo
   tempo, difícil de entender o fluxo. Mockup aprovado pelo usuário antes
