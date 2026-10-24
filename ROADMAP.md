@@ -866,7 +866,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Cadastro retroativo de carnê (mês da primeira parcela)** — PR a abrir
+- **Cadastro retroativo de carnê (mês da primeira parcela)** — PR #73
   (achado pelo usuário ao cadastrar em produção doadores que pegaram o
   carnê antes): o carnê de valor fixo sempre começava no mês do cadastro,
   então um carnê de 5 parcelas cadastrado com atraso só aceitava 4.
