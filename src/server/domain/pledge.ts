@@ -11,6 +11,10 @@ const pledgeInputSchema = z.object({
     .int()
     .positive("Quantidade de parcelas deve ser maior que zero")
     .optional(),
+  firstInstallmentMonth: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "Mês da primeira parcela inválido")
+    .optional(),
 });
 
 export interface PledgeInput {
@@ -18,6 +22,7 @@ export interface PledgeInput {
   donorId: string;
   pledgeTypeId: string;
   installmentCount?: number;
+  firstInstallmentMonth?: string;
 }
 
 export function parsePledgeInput(input: unknown): PledgeInput {
@@ -55,6 +60,34 @@ export function countRemainingInstallments(startDate: Date, campaignEndDate: Dat
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
   return count;
+}
+
+/**
+ * Meses que podem ser o da primeira parcela: do início da campanha até o
+ * mês atual. Meses passados existem para cadastrar um carnê que a pessoa
+ * pegou antes (as parcelas desses meses nascem pendentes e recebem baixa
+ * com a data real); meses futuros não, porque não há caso de uso para eles.
+ */
+export function listFirstInstallmentMonths(
+  campaignStartDate: Date,
+  campaignEndDate: Date,
+  now: Date,
+): Date[] {
+  const currentMonth = firstDayOfMonth(now);
+  const endMonth = firstDayOfMonth(campaignEndDate);
+  const lastMonth = currentMonth < endMonth ? currentMonth : endMonth;
+
+  const months: Date[] = [];
+  const cursor = firstDayOfMonth(campaignStartDate);
+  while (cursor <= lastMonth) {
+    months.push(new Date(cursor));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+  return months;
+}
+
+export function toMonthKey(month: Date): string {
+  return month.toISOString().slice(0, 7);
 }
 
 /**

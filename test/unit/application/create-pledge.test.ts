@@ -21,7 +21,7 @@ function createDependencies(options?: {
     findPeriodById() {
       const endDate =
         options?.campaignEndDate === undefined ? new Date("2026-06-30") : options.campaignEndDate;
-      return Promise.resolve(endDate ? { endDate } : null);
+      return Promise.resolve(endDate ? { startDate: new Date("2026-01-01"), endDate } : null);
     },
   };
   const pledgeTypeReader: PledgeTypeReader = {
@@ -60,6 +60,46 @@ describe("createPledge", () => {
     expect(pledge?.pledgeTypeId).toBe(pledgeTypeId);
     expect(pledge?.installments).toHaveLength(4);
     expect(pledge?.installments[0]?.amount.toCents()).toBe(10000);
+  });
+
+  it("gera as parcelas a partir do mês escolhido, para cadastrar um carnê retroativo", async () => {
+    const dependencies = createDependencies();
+
+    await createPledge(
+      dependencies,
+      { ...validInput, firstInstallmentMonth: "2026-01", installmentCount: "5" },
+      new Date("2026-03-15"),
+    );
+
+    const dueMonths = dependencies.pledgeRepository.saved[0]?.installments.map((installment) =>
+      installment.dueDate.toISOString().slice(0, 7),
+    );
+    expect(dueMonths).toEqual(["2026-01", "2026-02", "2026-03", "2026-04", "2026-05"]);
+  });
+
+  it("rejeita mês da primeira parcela depois do mês atual", async () => {
+    const dependencies = createDependencies();
+
+    await expect(
+      createPledge(
+        dependencies,
+        { ...validInput, firstInstallmentMonth: "2026-04" },
+        new Date("2026-03-15"),
+      ),
+    ).rejects.toThrow("Mês da primeira parcela");
+    expect(dependencies.pledgeRepository.saved).toHaveLength(0);
+  });
+
+  it("rejeita mês da primeira parcela antes do início da campanha", async () => {
+    const dependencies = createDependencies();
+
+    await expect(
+      createPledge(
+        dependencies,
+        { ...validInput, firstInstallmentMonth: "2025-12" },
+        new Date("2026-03-15"),
+      ),
+    ).rejects.toThrow("Mês da primeira parcela");
   });
 
   it("rejeita quando o tipo de carnê não existe", async () => {

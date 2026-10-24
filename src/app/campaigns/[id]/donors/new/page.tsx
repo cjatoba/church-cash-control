@@ -6,7 +6,11 @@ import { createPledge } from "@/server/application/create-pledge";
 import { createLoosePledge } from "@/server/application/create-loose-pledge";
 import { getCampaign } from "@/server/application/get-campaign";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
-import { countRemainingInstallments } from "@/server/domain/pledge";
+import {
+  countRemainingInstallments,
+  listFirstInstallmentMonths,
+  toMonthKey,
+} from "@/server/domain/pledge";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDonorRepository } from "@/server/infrastructure/db/donor-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
@@ -53,7 +57,22 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
     notFound();
   }
 
-  const maxInstallmentCount = countRemainingInstallments(new Date(), campaign.endDate);
+  const now = new Date();
+  const currentMonthKey = toMonthKey(now);
+  const firstMonthOptions = listFirstInstallmentMonths(
+    campaign.startDate,
+    campaign.endDate,
+    now,
+  ).map((month) => {
+    const value = toMonthKey(month);
+    const label = formatMonthLabel(month).replace("/", " de ");
+    return {
+      value,
+      label: value === currentMonthKey ? `${label} (mês atual)` : label,
+      maxInstallmentCount: countRemainingInstallments(month, campaign.endDate),
+    };
+  });
+  const maxInstallmentCount = countRemainingInstallments(now, campaign.endDate);
 
   async function create(
     _prevState: CreateDonorState,
@@ -71,6 +90,7 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
       pledgeTypeId: formData.get("pledgeTypeId"),
       installmentCountMode: formData.get("installmentCountMode"),
       installmentCount: formData.get("installmentCount"),
+      firstInstallmentMonth: formData.get("firstInstallmentMonth"),
     };
 
     try {
@@ -97,6 +117,10 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
             donorId,
             pledgeTypeId,
             installmentCount: isCustomCount ? input.installmentCount : undefined,
+            firstInstallmentMonth:
+              typeof input.firstInstallmentMonth === "string"
+                ? input.firstInstallmentMonth
+                : undefined,
           },
         );
       } else {
@@ -117,6 +141,7 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
           pledgeTypeId: toStringValue(input.pledgeTypeId),
           installmentCountMode: toStringValue(input.installmentCountMode) || "full",
           installmentCount: toStringValue(input.installmentCount),
+          firstInstallmentMonth: toStringValue(input.firstInstallmentMonth),
         },
       };
     }
@@ -157,6 +182,7 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
             : null,
         }))}
         maxInstallmentCount={maxInstallmentCount}
+        firstMonthOptions={firstMonthOptions}
         campaignEndMonthLabel={formatMonthLabel(campaign.endDate)}
         action={create}
       />
