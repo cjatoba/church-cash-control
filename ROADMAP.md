@@ -703,8 +703,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     pessoal real recebido do usuário (mesmo para uso legítimo, como o
     backfill da migration) direto para dentro de um arquivo versionado.
 
-## Em andamento (PRs abertas)
-
 - **Redesign das telas (navegação por seções + modo escuro opcional)** —
   PR #61: hoje o card de cada campanha no painel inicial junta 7 ações (tipos de
   carnê, doadores, doação avulsa, painel mensal, dinheiro em mãos,
@@ -741,6 +739,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     → "Doação sem carnê", "contribuição" de carnê avulso → "entrega".
   - Lacuna corrigida junto: o `body` forçava `Arial`, então a fonte
     Geist carregada no layout nunca era usada de fato.
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
