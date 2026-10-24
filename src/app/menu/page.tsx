@@ -7,7 +7,13 @@ import { PageHeader, roundIconButtonClassName } from "@/app/_components/page-hea
 import { NavListItem, NavSection } from "@/app/_components/nav-list";
 import { SectionTitle } from "@/app/_components/card";
 import { LogoutButton } from "@/app/_components/logout-button";
-import { LockIcon, ClockIcon, UsersIcon, XMarkIcon } from "@/app/_components/icons";
+import {
+  ClockIcon,
+  DevicePhoneIcon,
+  LockIcon,
+  UsersIcon,
+  XMarkIcon,
+} from "@/app/_components/icons";
 import { THEME_COOKIE_NAME, parseThemePreference } from "@/app/_lib/theme";
 import { ThemeSelector } from "./theme-selector";
 
@@ -63,6 +69,13 @@ export default async function MenuPage() {
 
       <NavSection title="Minha conta">
         <NavListItem href="/account/password" title="Trocar senha" icon={<LockIcon />} />
+        <NavListItem
+          href="/install"
+          title="Instalar no celular"
+          description="Abrir como aplicativo, com ícone na tela"
+          icon={<DevicePhoneIcon className="h-6 w-6" />}
+          iconTone="blue"
+        />
       </NavSection>
 
       <section className="flex flex-col gap-2">
