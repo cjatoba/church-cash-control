@@ -97,66 +97,72 @@ export function AppBrandingForm({
         </label>
       </section>
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2">
-          <SectionTitle>Ícone</SectionTitle>
-        </legend>
+      {/* Ícone e cor vão em campos ocultos ligados ao estado, não em radios:
+          ao concluir a action o React reinicia o formulário, e radios voltariam
+          a marcar a opção da carga da página — inclusive no próximo envio. */}
+      <input type="hidden" name="icon" value={icon} />
+      <input type="hidden" name="color" value={color} />
+
+      <section className="flex flex-col gap-2">
+        <SectionTitle>Ícone</SectionTitle>
         <div className="grid grid-cols-4 gap-2 rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-          {appIcons.map((option) => (
-            <label
-              key={option}
-              className="flex min-h-21 cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 border-transparent p-2 has-checked:border-blue-700 has-checked:bg-blue-50 dark:has-checked:border-blue-400 dark:has-checked:bg-blue-950/40"
-            >
-              <input
-                type="radio"
-                name="icon"
-                value={option}
-                checked={icon === option}
-                onChange={() => {
+          {appIcons.map((option) => {
+            const selected = icon === option;
+            return (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => {
                   setIcon(option);
                 }}
-                className="sr-only"
-              />
-              <AppIconTile glyph={appIconGlyph(option, name)} background={background} size={48} />
-              <span className="text-xs text-zinc-700 dark:text-zinc-300">
-                {appIconLabels[option]}
-              </span>
-            </label>
-          ))}
+                className={
+                  selected
+                    ? "flex min-h-21 flex-col items-center gap-1.5 rounded-xl border-2 border-blue-700 bg-blue-50 p-2 dark:border-blue-400 dark:bg-blue-950/40"
+                    : "flex min-h-21 flex-col items-center gap-1.5 rounded-xl border-2 border-transparent p-2"
+                }
+              >
+                <AppIconTile glyph={appIconGlyph(option, name)} background={background} size={48} />
+                <span className="text-xs text-zinc-700 dark:text-zinc-300">
+                  {appIconLabels[option]}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </fieldset>
+      </section>
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2">
-          <SectionTitle>Cor de fundo</SectionTitle>
-        </legend>
+      <section className="flex flex-col gap-2">
+        <SectionTitle>Cor de fundo</SectionTitle>
         <div className="grid grid-cols-4 gap-2 rounded-2xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-          {appIconColors.map((option) => (
-            <label
-              key={option}
-              className="group flex min-h-16 cursor-pointer flex-col items-center gap-1.5 p-1"
-            >
-              <input
-                type="radio"
-                name="color"
-                value={option}
-                checked={color === option}
-                onChange={() => {
+          {appIconColors.map((option) => {
+            const selected = color === option;
+            return (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => {
                   setColor(option);
                 }}
-                className="peer sr-only"
-              />
-              <span
-                className="h-10 w-10 rounded-full ring-blue-700 ring-offset-2 peer-checked:ring-3 peer-focus-visible:ring-3 dark:ring-blue-400 dark:ring-offset-zinc-900"
-                style={{ background: appIconColorOptions[option].hex }}
-              />
-              <span className="text-xs text-zinc-700 dark:text-zinc-300">
-                {appIconColorOptions[option].label}
-              </span>
-            </label>
-          ))}
+                className="flex min-h-16 flex-col items-center gap-1.5 p-1"
+              >
+                <span
+                  className={
+                    selected
+                      ? "h-10 w-10 rounded-full ring-3 ring-blue-700 ring-offset-2 dark:ring-blue-400 dark:ring-offset-zinc-900"
+                      : "h-10 w-10 rounded-full"
+                  }
+                  style={{ background: appIconColorOptions[option].hex }}
+                />
+                <span className="text-xs text-zinc-700 dark:text-zinc-300">
+                  {appIconColorOptions[option].label}
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </fieldset>
+      </section>
 
       <SubmitButton pendingLabel="Salvando…">Salvar</SubmitButton>
       <p className="mx-1 text-sm text-zinc-600 dark:text-zinc-400">

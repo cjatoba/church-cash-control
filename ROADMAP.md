@@ -792,6 +792,14 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     `unstable_cache` no Next 16, exigiria ligar `cacheComponents` no app
     inteiro. O manifesto passou a ser dinâmico (`force-dynamic`), senão o
     build tentaria ler o banco (que não existe no CI).
+  - **Bug corrigido depois do merge** (achado pelo usuário em produção):
+    ao salvar, o ícone e a cor voltavam a aparecer marcados como estavam
+    ao abrir a tela — e salvar de novo sem mexer reenviava os valores
+    antigos. Causa: ao concluir a server action o React reinicia o
+    formulário, e os radios voltam à marcação da carga da página.
+    Reproduzido isoladamente com o mesmo React do projeto; corrigido
+    trocando os radios por botões (`aria-pressed`) com o valor em campos
+    ocultos ligados ao estado. Campos de texto não tinham o problema.
 
 ## Em andamento (PRs abertas)
 
