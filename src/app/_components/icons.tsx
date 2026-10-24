@@ -299,3 +299,30 @@ export function DevicePhoneIcon({ className = "h-5 w-5" }: { className?: string 
     />
   );
 }
+
+export function DownloadIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <OutlineIcon
+      className={className}
+      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+    />
+  );
+}
+
+export function ShareIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <OutlineIcon
+      className={className}
+      d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+    />
+  );
+}
+
+export function PlusSquareIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <OutlineIcon
+      className={className}
+      d="M12 9v6m3-3H9m-3.75 9h13.5A2.25 2.25 0 0 0 21 18.75V5.25A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25v13.5A2.25 2.25 0 0 0 5.25 21Z"
+    />
+  );
+}

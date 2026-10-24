@@ -742,7 +742,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Instalar o app no celular (PWA)**: permitir salvar o app na tela
+- **Instalar o app no celular (PWA)** — PR #63: permitir salvar o app na tela
   inicial do celular, com ícone próprio e abrindo em tela cheia, sem a
   barra do navegador — sem loja de aplicativos. Manifesto do app
   (`src/app/manifest.ts`, suporte nativo do Next.js) + ícones nos
@@ -750,6 +750,18 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   menu com o passo a passo (no iPhone a instalação é só manual, pelo
   Safari). Funcionar sem internet fica fora do escopo (o app depende do
   banco para tudo).
+  - Tela `/install` (mockup aprovado): abas Android/iPhone, abrindo já na
+    do celular de quem acessa (`detectMobilePlatform`, pelo user-agent);
+    no Android, botão "Instalar agora" quando o Chrome oferece a
+    instalação (`beforeinstallprompt`, capturado no layout raiz porque o
+    evento dispara uma única vez ao carregar a página); se o app já está
+    aberto pelo ícone, mostra "O app já está instalado".
+  - O proxy de login (`src/proxy.ts`) bloqueava todo arquivo fora de
+    `api/auth`/`_next`, inclusive o manifesto e os ícones — o navegador
+    os busca sem sessão, então a instalação não funcionaria. Liberados
+    `manifest.webmanifest`, `icon.svg`, `apple-icon.png` e `icons/`
+    (efeito colateral positivo: o ícone da aba deixa de falhar na tela
+    de login).
 
 ## Backlog (próximas fatias, em ordem)
 
