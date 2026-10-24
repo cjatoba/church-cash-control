@@ -803,7 +803,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Tutorial de primeiro acesso + Ajuda** — PR a abrir: hoje quem entra
+- **Tutorial de primeiro acesso + Ajuda** — PR #68: hoje quem entra
   no app pela primeira vez não tem nenhuma orientação de como ele
   funciona, nem onde consultar depois. Mockup aprovado pelo usuário:
   - Tutorial (`/tutorial`) em telas curtas, com "Pular" sempre visível,
