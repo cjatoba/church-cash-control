@@ -17,6 +17,10 @@ export const users = pgTable("users", {
   // quem tem celular consegue logar.
   passwordHash: varchar("password_hash", { length: 255 }),
   mustChangePassword: boolean("must_change_password").notNull().default(true),
+  // Diferente de mustChangePassword, que volta a ficar ativo a cada senha
+  // temporária gerada: este só diz se a pessoa já criou uma senha própria
+  // alguma vez (separa "primeiro acesso" de "senha redefinida").
+  passwordSetByUser: boolean("password_set_by_user").notNull().default(false),
   canManageUsers: boolean("can_manage_users").notNull().default(false),
   canManageCampaigns: boolean("can_manage_campaigns").notNull().default(false),
   canReceiveFunds: boolean("can_receive_funds").notNull().default(false),

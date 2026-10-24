@@ -854,6 +854,15 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     também substituiu duas cópias da mesma função).
   - Ajuda: tópico "Convidar voluntários" atualizado com o nome novo do
     botão.
+  - **Bug corrigido depois do merge** — PR #72 (achado pelo usuário):
+    gerar uma nova senha para quem ainda não tinha entrado no app (ex.:
+    convite original nunca enviado) mandava a mensagem de "senha
+    redefinida", e não a de primeiro acesso. `mustChangePassword` não
+    servia para diferenciar, porque volta a ficar ativo a cada senha
+    temporária gerada; nova coluna `password_set_by_user` (marcada quando a
+    pessoa cria a própria senha; a migration preenche como verdadeira para
+    quem já tinha trocado a senha temporária) decide qual das duas
+    mensagens vai.
 
 ## Em andamento (PRs abertas)
 
