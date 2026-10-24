@@ -34,6 +34,7 @@ const dependencies = {
   generateTemporaryPassword: () => "k7Rt9mQx",
   hashPassword: (password: string) => Promise.resolve(`hashed:${password}`),
   loginUrl: "https://church-cash-control.vercel.app/login",
+  appName: "Caixa da Campanha",
 };
 
 const noAccessVolunteer: StoredUser = {
@@ -79,6 +80,9 @@ describe("activateUserAccess", () => {
     ]);
     expect(result.temporaryPassword).toBe("k7Rt9mQx");
     expect(result.whatsappLink).toContain("https://wa.me/5511912345678?text=");
+    expect(decodeURIComponent(result.whatsappLink)).toContain(
+      "Você recebeu acesso ao *Caixa da Campanha*",
+    );
   });
 
   it("rejeita ativar quem já tem acesso ao sistema", async () => {

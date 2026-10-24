@@ -24,6 +24,7 @@ const dependencies = {
   generateTemporaryPassword: () => "k7Rt9mQx",
   hashPassword: (password: string) => Promise.resolve(`hashed:${password}`),
   loginUrl: "https://church-cash-control.vercel.app/login",
+  appName: "Caixa da Campanha",
 };
 
 describe("regenerateTemporaryPassword", () => {
@@ -40,6 +41,9 @@ describe("regenerateTemporaryPassword", () => {
     expect(repository.updates).toEqual([{ userId: "user-1", passwordHash: "hashed:k7Rt9mQx" }]);
     expect(result.temporaryPassword).toBe("k7Rt9mQx");
     expect(result.whatsappLink).toContain("https://wa.me/5511912345678?text=");
+    expect(decodeURIComponent(result.whatsappLink)).toContain(
+      "Sua senha do *Caixa da Campanha* foi redefinida.",
+    );
   });
 
   it("rejeita gerar senha temporária para usuário desativado", async () => {

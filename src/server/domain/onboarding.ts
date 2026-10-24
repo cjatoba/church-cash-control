@@ -14,8 +14,3 @@ export function selectAvailableGuideItems<T extends GuideItem>(
 ): T[] {
   return items.filter((item) => item.requires === undefined || capabilities[item.requires]);
 }
-
-export function tutorialGreeting(fullName: string): string {
-  const firstName = fullName.trim().split(/\s+/)[0];
-  return firstName ? `Olá, ${firstName}!` : "Olá!";
-}

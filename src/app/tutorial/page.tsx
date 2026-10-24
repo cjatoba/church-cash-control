@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth, unstable_update } from "@/auth";
 import { completeTutorial } from "@/server/application/complete-tutorial";
-import { selectAvailableGuideItems, tutorialGreeting } from "@/server/domain/onboarding";
+import { greetByFirstName } from "@/server/domain/greeting";
+import { selectAvailableGuideItems } from "@/server/domain/onboarding";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { createTutorialProgressRepository } from "@/server/infrastructure/db/user-repository";
 import { PageShell } from "@/app/_components/page-shell";
@@ -34,7 +35,7 @@ export default async function TutorialPage() {
   }
 
   const steps = selectAvailableGuideItems(
-    buildTutorialSteps(tutorialGreeting(session.user.name)),
+    buildTutorialSteps(greetByFirstName(session.user.name)),
     session.user,
   );
   const slides = steps.map(({ id, title, text, tip, icon, tone }) => ({

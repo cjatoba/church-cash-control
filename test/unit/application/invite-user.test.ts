@@ -21,6 +21,7 @@ const dependencies = {
   generateTemporaryPassword: () => "k7Rt9mQx",
   hashPassword: (password: string) => Promise.resolve(`hashed:${password}`),
   loginUrl: "https://church-cash-control.vercel.app/login",
+  appName: "Caixa da Campanha",
 };
 
 describe("inviteUser", () => {
@@ -48,6 +49,9 @@ describe("inviteUser", () => {
     expect(result.temporaryPassword).toBe("k7Rt9mQx");
     expect(result.whatsappLink).toContain("https://wa.me/5511912345678?text=");
     expect(decodeURIComponent(result.whatsappLink ?? "")).toContain(dependencies.loginUrl);
+    expect(decodeURIComponent(result.whatsappLink ?? "")).toContain(
+      "Você recebeu acesso ao *Caixa da Campanha*",
+    );
   });
 
   it("cria voluntário sem celular, sem senha nem link do WhatsApp — sem acesso ao sistema", async () => {

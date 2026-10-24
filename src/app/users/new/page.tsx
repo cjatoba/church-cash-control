@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getCachedAppBranding } from "@/app/_lib/app-branding";
 import { auth } from "@/auth";
 import { inviteUser } from "@/server/application/invite-user";
 import { hashPassword } from "@/server/infrastructure/auth/password";
@@ -40,9 +41,10 @@ export default async function NewUserPage() {
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
       const loginUrl = await getLoginUrl();
+      const { name: appName } = await getCachedAppBranding();
       const result = await inviteUser(
         repository,
-        { generateTemporaryPassword, hashPassword, loginUrl },
+        { generateTemporaryPassword, hashPassword, loginUrl, appName },
         input,
       );
 

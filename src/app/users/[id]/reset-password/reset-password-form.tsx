@@ -27,7 +27,11 @@ export function ResetPasswordForm({
     return (
       <TemporaryPasswordReveal
         title="Nova senha gerada"
-        message={`Uma nova senha temporária foi gerada para ${state.result.name}.`}
+        message={
+          <>
+            Nova senha temporária gerada para <strong>{state.result.name}</strong>.
+          </>
+        }
         temporaryPassword={state.result.temporaryPassword}
         whatsappLink={state.result.whatsappLink}
         backHref="/users"

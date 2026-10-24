@@ -4,18 +4,7 @@ import { useActionState, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { BackLink } from "@/app/_components/back-link";
 import { TemporaryPasswordReveal } from "../_components/temporary-password-reveal";
-
-function grantedCapabilityLabels(capabilities: {
-  canManageUsers: boolean;
-  canManageCampaigns: boolean;
-  canReceiveFunds: boolean;
-}): string {
-  const labels: string[] = [];
-  if (capabilities.canManageUsers) labels.push("gerenciar usuários");
-  if (capabilities.canManageCampaigns) labels.push("gerenciar campanhas");
-  if (capabilities.canReceiveFunds) labels.push("receber arrecadação");
-  return labels.length > 0 ? labels.join(", ") : "só visualização";
-}
+import { describeAccess } from "../_lib/access-summary";
 
 export interface InviteUserState {
   error?: string;
@@ -68,12 +57,17 @@ function InviteUserFormFields({
     if (state.result.phone && state.result.temporaryPassword && state.result.whatsappLink) {
       return (
         <TemporaryPasswordReveal
-          title="Usuário convidado"
-          message={`${state.result.name} foi cadastrado(a) com acesso de ${grantedCapabilityLabels(state.result)}.`}
+          title="Convite pronto"
+          message={
+            <>
+              <strong>{state.result.name}</strong> já pode entrar no app.{" "}
+              {describeAccess(state.result)}
+            </>
+          }
           temporaryPassword={state.result.temporaryPassword}
           whatsappLink={state.result.whatsappLink}
           backHref="/users"
-          secondaryAction={{ onClick: onInviteAnother, label: "+ Cadastrar outro voluntário" }}
+          secondaryAction={{ onClick: onInviteAnother, label: "Cadastrar outro voluntário" }}
         />
       );
     }
@@ -84,7 +78,7 @@ function InviteUserFormFields({
           Voluntário cadastrado
         </h1>
         <p className="rounded-xl bg-green-50 p-3 text-[15px] text-green-800 dark:bg-green-950/50 dark:text-green-300">
-          {state.result.name} foi cadastrado(a) como voluntário(a), sem acesso ao sistema.
+          Cadastro de <strong>{state.result.name}</strong> concluído, sem acesso ao app.
         </p>
         <div className="flex flex-col gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
           <button

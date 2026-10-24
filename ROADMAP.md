@@ -832,7 +832,30 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Convite pelo WhatsApp mais profissional** — PR #70: o botão
+  "Abrir WhatsApp com o convite" quebrava em duas linhas desalinhadas no
+  celular, e a mensagem era um texto corrido de três frases. Mockup
+  aprovado pelo usuário:
+  - Tela de resultado (convite, ativação de acesso e nova senha) no
+    visual do redesign: botão voltar no topo, confirmação com ícone, senha
+    temporária em destaque e botão "Enviar pelo WhatsApp" com o ícone,
+    numa linha só. O rótulo do mockup ("Enviar convite pelo WhatsApp") não
+    cabia numa linha em celulares de 360–390 px, então foi encurtado — o
+    título da tela já diz o que é enviado.
+  - Mensagem (`buildAccessWhatsAppLink`, domínio `invite-message.ts`, com
+    TDD) com saudação pelo primeiro nome, passo a passo numerado (link,
+    celular, senha), negrito do próprio WhatsApp, dica de instalar no
+    celular e fechamento; versão própria para nova senha ("Sua senha foi
+    redefinida", com aviso caso não tenha sido a pessoa que pediu), em vez
+    de repetir o convite.
+  - O nome do app na mensagem vem de "Personalizar app" (antes era
+    "Controle de Caixa" fixo no código, contra a regra de dado da
+    instância no banco).
+  - Nomenclatura: "cadastrado(a) com acesso de…" virou "Fulano já pode
+    entrar no app. Pode receber arrecadação." (`describeAccess`, que
+    também substituiu duas cópias da mesma função).
+  - Ajuda: tópico "Convidar voluntários" atualizado com o nome novo do
+    botão.
 
 ## Backlog (próximas fatias, em ordem)
 
