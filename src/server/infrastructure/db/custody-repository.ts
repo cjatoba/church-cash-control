@@ -121,14 +121,14 @@ export function createCustodyRepository(
 
     async getTotalsByCampaign(campaignId) {
       const [allUsers, received, transferred] = await Promise.all([
-        db.select({ id: users.id, email: users.email }).from(users),
+        db.select({ id: users.id, name: users.name }).from(users),
         sumReceivedByUser(db, campaignId),
         sumTransferredByUser(db, campaignId),
       ]);
 
       return allUsers.map((user) => ({
         userId: user.id,
-        userLabel: user.email,
+        userLabel: user.name,
         receivedCents: received.get(user.id) ?? 0,
         transferredCents: transferred.get(user.id) ?? 0,
       }));
@@ -141,8 +141,8 @@ export function createCustodyRepository(
           recipientName: custodyTransfers.recipientName,
           amountCents: custodyTransfers.amountCents,
           transferDate: custodyTransfers.transferDate,
-          fromUserEmail: fromUser.email,
-          registeredByUserEmail: registeredByUser.email,
+          fromUserName: fromUser.name,
+          registeredByUserName: registeredByUser.name,
         })
         .from(custodyTransfers)
         .innerJoin(fromUser, eq(custodyTransfers.fromUserId, fromUser.id))
@@ -152,11 +152,11 @@ export function createCustodyRepository(
       return rows
         .map((row) => ({
           id: row.id,
-          fromUserLabel: row.fromUserEmail,
+          fromUserLabel: row.fromUserName,
           recipientName: row.recipientName,
           amount: Money.fromCents(row.amountCents),
           transferDate: row.transferDate,
-          registeredByUserLabel: row.registeredByUserEmail,
+          registeredByUserLabel: row.registeredByUserName,
         }))
         .sort((a, b) => b.transferDate.getTime() - a.transferDate.getTime());
     },

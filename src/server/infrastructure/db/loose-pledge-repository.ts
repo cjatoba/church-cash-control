@@ -156,8 +156,8 @@ export function createLoosePledgeRepository(
           amountCents: loosePledgeContributions.amountCents,
           date: loosePledgeContributions.date,
           paymentMethod: loosePledgeContributions.paymentMethod,
-          receivedByEmail: receivedByUser.email,
-          registeredByEmail: registeredByUser.email,
+          receivedByName: receivedByUser.name,
+          registeredByName: registeredByUser.name,
         })
         .from(loosePledgeContributions)
         .innerJoin(receivedByUser, eq(loosePledgeContributions.receivedByUserId, receivedByUser.id))
@@ -178,8 +178,8 @@ export function createLoosePledgeRepository(
             amount: Money.fromCents(row.amountCents),
             date: row.date,
             paymentMethod: row.paymentMethod,
-            receivedByLabel: row.receivedByEmail,
-            registeredByLabel: row.registeredByEmail,
+            receivedByLabel: row.receivedByName,
+            registeredByLabel: row.registeredByName,
           }))
           .sort((a, b) => b.date.getTime() - a.date.getTime()),
       };

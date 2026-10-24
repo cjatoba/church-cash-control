@@ -7,26 +7,34 @@ import { users } from "../src/server/infrastructure/db/schema";
 loadEnvConfig(process.cwd());
 
 async function main(): Promise<void> {
-  const [, , emailArg, passwordArg] = process.argv;
-  if (!emailArg || !passwordArg) {
-    console.error("Uso: pnpm user:create <email> <senha>");
+  const [, , phoneArg, nameArg, passwordArg] = process.argv;
+  if (!phoneArg || !nameArg || !passwordArg) {
+    console.error("Uso: pnpm user:create <celular> <nome> <senha>");
     process.exitCode = 1;
     return;
   }
 
-  const { email, password } = parseCredentials({ email: emailArg, password: passwordArg });
+  const name = nameArg.trim();
+  if (!name) {
+    console.error("Nome é obrigatório");
+    process.exitCode = 1;
+    return;
+  }
+
+  const { phone, password } = parseCredentials({ phone: phoneArg, password: passwordArg });
   const passwordHash = await hashPassword(password);
 
   const db = createDbClient();
   await db.insert(users).values({
-    email,
+    name,
+    phone,
     passwordHash,
     canManageUsers: true,
     canManageCampaigns: true,
     canReceiveFunds: true,
   });
 
-  console.log(`Usuário ${email} criado.`);
+  console.log(`Usuário ${phone} criado.`);
 }
 
 main().catch((error: unknown) => {

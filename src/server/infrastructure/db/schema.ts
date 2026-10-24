@@ -11,13 +11,16 @@ import {
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  // Opcional: um voluntário pode ser só um nome selecionável em "Recebido
+  // por" sem nunca acessar o sistema (ex.: pessoa idosa sem celular) — só
+  // quem tem celular consegue logar.
+  passwordHash: varchar("password_hash", { length: 255 }),
   mustChangePassword: boolean("must_change_password").notNull().default(true),
   canManageUsers: boolean("can_manage_users").notNull().default(false),
   canManageCampaigns: boolean("can_manage_campaigns").notNull().default(false),
   canReceiveFunds: boolean("can_receive_funds").notNull().default(false),
-  phone: varchar("phone", { length: 20 }),
+  phone: varchar("phone", { length: 20 }).unique(),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

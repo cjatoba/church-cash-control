@@ -8,14 +8,14 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   async function authenticate(_prevState: LoginState, formData: FormData): Promise<LoginState> {
     "use server";
-    const email = formData.get("email");
+    const phone = formData.get("phone");
     try {
       await signIn("credentials", formData);
     } catch (signInError) {
       if (signInError instanceof AuthError) {
         return {
-          error: "Email ou senha inválidos.",
-          values: { email: typeof email === "string" ? email : "" },
+          error: "Celular ou senha inválidos.",
+          values: { phone: typeof phone === "string" ? phone : "" },
         };
       }
       throw signInError;

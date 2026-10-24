@@ -41,7 +41,7 @@ export function createActivityLogRepository(
     async findAll() {
       const rows = await db
         .select({
-          actorLabel: users.email,
+          actorName: users.name,
           action: activityLog.action,
           subjectName: activityLog.subjectName,
           amountCents: activityLog.amountCents,
@@ -53,7 +53,7 @@ export function createActivityLogRepository(
         .limit(ACTIVITY_LOG_LIST_LIMIT);
 
       return rows.map((row) => ({
-        actorLabel: row.actorLabel,
+        actorLabel: row.actorName,
         action: toActivityLogAction(row.action),
         subjectName: row.subjectName,
         amount: row.amountCents === null ? null : Money.fromCents(row.amountCents),
