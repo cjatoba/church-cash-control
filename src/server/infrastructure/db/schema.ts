@@ -176,3 +176,15 @@ export const custodyTransfers = pgTable("custody_transfers", {
   description: varchar("description", { length: 500 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Linha única (id fixo "app"): configuração da própria instalação do sistema.
+// Ícone e cor ficam como texto validado no domínio, para incluir uma opção
+// nova sem precisar de migration de enum.
+export const appSettings = pgTable("app_settings", {
+  id: varchar("id", { length: 16 }).primaryKey(),
+  name: varchar("name", { length: 40 }).notNull(),
+  shortName: varchar("short_name", { length: 12 }).notNull(),
+  icon: varchar("icon", { length: 32 }).notNull(),
+  color: varchar("color", { length: 32 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
