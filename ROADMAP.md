@@ -705,7 +705,23 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Redesign das telas (navegação por seções + modo escuro opcional)**:
+  hoje o card de cada campanha no painel inicial junta 7 ações (tipos de
+  carnê, doadores, doação avulsa, painel mensal, dinheiro em mãos,
+  editar, arquivar) e o cabeçalho junta 5 links — tudo na tela ao mesmo
+  tempo, difícil de entender o fluxo. Mockup aprovado pelo usuário antes
+  de implementar: painel inicial só com cards grandes por campanha (nome,
+  arrecadado, meta) e um botão de menu; tela nova da campanha
+  (`/campaigns/[id]`) com resumo da meta, botão principal "Registrar
+  recebimento" e o resto dividido em seções (Acompanhar, Cadastros,
+  Configurações da campanha); tela nova "O que você recebeu?" que guia
+  para parcela de carnê, entrega de carnê avulso ou doação sem carnê;
+  parcelas do carnê divididas em abas "A pagar"/"Pagas"; tela de menu
+  reunindo trocar senha, usuários, registro de atividades e sair. Textos
+  e botões maiores em todo o app. Modo escuro passa a ser uma opção
+  escolhida pelo usuário (automático/claro/escuro), não só o do sistema.
+  Implementado em lotes numa mesma PR (lote 1: as telas do mockup; lotes
+  seguintes: aplicar o mesmo padrão às demais telas).
 
 ## Backlog (próximas fatias, em ordem)
 
