@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { TutorialProgressRepository } from "@/server/application/complete-tutorial";
 import type { UserListRepository } from "@/server/application/list-users";
 import type { UserCapabilities } from "@/server/domain/user-capabilities";
 import type { DbClient } from "./client";
@@ -10,6 +11,7 @@ export interface UserRecord extends UserCapabilities {
   phone: string;
   passwordHash: string;
   mustChangePassword: boolean;
+  tutorialCompleted: boolean;
   active: boolean;
 }
 
@@ -24,6 +26,7 @@ export async function findUserByPhone(db: DbClient, phone: string): Promise<User
       canManageUsers: users.canManageUsers,
       canManageCampaigns: users.canManageCampaigns,
       canReceiveFunds: users.canReceiveFunds,
+      tutorialCompleted: users.tutorialCompleted,
       active: users.active,
     })
     .from(users)
@@ -65,6 +68,14 @@ export function createUserListRepository(db: DbClient): UserListRepository {
   return {
     async findAll() {
       return db.select({ id: users.id, name: users.name }).from(users);
+    },
+  };
+}
+
+export function createTutorialProgressRepository(db: DbClient): TutorialProgressRepository {
+  return {
+    async markTutorialCompleted(userId) {
+      await db.update(users).set({ tutorialCompleted: true }).where(eq(users.id, userId));
     },
   };
 }

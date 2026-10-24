@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   canManageUsers: boolean("can_manage_users").notNull().default(false),
   canManageCampaigns: boolean("can_manage_campaigns").notNull().default(false),
   canReceiveFunds: boolean("can_receive_funds").notNull().default(false),
+  tutorialCompleted: boolean("tutorial_completed").notNull().default(false),
   phone: varchar("phone", { length: 20 }).unique(),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

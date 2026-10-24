@@ -8,6 +8,7 @@ declare module "next-auth" {
     canManageUsers?: boolean;
     canManageCampaigns?: boolean;
     canReceiveFunds?: boolean;
+    tutorialCompleted?: boolean;
   }
 
   interface Session {
@@ -19,6 +20,7 @@ declare module "next-auth" {
       canManageUsers: boolean;
       canManageCampaigns: boolean;
       canReceiveFunds: boolean;
+      tutorialCompleted: boolean;
     } & DefaultSession["user"];
   }
 }

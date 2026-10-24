@@ -1,6 +1,14 @@
 import type { NextAuthConfig, User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+// Só a conclusão do tutorial pode ser alterada por `unstable_update`: o
+// endpoint de sessão também aceita atualização vinda do navegador, então
+// nada que dê acesso (capacidades, troca de senha) pode entrar por aqui.
+const tutorialCompletedUpdateSchema = z.object({
+  user: z.object({ tutorialCompleted: z.literal(true) }),
+});
 
 export const authConfig = {
   pages: {
@@ -27,6 +35,10 @@ export const authConfig = {
         return NextResponse.redirect(new URL("/", request.nextUrl));
       }
 
+      if (pathname === "/" && !auth.user.tutorialCompleted) {
+        return NextResponse.redirect(new URL("/tutorial", request.nextUrl));
+      }
+
       if (pathname.startsWith("/users") && !auth.user.canManageUsers) {
         return NextResponse.redirect(new URL("/", request.nextUrl));
       }
@@ -37,7 +49,20 @@ export const authConfig = {
     // NextAuth só com authConfig, então se jwt/session ficassem apenas na
     // config completa, mustChangePassword nunca chegaria em auth.user
     // dentro do authorized acima, mesmo com o token já carregando o campo.
-    jwt({ token, user }: { token: JWT; user?: User }) {
+    jwt({
+      token,
+      user,
+      trigger,
+      session,
+    }: {
+      token: JWT;
+      user?: User;
+      trigger?: "signIn" | "signUp" | "update";
+      session?: unknown;
+    }) {
+      if (trigger === "update" && tutorialCompletedUpdateSchema.safeParse(session).success) {
+        token.tutorialCompleted = true;
+      }
       // `user` só vem preenchido no login (trigger "signIn"/"signUp"); em
       // toda outra checagem de sessão (ex.: a cada request pelo proxy) ele
       // vem undefined, mesmo o tipo do Auth.js não marcando isso.
@@ -61,6 +86,9 @@ export const authConfig = {
       }
       if (typeof user?.canReceiveFunds === "boolean") {
         token.canReceiveFunds = user.canReceiveFunds;
+      }
+      if (typeof user?.tutorialCompleted === "boolean") {
+        token.tutorialCompleted = user.tutorialCompleted;
       }
       return token;
     },
@@ -86,6 +114,9 @@ export const authConfig = {
       if (typeof token.canReceiveFunds === "boolean") {
         session.user.canReceiveFunds = token.canReceiveFunds;
       }
+      // Sessões abertas antes desta coluna existir não carregam o campo:
+      // contam como "ainda não viu", para quem já usa o app ver uma vez.
+      session.user.tutorialCompleted = token.tutorialCompleted === true;
       return session;
     },
   },

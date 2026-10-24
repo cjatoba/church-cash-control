@@ -12,6 +12,7 @@ import {
   DevicePhoneIcon,
   LockIcon,
   PaintBrushIcon,
+  QuestionMarkCircleIcon,
   UsersIcon,
   XMarkIcon,
 } from "@/app/_components/icons";
@@ -75,6 +76,13 @@ export default async function MenuPage() {
           title="Instalar no celular"
           description="Abrir como aplicativo, com ícone na tela"
           icon={<DevicePhoneIcon className="h-6 w-6" />}
+          iconTone="blue"
+        />
+        <NavListItem
+          href="/help"
+          title="Ajuda"
+          description="Como usar cada parte do app"
+          icon={<QuestionMarkCircleIcon />}
           iconTone="blue"
         />
       </NavSection>

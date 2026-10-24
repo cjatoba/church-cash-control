@@ -6,7 +6,7 @@ import { verifyPassword } from "./server/infrastructure/auth/password";
 import { createDbClient } from "./server/infrastructure/db/client";
 import { findUserByPhone } from "./server/infrastructure/db/user-repository";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   session: { strategy: "jwt" },
   providers: [
@@ -42,6 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           canManageUsers: user.canManageUsers,
           canManageCampaigns: user.canManageCampaigns,
           canReceiveFunds: user.canReceiveFunds,
+          tutorialCompleted: user.tutorialCompleted,
         };
       },
     }),
