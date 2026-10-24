@@ -830,8 +830,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     no celular e precisaria de dados fictícios por causa da LGPD. O botão
     de atalho de cada tópico, que leva direto à tela, cumpre esse papel.
 
-## Em andamento (PRs abertas)
-
 - **Convite pelo WhatsApp mais profissional** — PR #70: o botão
   "Abrir WhatsApp com o convite" quebrava em duas linhas desalinhadas no
   celular, e a mensagem era um texto corrido de três frases. Mockup
@@ -856,6 +854,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     também substituiu duas cópias da mesma função).
   - Ajuda: tópico "Convidar voluntários" atualizado com o nome novo do
     botão.
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
