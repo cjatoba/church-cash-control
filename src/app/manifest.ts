@@ -1,9 +1,17 @@
 import type { MetadataRoute } from "next";
+import { getCachedAppBranding } from "@/app/_lib/app-branding";
+import { appIconUrl } from "@/app/_lib/app-icon-catalog";
 
-export default function manifest(): MetadataRoute.Manifest {
+// O nome e o ícone vêm do banco: sem isto o Next tentaria gerar o manifesto
+// no build, onde não há banco disponível (ex.: CI).
+export const dynamic = "force-dynamic";
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const branding = await getCachedAppBranding();
+
   return {
-    name: "Controle de Caixa",
-    short_name: "Caixa",
+    name: branding.name,
+    short_name: branding.shortName,
     description: "Controle de caixa para igrejas — campanhas, carnês e arrecadação.",
     lang: "pt-BR",
     start_url: "/",
@@ -12,10 +20,20 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#f4f4f5",
     theme_color: "#f4f4f5",
     icons: [
-      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       {
-        src: "/icons/icon-maskable-512.png",
+        src: appIconUrl("icon-192.png", branding),
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: appIconUrl("icon-512.png", branding),
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: appIconUrl("icon-maskable-512.png", branding),
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

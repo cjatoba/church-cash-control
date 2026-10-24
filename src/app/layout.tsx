@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { THEME_COOKIE_NAME, parseThemePreference } from "@/app/_lib/theme";
 import { InstallPromptCapture } from "@/app/_components/install-prompt-capture";
+import { getCachedAppBranding } from "@/app/_lib/app-branding";
+import { appIconUrl } from "@/app/_lib/app-icon-catalog";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,14 +17,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Controle de Caixa",
-  description: "Controle de caixa para igrejas — campanhas, carnês e arrecadação.",
-  appleWebApp: {
-    title: "Caixa",
-    statusBarStyle: "default",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getCachedAppBranding();
+
+  return {
+    title: branding.name,
+    description: "Controle de caixa para igrejas — campanhas, carnês e arrecadação.",
+    icons: {
+      icon: appIconUrl("icon-192.png", branding),
+      apple: appIconUrl("apple-icon.png", branding),
+    },
+    appleWebApp: {
+      title: branding.shortName,
+      statusBarStyle: "default",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

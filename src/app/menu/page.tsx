@@ -11,6 +11,7 @@ import {
   ClockIcon,
   DevicePhoneIcon,
   LockIcon,
+  PaintBrushIcon,
   UsersIcon,
   XMarkIcon,
 } from "@/app/_components/icons";
@@ -93,6 +94,12 @@ export default async function MenuPage() {
             title="Voluntários e acessos"
             description="Cadastrar e gerenciar quem usa o sistema"
             icon={<UsersIcon className="h-6 w-6" />}
+          />
+          <NavListItem
+            href="/app-settings"
+            title="Personalizar app"
+            description="Nome e ícone que aparecem no celular"
+            icon={<PaintBrushIcon />}
           />
           <NavListItem
             href="/activity-log"

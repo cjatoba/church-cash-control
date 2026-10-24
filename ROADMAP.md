@@ -774,6 +774,26 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   configuração. Limitação conhecida: no iPhone, quem já instalou precisa
   reinstalar para ver a mudança; no Android o Chrome atualiza sozinho
   com o tempo.
+  - Mockup aprovado: 12 ícones (cifrão, igreja, cruz, Bíblia, pomba,
+    peixe, coração, chama, coroa, estrela, cofre, inicial do nome) e 8
+    cores, com prévia ao vivo. Decisão tomada com o usuário: só opções
+    prontas — upload de imagem e geração de ícone por IA ficaram fora
+    (custo, serviço externo e LGPD), e a etapa de IA não entra no backlog.
+  - Domínio `AppBranding` (validação + padrão "Controle de Caixa"/"Caixa"/
+    cifrão/verde enquanto ninguém personalizou) e
+    `getAppBranding`/`updateAppBranding` (TDD); tabela `app_settings`
+    de linha única (ícone e cor como texto validado no domínio, para
+    incluir opção nova sem migration de enum).
+  - Ícones PNG gerados sob demanda (`/icons/[file]`, `ImageResponse`),
+    com versão na URL derivada da configuração (o `ImageResponse` responde
+    com cache imutável). "R$" e a inicial usam Geist Bold (licença OFL,
+    `assets/fonts/`), já que a fonte padrão do gerador não tem negrito.
+  - A configuração é lida em toda página (título, manifesto, ícones), então
+    passa por `unstable_cache` com tag invalidada ao salvar — evita uma
+    consulta ao banco por página aberta. `'use cache'`, que substitui o
+    `unstable_cache` no Next 16, exigiria ligar `cacheComponents` no app
+    inteiro. O manifesto passou a ser dinâmico (`force-dynamic`), senão o
+    build tentaria ler o banco (que não existe no CI).
 
 ## Backlog (próximas fatias, em ordem)
 
