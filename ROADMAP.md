@@ -792,7 +792,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     `unstable_cache` no Next 16, exigiria ligar `cacheComponents` no app
     inteiro. O manifesto passou a ser dinâmico (`force-dynamic`), senão o
     build tentaria ler o banco (que não existe no CI).
-  - **Bug corrigido depois do merge** (achado pelo usuário em produção):
+  - **Bug corrigido depois do merge** — PR #67 (achado pelo usuário em produção):
     ao salvar, o ícone e a cor voltavam a aparecer marcados como estavam
     ao abrir a tela — e salvar de novo sem mexer reenviava os valores
     antigos. Causa: ao concluir a server action o React reinicia o
