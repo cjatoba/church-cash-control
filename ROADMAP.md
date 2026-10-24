@@ -832,7 +832,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Convite pelo WhatsApp mais profissional** — PR a abrir: o botão
+- **Convite pelo WhatsApp mais profissional** — PR #70: o botão
   "Abrir WhatsApp com o convite" quebrava em duas linhas desalinhadas no
   celular, e a mensagem era um texto corrido de três frases. Mockup
   aprovado pelo usuário:
