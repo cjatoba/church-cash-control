@@ -69,6 +69,7 @@ export function createUserManagementRepository(
           name: users.name,
           phone: users.phone,
           active: users.active,
+          passwordSetByUser: users.passwordSetByUser,
         })
         .from(users)
         .where(eq(users.id, userId))

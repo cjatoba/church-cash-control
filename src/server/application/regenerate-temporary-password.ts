@@ -7,6 +7,7 @@ export interface RegenerateTemporaryPasswordRepository {
     name: string;
     phone: string | null;
     active: boolean;
+    passwordSetByUser: boolean;
   } | null>;
   updatePasswordHash(userId: string, passwordHash: string): Promise<void>;
 }
@@ -49,7 +50,10 @@ export async function regenerateTemporaryPassword(
     phone: user.phone,
     temporaryPassword,
     whatsappLink: buildAccessWhatsAppLink({
-      kind: "password-reset",
+      // Quem nunca criou a própria senha ainda está no primeiro acesso (ex.:
+      // o convite original não chegou a ser enviado): recebe o convite, não
+      // o aviso de "senha redefinida".
+      kind: user.passwordSetByUser ? "password-reset" : "invite",
       name: user.name,
       phone: user.phone,
       appName: dependencies.appName,

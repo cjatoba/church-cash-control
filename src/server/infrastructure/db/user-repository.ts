@@ -60,7 +60,7 @@ export async function completeUserPasswordChange(
 ): Promise<void> {
   await db
     .update(users)
-    .set({ passwordHash, mustChangePassword: false })
+    .set({ passwordHash, mustChangePassword: false, passwordSetByUser: true })
     .where(eq(users.id, userId));
 }
 

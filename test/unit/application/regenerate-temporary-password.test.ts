@@ -5,13 +5,19 @@ import {
 } from "@/server/application/regenerate-temporary-password";
 
 function createInMemoryRepository(
-  user: { id: string; name: string; phone: string | null; active: boolean } | null,
+  user: {
+    id: string;
+    name: string;
+    phone: string | null;
+    active: boolean;
+    passwordSetByUser?: boolean;
+  } | null,
 ): RegenerateTemporaryPasswordRepository & { updates: { userId: string; passwordHash: string }[] } {
   const updates: { userId: string; passwordHash: string }[] = [];
   return {
     updates,
     findById(userId) {
-      return Promise.resolve(user?.id === userId ? user : null);
+      return Promise.resolve(user?.id === userId ? { passwordSetByUser: true, ...user } : null);
     },
     updatePasswordHash(userId, passwordHash) {
       updates.push({ userId, passwordHash });
@@ -44,6 +50,22 @@ describe("regenerateTemporaryPassword", () => {
     expect(decodeURIComponent(result.whatsappLink)).toContain(
       "Sua senha do *Caixa da Campanha* foi redefinida.",
     );
+  });
+
+  it("manda o convite de primeiro acesso para quem ainda não criou a própria senha", async () => {
+    const repository = createInMemoryRepository({
+      id: "user-1",
+      name: "Voluntária",
+      phone: "11912345678",
+      active: true,
+      passwordSetByUser: false,
+    });
+
+    const result = await regenerateTemporaryPassword(repository, dependencies, "user-1");
+
+    const message = decodeURIComponent(result.whatsappLink);
+    expect(message).toContain("Você recebeu acesso ao *Caixa da Campanha*");
+    expect(message).not.toContain("foi redefinida");
   });
 
   it("rejeita gerar senha temporária para usuário desativado", async () => {
