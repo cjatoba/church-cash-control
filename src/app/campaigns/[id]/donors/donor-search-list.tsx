@@ -10,6 +10,13 @@ export interface DonorSearchItem {
   content: ReactNode;
 }
 
+export interface DonorSearchSection {
+  key: string;
+  title?: string;
+  noMatchMessage?: string;
+  items: DonorSearchItem[];
+}
+
 function describeCount(visible: number, searching: boolean): string {
   if (searching) {
     return visible === 1 ? "1 doador encontrado" : `${String(visible)} doadores encontrados`;
@@ -17,13 +24,15 @@ function describeCount(visible: number, searching: boolean): string {
   return visible === 1 ? "1 doador" : `${String(visible)} doadores`;
 }
 
-export function DonorSearchList({ items }: { items: DonorSearchItem[] }) {
+export function DonorSearchList({ sections }: { sections: DonorSearchSection[] }) {
   const [query, setQuery] = useState("");
   const searching = query.trim() !== "";
-  const visibleItems = items.filter((item) => matchesDonorName(item.donorName, query));
+  const clearQuery = () => {
+    setQuery("");
+  };
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4">
       <div className="relative flex items-center">
         <SearchIcon />
         <label htmlFor="donor-search" className="sr-only">
@@ -44,9 +53,7 @@ export function DonorSearchList({ items }: { items: DonorSearchItem[] }) {
         {query !== "" ? (
           <button
             type="button"
-            onClick={() => {
-              setQuery("");
-            }}
+            onClick={clearQuery}
             aria-label="Limpar pesquisa"
             className="absolute right-1.5 flex h-11 w-11 items-center justify-center rounded-full text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
           >
@@ -55,36 +62,60 @@ export function DonorSearchList({ items }: { items: DonorSearchItem[] }) {
         ) : null}
       </div>
 
-      <p aria-live="polite" className="mx-1 text-[15px] text-zinc-600 dark:text-zinc-400">
-        {describeCount(visibleItems.length, searching)}
-      </p>
+      {sections.map((section) => {
+        const visibleItems = section.items.filter((item) =>
+          matchesDonorName(item.donorName, query),
+        );
 
-      {visibleItems.length > 0 ? (
-        <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
-          {visibleItems.map((item) => (
-            <li key={item.key} className="flex flex-col">
-              {item.content}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-900">
-          <p className="text-[17px] font-semibold">Nenhum doador encontrado</p>
-          <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
-            Confira se o nome está escrito certo.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setQuery("");
-            }}
-            className="min-h-12 rounded-full border border-zinc-300 bg-white px-5 text-base font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-800"
-          >
-            Limpar pesquisa
-          </button>
-        </div>
-      )}
+        return (
+          <div key={section.key} className="flex flex-col gap-2">
+            {section.title ? (
+              <h2 className="mx-1 text-sm font-semibold tracking-wide text-zinc-600 uppercase dark:text-zinc-400">
+                {section.title} ({visibleItems.length})
+              </h2>
+            ) : (
+              <p aria-live="polite" className="mx-1 text-[15px] text-zinc-600 dark:text-zinc-400">
+                {describeCount(visibleItems.length, searching)}
+              </p>
+            )}
+
+            {visibleItems.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+                {visibleItems.map((item) => (
+                  <li key={item.key} className="flex flex-col">
+                    {item.content}
+                  </li>
+                ))}
+              </ul>
+            ) : section.noMatchMessage ? (
+              <p className="mx-1 text-[15px] text-zinc-600 dark:text-zinc-400">
+                {section.noMatchMessage}
+              </p>
+            ) : (
+              <NoDonorFound onClear={clearQuery} />
+            )}
+          </div>
+        );
+      })}
     </section>
+  );
+}
+
+function NoDonorFound({ onClear }: { onClear: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-6 text-center dark:border-zinc-800 dark:bg-zinc-900">
+      <p className="text-[17px] font-semibold">Nenhum doador encontrado</p>
+      <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+        Confira se o nome está escrito certo.
+      </p>
+      <button
+        type="button"
+        onClick={onClear}
+        className="min-h-12 rounded-full border border-zinc-300 bg-white px-5 text-base font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-800"
+      >
+        Limpar pesquisa
+      </button>
+    </div>
   );
 }
 
