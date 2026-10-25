@@ -994,7 +994,17 @@ Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-Nenhuma fatia no backlog no momento.
+1. **Barra fixa inferior de navegação (Início e Menu em todas as telas)**
+   — pedido do usuário: hoje o menu só abre pela tela inicial, e voltar
+   ao início a partir de uma tela funda (ex.: carnê → corrigir tipo)
+   exige 4–5 toques em "Voltar". Barra fixa na parte de baixo com dois
+   itens, "Início" e "Menu", em todas as telas logadas (fora login,
+   troca de senha obrigatória e tutorial), respeitando a área segura do
+   iPhone no app instalado. "Início" fica marcado nas telas de campanha;
+   "Menu" no menu e nas telas abertas por ele. O botão ☰ do cabeçalho da
+   tela inicial e o "X" do menu deixam de existir (a barra substitui
+   os dois); o "Voltar" de cada tela continua. Sem consulta nova ao
+   banco. Mockup em preparação para aprovação antes de implementar.
 
 ## Como usar este arquivo
 
