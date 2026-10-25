@@ -864,8 +864,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     quem já tinha trocado a senha temporária) decide qual das duas
     mensagens vai.
 
-## Em andamento (PRs abertas)
-
 - **Cadastro retroativo de carnê (mês da primeira parcela)** — PR #73
   (achado pelo usuário ao cadastrar em produção doadores que pegaram o
   carnê antes): o carnê de valor fixo sempre começava no mês do cadastro,
@@ -880,6 +878,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   "Cadastrar um doador e o carnê" atualizado. Decisão registrada: marcar
   de uma vez as parcelas passadas como pagas fica de fora até aparecer
   necessidade concreta.
+
+## Em andamento (PRs abertas)
+
+Nenhuma fatia em andamento no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
