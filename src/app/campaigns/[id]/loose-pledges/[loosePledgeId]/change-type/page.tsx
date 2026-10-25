@@ -77,6 +77,7 @@ export default async function ChangeLoosePledgeTypePage({
             installmentValueLabel: pledgeType.installmentValue
               ? formatCurrency(pledgeType.installmentValue)
               : null,
+            installmentValueCents: pledgeType.installmentValue?.toCents() ?? null,
           }))}
         firstMonthOptions={buildFirstMonthOptions(campaign, new Date())}
         action={change}

@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   changePledgeType,
   getPledgeTypeChangeSource,
+  listPledgeInstallmentSlots,
   type PledgeTypeChangeRepository,
 } from "@/server/application/change-pledge-type";
 import type { CampaignPeriodReader, PledgeTypeReader } from "@/server/application/create-pledge";
 import { Money } from "@/server/domain/money";
 import type { Pledge } from "@/server/domain/pledge";
+import type { InstallmentSlot } from "@/server/domain/installment-repricing";
 
 const campaignId = "campaign-1";
 
@@ -25,6 +27,25 @@ function createDependencies(source: {
 }) {
   const calls: string[] = [];
   const createdFixed: Pledge[] = [];
+  const repriced: InstallmentSlot[][] = [];
+  const currentInstallments: InstallmentSlot[] = [
+    {
+      id: "i1",
+      dueDate: new Date("2026-01-01"),
+      amountCents: 5000,
+      payment: source.hasPayments
+        ? {
+            paidAt: new Date("2026-01-10"),
+            paidAmountCents: 10000,
+            paymentMethod: "cash",
+            receivedByUserId: "user-1",
+            registeredByUserId: "user-1",
+          }
+        : null,
+    },
+    { id: "i2", dueDate: new Date("2026-02-01"), amountCents: 5000, payment: null },
+    { id: "i3", dueDate: new Date("2026-03-01"), amountCents: 5000, payment: null },
+  ];
   const repository: PledgeTypeChangeRepository = {
     findSource(kind, id) {
       return Promise.resolve(
@@ -33,8 +54,12 @@ function createDependencies(source: {
           : null,
       );
     },
-    repriceFixed(pledgeId, pledgeTypeId, installmentValue) {
-      calls.push(`reprice ${pledgeId} ${pledgeTypeId} ${String(installmentValue.toCents())}`);
+    findInstallments() {
+      return Promise.resolve(currentInstallments);
+    },
+    repriceFixed(pledgeId, pledgeTypeId, installments) {
+      calls.push(`reprice ${pledgeId} ${pledgeTypeId}`);
+      repriced.push(installments);
       return Promise.resolve();
     },
     relabelLoose(id, pledgeTypeId) {
@@ -58,27 +83,34 @@ function createDependencies(source: {
     findPeriodById: () =>
       Promise.resolve({ startDate: new Date("2026-01-01"), endDate: new Date("2026-06-30") }),
   };
-  return { repository, pledgeTypeReader, campaignReader, calls, createdFixed };
+  return { repository, pledgeTypeReader, campaignReader, calls, createdFixed, repriced };
 }
 
 const now = new Date("2026-03-15");
 
 describe("changePledgeType", () => {
-  it("troca o tipo de um carnê de valor fixo, com o novo valor para as parcelas", async () => {
+  it("troca o tipo de um carnê de valor fixo, recontando o que já foi pago no valor novo", async () => {
     const dependencies = createDependencies({
       kind: "fixed",
-      pledgeTypeId: "type-50",
+      pledgeTypeId: "type-100",
       hasPayments: true,
     });
 
     const result = await changePledgeType(
       dependencies,
-      { sourceKind: "fixed", sourceId: "pledge-1", pledgeTypeId: "type-100" },
+      { sourceKind: "fixed", sourceId: "pledge-1", pledgeTypeId: "type-50" },
       now,
     );
 
     expect(result).toEqual({ kind: "fixed", id: "pledge-1" });
-    expect(dependencies.calls).toEqual(["reprice pledge-1 type-100 10000"]);
+    expect(dependencies.calls).toEqual(["reprice pledge-1 type-50"]);
+    const installments = dependencies.repriced[0] ?? [];
+    expect(installments.map((item) => item.payment?.paidAmountCents ?? "a pagar")).toEqual([
+      5000,
+      5000,
+      "a pagar",
+    ]);
+    expect(installments.every((item) => item.amountCents === 5000)).toBe(true);
   });
 
   it("troca o tipo de um carnê avulso por outro avulso", async () => {
@@ -213,5 +245,19 @@ describe("getPledgeTypeChangeSource", () => {
       pledgeTypeId: "type-loose",
       hasPayments: true,
     });
+  });
+});
+
+describe("listPledgeInstallmentSlots", () => {
+  it("devolve as parcelas do carnê, com o que já foi pago, para prever a troca de valor", async () => {
+    const { repository } = createDependencies({
+      kind: "fixed",
+      pledgeTypeId: "type-100",
+      hasPayments: true,
+    });
+
+    const slots = await listPledgeInstallmentSlots(repository, "pledge-1");
+
+    expect(slots.map((slot) => slot.payment?.paidAmountCents ?? null)).toEqual([10000, null, null]);
   });
 });

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { asc, eq, isNotNull, sql } from "drizzle-orm";
 import type { PledgeTypeChangeRepository } from "@/server/application/change-pledge-type";
+import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
 import { installments, loosePledgeContributions, loosePledges, pledges } from "./schema";
 
@@ -8,6 +9,10 @@ const hasPaidInstallment = sql<boolean>`exists (
   select 1 from ${installments}
   where ${installments.pledgeId} = ${pledges.id} and ${isNotNull(installments.paidAt)}
 )`;
+
+function toPaymentMethod(value: string | null): PaymentMethod | null {
+  return value === "pix" || value === "cash" ? value : null;
+}
 
 const hasContribution = sql<boolean>`exists (
   select 1 from ${loosePledgeContributions}
@@ -46,13 +51,54 @@ export function createPledgeTypeChangeRepository(db: DbClient): PledgeTypeChange
       return row ?? null;
     },
 
-    async repriceFixed(pledgeId, pledgeTypeId, installmentValue) {
+    async findInstallments(pledgeId) {
+      const rows = await db
+        .select({
+          id: installments.id,
+          dueDate: installments.dueDate,
+          amountCents: installments.amountCents,
+          paidAt: installments.paidAt,
+          paidAmountCents: installments.paidAmountCents,
+          paymentMethod: installments.paymentMethod,
+          receivedByUserId: installments.receivedByUserId,
+          registeredByUserId: installments.registeredByUserId,
+        })
+        .from(installments)
+        .where(eq(installments.pledgeId, pledgeId))
+        .orderBy(asc(installments.dueDate));
+
+      return rows.map((row) => ({
+        id: row.id,
+        dueDate: row.dueDate,
+        amountCents: row.amountCents,
+        payment: row.paidAt
+          ? {
+              paidAt: row.paidAt,
+              paidAmountCents: row.paidAmountCents ?? row.amountCents,
+              paymentMethod: toPaymentMethod(row.paymentMethod),
+              receivedByUserId: row.receivedByUserId,
+              registeredByUserId: row.registeredByUserId,
+            }
+          : null,
+      }));
+    },
+
+    async repriceFixed(pledgeId, pledgeTypeId, repricedInstallments) {
       await db.batch([
         db.update(pledges).set({ pledgeTypeId }).where(eq(pledges.id, pledgeId)),
-        db
-          .update(installments)
-          .set({ amountCents: installmentValue.toCents() })
-          .where(and(eq(installments.pledgeId, pledgeId), isNull(installments.paidAt))),
+        ...repricedInstallments.map((installment) =>
+          db
+            .update(installments)
+            .set({
+              amountCents: installment.amountCents,
+              paidAt: installment.payment?.paidAt ?? null,
+              paidAmountCents: installment.payment?.paidAmountCents ?? null,
+              paymentMethod: installment.payment?.paymentMethod ?? null,
+              receivedByUserId: installment.payment?.receivedByUserId ?? null,
+              registeredByUserId: installment.payment?.registeredByUserId ?? null,
+            })
+            .where(eq(installments.id, installment.id)),
+        ),
       ]);
     },
 

@@ -885,8 +885,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   ao cadastrar em produção: não havia como ajustar um carnê cadastrado com
   o tipo errado). Mockup aprovado e decisões tomadas com o usuário: troca
   entre tipos do mesmo jeito (valor fixo ↔ valor fixo, avulso ↔ avulso) a
-  qualquer momento — as parcelas a pagar ganham o valor novo e as já
-  pagas continuam com o valor pago; troca entre valor fixo e avulso só
+  qualquer momento — as parcelas a pagar ganham o valor novo; troca entre valor fixo e avulso só
   enquanto nada foi pago/entregue, refazendo o carnê do zero (de avulso
   para valor fixo, com mês da primeira parcela e quantidade, como no
   cadastro). Corrigir mês/quantidade de um carnê já cadastrado ficou de
@@ -903,6 +902,21 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   num erro (mesmo problema da PR #67); `SubmitButton` ganhou a prop
   `pending` para esse caso. Ajuda: tópico novo "Corrigir o tipo de carnê
   de um doador".
+  - Lacuna achada pelo usuário na validação em preview: um doador que
+    pagou R$ 100 num carnê de R$ 100, corrigido para um tipo de R$ 50,
+    ficava com uma parcela paga de R$ 100 e todas as outras de R$ 50 a
+    pagar, como se tivesse pago a mais. Decisão tomada com o usuário:
+    o que já foi pago é recontado no valor novo
+    (`repriceInstallments`, domínio `installment-repricing.ts`, TDD) — R$
+    100 viram duas parcelas pagas de R$ 50 (mesma data, forma de
+    pagamento e quem recebeu), e pagamentos iguais (mesma data, forma e
+    quem recebeu) que somam o valor novo viram uma parcela só (ex.: duas
+    de R$ 50 viram uma de R$ 100). Só quando fecha certinho: valor
+    quebrado (ex.: R$ 100 para R$ 30) mantém o pagamento como estava, e
+    nada é recontado se o pago passar do número de parcelas do carnê. Os
+    pagamentos ocupam as primeiras parcelas. O total arrecadado e o
+    "Dinheiro em mãos" não mudam (mesmo dinheiro, mesmo recebedor). O
+    aviso da tela mostra o resultado antes de salvar, com a mesma regra.
 
 ## Backlog (próximas fatias, em ordem)
 

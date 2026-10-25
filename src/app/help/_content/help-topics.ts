@@ -80,7 +80,7 @@ export const helpTopics: HelpTopic[] = [
       "Escolha o tipo certo e confira o aviso que explica o que vai mudar.",
       'Toque em "Salvar tipo novo".',
     ],
-    tip: "Entre tipos de valor fixo, as parcelas a pagar ganham o valor novo e as já pagas continuam com o valor pago. Trocar entre valor fixo e avulso só é possível enquanto nada foi pago ou entregue.",
+    tip: "Entre tipos de valor fixo, as parcelas a pagar ganham o valor novo, e o que já foi pago é recontado no valor novo quando fecha certinho (ex.: R$ 100 pagos viram duas parcelas pagas de R$ 50). Trocar entre valor fixo e avulso só é possível enquanto nada foi pago ou entregue.",
     action: toCampaigns,
     related: ["cadastrar-doador"],
   },

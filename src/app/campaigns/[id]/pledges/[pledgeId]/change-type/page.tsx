@@ -1,7 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
-import { getPledgeTypeChangeSource } from "@/server/application/change-pledge-type";
+import {
+  getPledgeTypeChangeSource,
+  listPledgeInstallmentSlots,
+} from "@/server/application/change-pledge-type";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
 import { createPledgeTypeChangeRepository } from "@/server/infrastructure/db/pledge-type-change-repository";
@@ -27,10 +30,12 @@ export default async function ChangeFixedPledgeTypePage({
   }
 
   const db = createDbClient();
-  const [pledge, source, pledgeTypes] = await Promise.all([
+  const changeRepository = createPledgeTypeChangeRepository(db);
+  const [pledge, source, pledgeTypes, installmentSlots] = await Promise.all([
     getPledgeDetail(createPledgeRepository(db), pledgeId),
-    getPledgeTypeChangeSource(createPledgeTypeChangeRepository(db), "fixed", pledgeId),
+    getPledgeTypeChangeSource(changeRepository, "fixed", pledgeId),
     listPledgeTypes(createPledgeTypeRepository(db), campaignId),
+    listPledgeInstallmentSlots(changeRepository, pledgeId),
   ]);
   if (!pledge || source?.campaignId !== campaignId) {
     notFound();
@@ -69,6 +74,7 @@ export default async function ChangeFixedPledgeTypePage({
           installmentValueLabel: formatCurrency(pledge.installmentValue),
           pendingCount,
           paidCount,
+          installments: installmentSlots,
         }}
         hasPayments={source.hasPayments}
         options={pledgeTypes
@@ -79,6 +85,7 @@ export default async function ChangeFixedPledgeTypePage({
             installmentValueLabel: pledgeType.installmentValue
               ? formatCurrency(pledgeType.installmentValue)
               : null,
+            installmentValueCents: pledgeType.installmentValue?.toCents() ?? null,
           }))}
         firstMonthOptions={[]}
         action={change}

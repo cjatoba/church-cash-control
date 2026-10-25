@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Money } from "../domain/money";
+import { repriceInstallments, type InstallmentSlot } from "../domain/installment-repricing";
 import type { Pledge } from "../domain/pledge";
 import { planPledgeTypeChange, type PledgeKind } from "../domain/pledge-type-change";
 import {
@@ -33,9 +33,12 @@ export interface PledgeTypeChangeRepository {
     pledgeTypeId: string;
     hasPayments: boolean;
   } | null>;
-  // Só as parcelas ainda não pagas mudam de valor: as pagas guardam o valor
-  // efetivamente recebido à parte e são histórico financeiro.
-  repriceFixed(pledgeId: string, pledgeTypeId: string, installmentValue: Money): Promise<void>;
+  findInstallments(pledgeId: string): Promise<InstallmentSlot[]>;
+  repriceFixed(
+    pledgeId: string,
+    pledgeTypeId: string,
+    installments: InstallmentSlot[],
+  ): Promise<void>;
   relabelLoose(loosePledgeId: string, pledgeTypeId: string): Promise<void>;
   convertFixedToLoose(
     pledgeId: string,
@@ -50,6 +53,13 @@ export function getPledgeTypeChangeSource(
   id: string,
 ) {
   return repository.findSource(kind, id);
+}
+
+export function listPledgeInstallmentSlots(
+  repository: Pick<PledgeTypeChangeRepository, "findInstallments">,
+  pledgeId: string,
+): Promise<InstallmentSlot[]> {
+  return repository.findInstallments(pledgeId);
 }
 
 export interface ChangePledgeTypeDependencies {
@@ -82,9 +92,14 @@ export async function changePledgeType(
   );
 
   switch (plan.kind) {
-    case "reprice":
-      await repository.repriceFixed(data.sourceId, data.pledgeTypeId, plan.installmentValue);
+    case "reprice": {
+      const repriced = repriceInstallments(
+        await repository.findInstallments(data.sourceId),
+        plan.installmentValue.toCents(),
+      );
+      await repository.repriceFixed(data.sourceId, data.pledgeTypeId, repriced.installments);
       return { kind: "fixed", id: data.sourceId };
+    }
     case "relabel":
       await repository.relabelLoose(data.sourceId, data.pledgeTypeId);
       return { kind: "loose", id: data.sourceId };
