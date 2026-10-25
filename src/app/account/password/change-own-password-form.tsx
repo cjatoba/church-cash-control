@@ -23,7 +23,7 @@ export function ChangeOwnPasswordForm({
       action={formAction}
       className="flex w-full max-w-md flex-col gap-5 self-start rounded-2xl border border-zinc-200 bg-white p-6 text-zinc-900 sm:self-auto sm:p-8 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
     >
-      <BackLink href="/menu" />
+      <BackLink href="/" />
       <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Trocar senha</h1>
       {state.error ? (
         <p className="rounded-xl bg-red-50 p-3 text-[15px] text-red-800 dark:bg-red-950/50 dark:text-red-300">

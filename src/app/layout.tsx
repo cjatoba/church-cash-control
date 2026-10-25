@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { THEME_COOKIE_NAME, parseThemePreference } from "@/app/_lib/theme";
 import { InstallPromptCapture } from "@/app/_components/install-prompt-capture";
+import { AppNavigation } from "@/app/_components/app-navigation";
 import { getCachedAppBranding } from "@/app/_lib/app-branding";
 import { appIconUrl } from "@/app/_lib/app-icon-catalog";
 import "./globals.css";
@@ -35,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f4f4f5" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
@@ -54,6 +56,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <InstallPromptCapture />
         {children}
+        <AppNavigation theme={theme} />
       </body>
     </html>
   );

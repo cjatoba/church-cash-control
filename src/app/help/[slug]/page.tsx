@@ -7,6 +7,7 @@ import { PageHeader } from "@/app/_components/page-header";
 import { NavListItem, NavSection } from "@/app/_components/nav-list";
 import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
 import { InfoIcon } from "@/app/_components/icons";
+import { OpenMenuButton } from "@/app/_components/menu-sheet";
 import { findHelpTopic } from "../_content/help-topics";
 
 export default async function HelpTopicPage({ params }: PageProps<"/help/[slug]">) {
@@ -52,7 +53,9 @@ export default async function HelpTopicPage({ params }: PageProps<"/help/[slug]"
         </div>
       ) : null}
 
-      {topic.action ? (
+      {topic.action && "opensMenu" in topic.action ? (
+        <OpenMenuButton label={topic.action.label} />
+      ) : topic.action ? (
         <Link
           href={topic.action.href}
           className={`${buttonBaseClassName} ${buttonClassNames.primaryLarge}`}

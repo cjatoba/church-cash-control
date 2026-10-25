@@ -15,7 +15,7 @@ export default async function InstallPage() {
 
   return (
     <PageShell>
-      <PageHeader backHref="/menu" backLabel="Voltar para o menu" title="Instalar no celular" />
+      <PageHeader backHref="/" backLabel="Voltar para o início" title="Instalar no celular" />
 
       <section className="flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
         <AppIconTile

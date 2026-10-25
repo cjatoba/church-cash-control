@@ -184,7 +184,7 @@ export default async function UsersPage() {
 
   return (
     <PageShell>
-      <PageHeader backHref="/menu" title="Voluntários e acessos" />
+      <PageHeader backHref="/" backLabel="Voltar para o início" title="Voluntários e acessos" />
 
       <Link
         href="/users/new"

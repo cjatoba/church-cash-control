@@ -28,7 +28,7 @@ export default async function HelpPage() {
 
   return (
     <PageShell>
-      <PageHeader title="Ajuda" backHref="/menu" backLabel="Voltar para o menu" />
+      <PageHeader title="Ajuda" backHref="/" backLabel="Voltar para o início" />
 
       <Link
         href="/tutorial"

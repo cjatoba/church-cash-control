@@ -10,9 +10,8 @@ import { createActivityLogRepository } from "@/server/infrastructure/db/activity
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { PageShell } from "@/app/_components/page-shell";
-import { roundIconButtonClassName } from "@/app/_components/page-header";
 import { ProgressBar } from "@/app/_components/progress-bar";
-import { ArrowPathIcon, ChevronRightIcon, MenuIcon, PlusIcon } from "@/app/_components/icons";
+import { ArrowPathIcon, ChevronRightIcon, PlusIcon } from "@/app/_components/icons";
 import { formatCurrency, formatMonthYear } from "@/app/_lib/format";
 
 export default async function Home() {
@@ -54,14 +53,9 @@ export default async function Home() {
 
   return (
     <PageShell>
-      <header className="flex items-center justify-between gap-4 pt-2">
-        <div className="flex min-w-0 flex-col">
-          <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Olá,</span>
-          <span className="truncate text-2xl font-bold">{session?.user.name ?? "bem-vindo"}</span>
-        </div>
-        <Link href="/menu" aria-label="Abrir menu" className={roundIconButtonClassName}>
-          <MenuIcon />
-        </Link>
+      <header className="flex min-w-0 flex-col pt-2">
+        <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Olá,</span>
+        <span className="truncate text-2xl font-bold">{session?.user.name ?? "bem-vindo"}</span>
       </header>
 
       <h1 className="text-xl font-semibold">Suas campanhas</h1>

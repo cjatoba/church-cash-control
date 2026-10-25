@@ -9,7 +9,7 @@ export interface HelpTopic extends GuideItem {
   summary: string;
   steps: string[];
   tip?: string;
-  action?: { href: string; label: string };
+  action?: { href: string; label: string } | { opensMenu: true; label: string };
   related?: string[];
 }
 
@@ -204,7 +204,7 @@ export const helpTopics: HelpTopic[] = [
     title: "Trocar minha senha",
     summary: "Para definir uma senha nova quando quiser.",
     steps: [
-      'Toque no botão de menu (canto de cima da tela inicial) e depois em "Trocar senha".',
+      'Toque em "Menu", na barra de baixo da tela, e depois em "Trocar senha".',
       "Informe a senha atual e a nova senha duas vezes.",
       "Depois de salvar, entre de novo com a senha nova.",
     ],
@@ -216,7 +216,7 @@ export const helpTopics: HelpTopic[] = [
     title: "Instalar no celular",
     summary: "Coloque o app na tela inicial do celular e abra como um aplicativo.",
     steps: [
-      'Toque no botão de menu e depois em "Instalar no celular".',
+      'Toque em "Menu", na barra de baixo da tela, e depois em "Instalar no celular".',
       "Escolha a aba do seu celular (Android ou iPhone) e siga os passos.",
     ],
     action: { href: "/install", label: "Ver como instalar" },
@@ -226,10 +226,10 @@ export const helpTopics: HelpTopic[] = [
     title: "Modo claro ou escuro",
     summary: "Escolha as cores do app.",
     steps: [
-      'Toque no botão de menu e, em "Aparência", escolha Automático, Claro ou Escuro.',
+      'Toque em "Menu", na barra de baixo da tela. Em "Aparência", escolha Automático, Claro ou Escuro.',
       '"Automático" segue o modo claro ou escuro do seu celular.',
     ],
-    action: { href: "/menu", label: "Abrir o menu" },
+    action: { opensMenu: true, label: "Abrir o menu" },
   },
   {
     slug: "convidar-voluntarios",
@@ -237,7 +237,7 @@ export const helpTopics: HelpTopic[] = [
     title: "Convidar voluntários",
     summary: "Cadastre quem ajuda na campanha e escolha o que cada pessoa pode fazer.",
     steps: [
-      'Toque no botão de menu e depois em "Voluntários e acessos".',
+      'Toque em "Menu", na barra de baixo da tela, e depois em "Voluntários e acessos".',
       'Toque em "Cadastrar voluntário" e informe o nome.',
       "Se a pessoa for usar o app, marque a opção de acesso, informe o celular e o que ela pode fazer.",
       'Toque em "Enviar pelo WhatsApp" e envie a mensagem pronta, que já leva o link, o celular e a senha temporária. No primeiro acesso, a pessoa cria a própria senha.',
@@ -251,7 +251,7 @@ export const helpTopics: HelpTopic[] = [
     title: "Personalizar nome e ícone",
     summary: "Mude o nome do app e o ícone que aparece no celular.",
     steps: [
-      'Toque no botão de menu e depois em "Personalizar app".',
+      'Toque em "Menu", na barra de baixo da tela, e depois em "Personalizar app".',
       "Escolha o nome, o nome curto, o ícone e a cor, e toque em Salvar.",
     ],
     tip: "No iPhone, quem já instalou o app precisa remover e instalar de novo para ver o ícone novo.",
@@ -263,7 +263,7 @@ export const helpTopics: HelpTopic[] = [
     title: "Registro de atividades",
     summary:
       "Mostra quem fez o quê e quando: recebimentos, repasses, cadastros, mudanças nas campanhas e nos voluntários, e cada correção com o que era antes e o que ficou.",
-    steps: ['Toque no botão de menu e depois em "Registro de atividades".'],
+    steps: ['Toque em "Menu", na barra de baixo da tela, e depois em "Registro de atividades".'],
     action: { href: "/activity-log", label: "Ver registro" },
   },
 ];
