@@ -881,7 +881,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-- **Corrigir tipo de carnê de um doador** — PR a abrir (pedido do usuário
+- **Corrigir tipo de carnê de um doador** — PR #75 (pedido do usuário
   ao cadastrar em produção: não havia como ajustar um carnê cadastrado com
   o tipo errado). Mockup aprovado e decisões tomadas com o usuário: troca
   entre tipos do mesmo jeito (valor fixo ↔ valor fixo, avulso ↔ avulso) a
