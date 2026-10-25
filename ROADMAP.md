@@ -975,17 +975,15 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     com ele (coluna `donor_id` em `activity_log`, `ON DELETE SET NULL`).
     Ao excluir os dados do doador (`anonymizeDonor`, porta nova
     `DonorActivityRedactor`, TDD), essas atividades passam a mostrar
-    "Doador removido" no lugar do nome, e o "antes → depois" da correção
+    "Doador anonimizado" no lugar do nome, e o "antes → depois" da correção
     de nome do doador é apagado (as demais correções falam de valor, data,
     forma ou quem recebeu, sem o nome do doador).
   - Atividades anteriores à coluna: a migration `0024` liga ao doador pelo
     nome só quando um único doador tem aquele nome, para nunca apagar
     depois o nome de um homônimo. Em produção não havia doador removido
     nem nomes repetidos, então todas as atividades antigas ficam ligadas.
-  - Texto: o usuário escolheu "Doador anonimizado", mas foi usado "Doador
-    removido" — o mesmo nome que o app já mostra no lugar de um doador
-    excluído em todas as outras telas, e linguagem mais simples (regra de
-    nomenclatura do `CLAUDE.md`).
+  - Texto: "Doador anonimizado", escolha do usuário (o cadastro do doador
+    continua mostrando "Doador removido", como antes).
   - Doação sem carnê não entra: o nome nela é um texto livre, sem cadastro
     de doador, e o app não tem pedido de exclusão para esse caso.
   - A confirmação de "Excluir dados do doador" passa a avisar que o nome

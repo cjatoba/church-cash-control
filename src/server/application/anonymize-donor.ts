@@ -1,5 +1,5 @@
 import {
-  ANONYMIZED_DONOR_NAME,
+  ANONYMIZED_DONOR_ACTIVITY_NAME,
   anonymizeDonor as computeAnonymization,
   type DonorState,
 } from "../domain/donor";
@@ -35,5 +35,5 @@ export async function anonymizeDonor(
 
   const anonymized = computeAnonymization(donor);
   await dependencies.donorAnonymizeRepository.anonymize(id, anonymized);
-  await dependencies.activityRedactor.redactDonor(id, ANONYMIZED_DONOR_NAME);
+  await dependencies.activityRedactor.redactDonor(id, ANONYMIZED_DONOR_ACTIVITY_NAME);
 }

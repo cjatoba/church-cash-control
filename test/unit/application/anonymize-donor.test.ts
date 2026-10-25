@@ -57,7 +57,7 @@ describe("anonymizeDonor", () => {
     await anonymizeDonor(dependencies, "donor-1");
 
     expect(dependencies.redactions).toEqual([
-      { donorId: "donor-1", replacementName: "Doador removido" },
+      { donorId: "donor-1", replacementName: "Doador anonimizado" },
     ]);
   });
 
