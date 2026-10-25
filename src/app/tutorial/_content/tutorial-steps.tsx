@@ -67,7 +67,7 @@ export function buildTutorialSteps(greeting: string): TutorialStep[] {
     {
       id: "help",
       title: "Precisa de ajuda?",
-      text: 'No Menu, toque em "Ajuda" para ver o passo a passo de cada parte do app — e rever este tutorial quando quiser.',
+      text: 'Use a barra de baixo da tela: "Início" volta para a tela inicial de qualquer lugar, e em "Menu" fica a "Ajuda", com o passo a passo de cada parte do app — e este tutorial, para rever quando quiser.',
       icon: <QuestionMarkCircleIcon className={iconClassName} />,
       tone: "rose",
     },

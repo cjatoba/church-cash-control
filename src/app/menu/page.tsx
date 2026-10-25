@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { PageShell } from "@/app/_components/page-shell";
-import { PageHeader, roundIconButtonClassName } from "@/app/_components/page-header";
+import { PageHeader } from "@/app/_components/page-header";
 import { NavListItem, NavSection } from "@/app/_components/nav-list";
 import { SectionTitle } from "@/app/_components/card";
 import { LogoutButton } from "@/app/_components/logout-button";
@@ -14,7 +13,6 @@ import {
   PaintBrushIcon,
   QuestionMarkCircleIcon,
   UsersIcon,
-  XMarkIcon,
 } from "@/app/_components/icons";
 import { THEME_COOKIE_NAME, parseThemePreference } from "@/app/_lib/theme";
 import { ThemeSelector } from "./theme-selector";
@@ -53,14 +51,7 @@ export default async function MenuPage() {
 
   return (
     <PageShell>
-      <PageHeader
-        title="Menu"
-        action={
-          <Link href="/" aria-label="Fechar menu" className={roundIconButtonClassName}>
-            <XMarkIcon />
-          </Link>
-        }
-      />
+      <PageHeader title="Menu" />
 
       <section className="flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
         <span className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-xl font-semibold text-white dark:bg-zinc-50 dark:text-zinc-900">
