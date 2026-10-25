@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import type { ThemePreference } from "@/app/_lib/theme";
-import { DevicePhoneIcon, MoonIcon, SunIcon } from "@/app/_components/icons";
+import { DevicePhoneIcon, MoonIcon, SunIcon } from "./icons";
 
 const options: { value: ThemePreference; label: string; icon: ReactNode }[] = [
   { value: "system", label: "Automático", icon: <DevicePhoneIcon /> },

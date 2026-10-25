@@ -9,8 +9,7 @@ describe("selectBottomNavTab", () => {
     expect(selectBottomNavTab("/campaigns/new")).toBe("home");
   });
 
-  it("marca Menu no menu e nas telas abertas por ele", () => {
-    expect(selectBottomNavTab("/menu")).toBe("menu");
+  it("marca Menu nas telas abertas pelo menu", () => {
     expect(selectBottomNavTab("/account/password")).toBe("menu");
     expect(selectBottomNavTab("/install")).toBe("menu");
     expect(selectBottomNavTab("/help")).toBe("menu");

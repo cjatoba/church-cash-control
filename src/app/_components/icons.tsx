@@ -193,6 +193,10 @@ export function MenuIcon({ className = "h-6 w-6" }: { className?: string }) {
   return <OutlineIcon className={className} d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />;
 }
 
+export function XMarkIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return <OutlineIcon className={className} d="M6 18 18 6M6 6l12 12" />;
+}
+
 export function HomeIcon({ className = "h-6 w-6" }: { className?: string }) {
   return (
     <OutlineIcon

@@ -57,8 +57,8 @@ export function AppBrandingForm({
             Personalização salva. O nome novo já aparece no app; no celular, o ícone instalado
             atualiza sozinho no Android em alguns dias, e no iPhone é preciso instalar de novo.
           </span>
-          <Link href="/menu" className="self-start font-semibold underline">
-            Voltar para o menu
+          <Link href="/" className="self-start font-semibold underline">
+            Voltar para o início
           </Link>
         </div>
       ) : null}

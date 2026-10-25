@@ -2,15 +2,7 @@ export type BottomNavTab = "home" | "menu";
 
 const HIDDEN_ROUTES = ["/login", "/change-password", "/tutorial"];
 
-const MENU_ROUTES = [
-  "/menu",
-  "/account",
-  "/install",
-  "/help",
-  "/users",
-  "/app-settings",
-  "/activity-log",
-];
+const MENU_ROUTES = ["/account", "/install", "/help", "/users", "/app-settings", "/activity-log"];
 
 function matchesRoute(pathname: string, route: string): boolean {
   return pathname === route || pathname.startsWith(`${route}/`);

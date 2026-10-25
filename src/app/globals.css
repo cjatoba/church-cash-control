@@ -70,3 +70,19 @@ input[type="radio"] {
   flex-shrink: 0;
   accent-color: var(--foreground);
 }
+
+.bottom-sheet[open] {
+  animation: bottom-sheet-in 200ms ease-out;
+}
+
+@keyframes bottom-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet[open] {
+    animation: none;
+  }
+}

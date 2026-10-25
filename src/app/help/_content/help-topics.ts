@@ -9,7 +9,7 @@ export interface HelpTopic extends GuideItem {
   summary: string;
   steps: string[];
   tip?: string;
-  action?: { href: string; label: string };
+  action?: { href: string; label: string } | { opensMenu: true; label: string };
   related?: string[];
 }
 
@@ -229,7 +229,7 @@ export const helpTopics: HelpTopic[] = [
       'Toque em "Menu", na barra de baixo da tela. Em "Aparência", escolha Automático, Claro ou Escuro.',
       '"Automático" segue o modo claro ou escuro do seu celular.',
     ],
-    action: { href: "/menu", label: "Abrir o menu" },
+    action: { opensMenu: true, label: "Abrir o menu" },
   },
   {
     slug: "convidar-voluntarios",

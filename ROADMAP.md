@@ -997,13 +997,26 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   baixo com "Início" e "Menu" em todas as telas logadas (fora login,
   troca de senha obrigatória e tutorial — `selectBottomNavTab`,
   `src/app/_lib/bottom-nav.ts`). "Início" fica marcado nas telas de
-  campanha; "Menu" no menu e nas telas abertas por ele. O botão ☰ da tela
-  inicial e o "X" do menu saíram (a barra substitui os dois); o "Voltar"
-  de cada tela continua. A barra respeita a área segura do iPhone no app
+  campanha; "Menu" quando o menu está aberto e nas telas abertas por ele.
+  O botão ☰ da tela inicial saiu (a barra substitui); o "Voltar" de cada
+  tela continua. A barra respeita a área segura do iPhone no app
   instalado (`viewportFit: "cover"` no layout raiz). Sem consulta nova ao
-  banco (componente cliente com `usePathname`, no layout raiz). Ajuda
-  (tópicos que diziam "botão de menu") e tutorial (passo "Precisa de
-  ajuda?") atualizados.
+  banco: a barra e o menu usam só a sessão (JWT) e o cookie de tema.
+  - Lacuna achada pelo usuário na validação em preview: com o menu numa
+    tela própria (`/menu`) e sem o "X", abrir o menu a partir de uma tela
+    funda deixava só a opção de ir ao início, perdendo o lugar (no iPhone
+    com o app instalado não há botão voltar). Mockup revisto e aprovado: o
+    menu virou uma folha que sobe por cima da tela atual
+    (`MenuSheet`, `<dialog>` modal) — fechar (X, tocar fora, arrastar para
+    baixo, Esc) devolve exatamente à tela de baixo. A rota `/menu` deixou
+    de existir; o "Voltar" das telas abertas pelo menu leva ao início.
+    Abrir o menu empilha uma entrada no histórico, para o botão voltar do
+    Android fechar o menu em vez de sair da tela; um link tocado dentro do
+    menu substitui essa entrada (`router.replace`), para não sobrar uma
+    entrada "fantasma". Trocar o tema muda na hora, com o menu aberto.
+  - Ajuda (tópicos que diziam "botão de menu"; o botão "Abrir o menu" do
+    tópico de modo escuro agora abre a folha) e tutorial (passo "Precisa
+    de ajuda?") atualizados.
 
 ## Backlog (próximas fatias, em ordem)
 

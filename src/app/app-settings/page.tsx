@@ -30,7 +30,7 @@ function toSubmittedValues(formData: FormData, fallback: AppBranding): AppBrandi
 export default async function AppSettingsPage() {
   const session = await auth();
   if (!session?.user.canManageUsers) {
-    redirect("/menu");
+    redirect("/");
   }
 
   const current = await getCachedAppBranding();
@@ -43,7 +43,7 @@ export default async function AppSettingsPage() {
 
     const actionSession = await auth();
     if (!actionSession?.user.canManageUsers) {
-      redirect("/menu");
+      redirect("/");
     }
 
     const values = toSubmittedValues(formData, current);
@@ -71,7 +71,7 @@ export default async function AppSettingsPage() {
 
   return (
     <PageShell>
-      <PageHeader backHref="/menu" backLabel="Voltar para o menu" title="Personalizar app" />
+      <PageHeader backHref="/" backLabel="Voltar para o início" title="Personalizar app" />
       <AppBrandingForm current={current} action={save} />
     </PageShell>
   );
