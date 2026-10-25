@@ -44,6 +44,7 @@ const activityLogInputSchema = z.object({
   subjectName: z.string().trim().min(1, "Nome do item da ação é obrigatório"),
   amountCents: z.number().int().nonnegative().nullable(),
   details: z.string().trim().nullable().default(null),
+  donorId: z.string().trim().min(1).nullable().default(null),
 });
 
 export interface ActivityLogEntry {
@@ -52,6 +53,9 @@ export interface ActivityLogEntry {
   subjectName: string;
   amount: Money | null;
   details: string | null;
+  // Vínculo com o doador citado em subjectName: é por ele que o nome é
+  // apagado do registro quando o doador pede a exclusão dos próprios dados.
+  donorId: string | null;
   occurredAt: Date;
 }
 
@@ -68,6 +72,7 @@ export function parseActivityLogEntry(
     // Truncado em vez de rejeitado: o registro acontece depois da ação já
     // salva, e um detalhe longo demais não pode fazer a ação parecer falha.
     details: data.details && data.details.length > 0 ? data.details.slice(0, 500) : null,
+    donorId: data.donorId,
     occurredAt,
   };
 }

@@ -62,6 +62,8 @@ export default async function PledgeDetailPage({
     notFound();
   }
 
+  const pledgeDonorId = pledge.donorId;
+
   async function markInstallmentAsPaid(formData: FormData): Promise<void> {
     "use server";
 
@@ -103,6 +105,7 @@ export default async function PledgeDetailPage({
       actorUserId: registeredByUserId,
       action: "installment_paid",
       subjectName: donorName,
+      donorId: pledgeDonorId,
       amountCents: Number(amountCentsValue),
     });
 
@@ -148,6 +151,7 @@ export default async function PledgeDetailPage({
         actorUserId: actionSession.user.id,
         action: "installment_payment_corrected",
         subjectName: donorName,
+        donorId: pledgeDonorId,
         amountCents: after.paidAmount.toCents(),
         details: describeEntryCorrection(
           {
@@ -216,6 +220,7 @@ export default async function PledgeDetailPage({
       actorUserId: actionSession.user.id,
       action: "installment_payment_reverted",
       subjectName: donorName,
+      donorId: pledgeDonorId,
       amountCents: Number(amountCentsValue),
     });
 

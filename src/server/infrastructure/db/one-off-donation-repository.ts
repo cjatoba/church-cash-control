@@ -71,6 +71,7 @@ export function createOneOffDonationStore(db: DbClient): OneOffDonationStore {
       return {
         campaignId: row.campaignId,
         subjectName: row.donorName ?? "Doação anônima",
+        donorId: null,
         fields: {
           donorName: row.donorName,
           amount: Money.fromCents(row.amountCents),

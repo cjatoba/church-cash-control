@@ -965,17 +965,36 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Apagar o nome do doador também do registro de atividades** — PR #79
+  (lacuna de LGPD notada durante a PR #77, anterior a ela): o registro de
+  atividades guarda o nome do doador como retrato do momento
+  (`subjectName`), então excluir os dados de um doador a pedido dele
+  apagava o nome do cadastro, mas não das atividades. Decisões tomadas
+  com o usuário:
+  - Toda atividade sobre um doador cadastrado passa a guardar o vínculo
+    com ele (coluna `donor_id` em `activity_log`, `ON DELETE SET NULL`).
+    Ao excluir os dados do doador (`anonymizeDonor`, porta nova
+    `DonorActivityRedactor`, TDD), essas atividades passam a mostrar
+    "Doador removido" no lugar do nome, e o "antes → depois" da correção
+    de nome do doador é apagado (as demais correções falam de valor, data,
+    forma ou quem recebeu, sem o nome do doador).
+  - Atividades anteriores à coluna: a migration `0024` liga ao doador pelo
+    nome só quando um único doador tem aquele nome, para nunca apagar
+    depois o nome de um homônimo. Em produção não havia doador removido
+    nem nomes repetidos, então todas as atividades antigas ficam ligadas.
+  - Texto: o usuário escolheu "Doador anonimizado", mas foi usado "Doador
+    removido" — o mesmo nome que o app já mostra no lugar de um doador
+    excluído em todas as outras telas, e linguagem mais simples (regra de
+    nomenclatura do `CLAUDE.md`).
+  - Doação sem carnê não entra: o nome nela é um texto livre, sem cadastro
+    de doador, e o app não tem pedido de exclusão para esse caso.
+  - A confirmação de "Excluir dados do doador" passa a avisar que o nome
+    sai também do registro de atividades. Ajuda e tutorial sem mudança
+    (não falam desse detalhe).
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Anonimizar o nome do doador também no registro de atividades** —
-   lacuna de LGPD notada durante a PR #77, anterior a ela: o registro de
-   atividades guarda o nome do doador como retrato do momento
-   (`subjectName`, e agora também o "antes → depois" das correções), então
-   excluir os dados de um doador a pedido dele apaga o nome do cadastro,
-   mas não das atividades antigas. Precisa decidir com o usuário como
-   localizar esses registros (hoje não há vínculo com o doador).
+Nenhuma fatia no backlog no momento.
 
 ## Como usar este arquivo
 

@@ -119,6 +119,7 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
         actorUserId: actionSession.user.id,
         action: "donor_created",
         subjectName: toStringValue(input.name),
+        donorId,
       });
     } catch (error) {
       return {

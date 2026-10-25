@@ -18,6 +18,7 @@ describe("getLoosePledgeDetail", () => {
   it("retorna o carnê avulso com as contribuições", async () => {
     const pledge: LoosePledgeDetail = {
       id: "loose-pledge-1",
+      donorId: "donor-1",
       donorName: "Maria Souza",
       pledgeTypeName: "Avulso",
       status: "open",

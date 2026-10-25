@@ -155,6 +155,7 @@ export function createPledgeRepository(
       const [pledgeRow] = await db
         .select({
           id: pledges.id,
+          donorId: pledges.donorId,
           donorName: donors.name,
           pledgeTypeName: pledgeTypes.name,
           installmentValueCents: pledgeTypes.installmentValueCents,
@@ -188,6 +189,7 @@ export function createPledgeRepository(
 
       return {
         id: pledgeRow.id,
+        donorId: pledgeRow.donorId,
         donorName: pledgeRow.donorName,
         pledgeTypeName: pledgeRow.pledgeTypeName,
         installmentValue: Money.fromCents(

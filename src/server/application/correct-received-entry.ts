@@ -17,6 +17,9 @@ import type { CustodyBalanceReader } from "./create-custody-transfer";
 export interface StoredEntry<Stored> {
   campaignId: string;
   subjectName: string;
+  // Doador cadastrado de quem veio a entrada (entrega de carnê avulso);
+  // null em doação sem carnê e repasse, que não citam um doador cadastrado.
+  donorId: string | null;
   fields: Stored;
 }
 
@@ -54,6 +57,7 @@ async function findInCampaign<Stored extends ReceivedAmount, Corrected>(
 
 export interface EntryCorrection<Stored, Corrected> {
   subjectName: string;
+  donorId: string | null;
   before: Stored;
   after: Corrected;
 }
@@ -78,14 +82,18 @@ async function correctReceivedEntry<
   id: string,
   corrected: Corrected,
 ): Promise<EntryCorrection<Stored, Corrected>> {
-  const { subjectName, fields: before } = await findInCampaign(dependencies.store, campaignId, id);
+  const {
+    subjectName,
+    donorId,
+    fields: before,
+  } = await findInCampaign(dependencies.store, campaignId, id);
   assertEntryChangeKeepsBalance(
     before,
     corrected,
     await previousReceiverBalance(dependencies.balanceReader, campaignId, before),
   );
   await dependencies.store.update(id, corrected);
-  return { subjectName, before, after: corrected };
+  return { subjectName, donorId, before, after: corrected };
 }
 
 async function deleteReceivedEntry<Stored extends ReceivedAmount, Corrected>(

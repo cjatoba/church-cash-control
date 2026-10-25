@@ -153,6 +153,7 @@ export interface InstallmentDetail {
 
 export interface PledgeDetail {
   id: string;
+  donorId: string;
   donorName: string;
   pledgeTypeName: string;
   installmentValue: Money;

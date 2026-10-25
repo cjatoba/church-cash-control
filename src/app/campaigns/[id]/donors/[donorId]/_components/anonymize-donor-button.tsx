@@ -31,8 +31,9 @@ export function AnonymizeDonorButton({ action }: { action: () => Promise<void> }
           <div className="flex flex-col gap-4">
             <p className="text-lg font-semibold">Excluir dados do doador</p>
             <p className="text-zinc-700 dark:text-zinc-300">
-              O nome será removido permanentemente. O histórico de carnês e parcelas pagas é
-              mantido, mas sem vínculo com o nome. Essa ação não pode ser desfeita.
+              O nome será removido permanentemente, inclusive do registro de atividades. O histórico
+              de carnês e parcelas pagas é mantido, mas sem vínculo com o nome. Essa ação não pode
+              ser desfeita.
             </p>
             <div className="flex justify-end gap-3">
               <button

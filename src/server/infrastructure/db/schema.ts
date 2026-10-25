@@ -155,6 +155,9 @@ export const activityLog = pgTable("activity_log", {
   amountCents: integer("amount_cents"),
   // Numa correção, o que era antes e o que ficou (ex.: "Recebido por: A → B").
   details: varchar("details", { length: 500 }),
+  // Doador citado em subjectName, para apagar o nome dele daqui quando
+  // pedir a exclusão dos próprios dados.
+  donorId: uuid("donor_id").references(() => donors.id, { onDelete: "set null" }),
   occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
 });
 

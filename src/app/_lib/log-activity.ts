@@ -11,6 +11,7 @@ export function logActivity(
     subjectName: string;
     amountCents?: number | null;
     details?: string | null;
+    donorId?: string | null;
   },
 ): Promise<void> {
   return recordActivity(createActivityLogRepository(db), {
@@ -19,5 +20,6 @@ export function logActivity(
     subjectName: entry.subjectName,
     amountCents: entry.amountCents ?? null,
     details: entry.details ?? null,
+    donorId: entry.donorId ?? null,
   });
 }

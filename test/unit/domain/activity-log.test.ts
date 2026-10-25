@@ -20,6 +20,13 @@ describe("parseActivityLogEntry", () => {
     expect(entry.amount?.equals(Money.fromReais(100))).toBe(true);
     expect(entry.occurredAt).toEqual(occurredAt);
     expect(entry.details).toBeNull();
+    expect(entry.donorId).toBeNull();
+  });
+
+  it("guarda a qual doador a atividade se refere, para poder apagar o nome dele depois", () => {
+    const entry = parseActivityLogEntry({ ...validInput, donorId: "donor-1" }, occurredAt);
+
+    expect(entry.donorId).toBe("donor-1");
   });
 
   it("guarda o detalhe do que mudou numa correção", () => {
