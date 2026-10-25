@@ -1033,8 +1033,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   um serviço de IA externo (LGPD, custo e lentidão). Ajuda ("Dar baixa
   numa parcela" e "Registrar entrega de carnê avulso") atualizada.
 
-## Em andamento (PRs abertas)
-
 - **Doações sem carnê na lista de doadores** — PR #85 (pedido do usuário:
   quem doou sem carnê não aparecia em "Doadores e carnês"). Opção
   escolhida com o usuário entre três (seção própria na mesma tela, tela
@@ -1050,6 +1048,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   consulta a mais ao abrir a tela, em paralelo com as dos carnês. Ajuda
   ("Registrar doação sem carnê" e "Corrigir ou excluir uma doação,
   entrega ou repasse") atualizada.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
