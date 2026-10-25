@@ -41,6 +41,7 @@ export default async function ChangeLoosePledgeTypePage({
   }
 
   const logContext = {
+    donorId: source.donorId,
     donorName: loosePledge.donorName,
     currentTypeName: loosePledge.pledgeTypeName,
     typeNames: Object.fromEntries(pledgeTypes.map((type) => [type.id, type.name])),

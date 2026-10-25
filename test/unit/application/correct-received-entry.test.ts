@@ -24,6 +24,7 @@ function createDonationStore() {
           ? {
               campaignId: "campaign-1",
               subjectName: "Tesouraria",
+              donorId: null,
               fields: {
                 donorName: "Tesouraria",
                 amount: Money.fromReais(5000),
@@ -146,6 +147,7 @@ function createContributionStore() {
       return Promise.resolve({
         campaignId: "campaign-1",
         subjectName: "Rita Gomes",
+        donorId: "donor-1",
         fields: {
           amount: Money.fromReais(50),
           date: new Date("2026-09-02"),
@@ -180,6 +182,7 @@ describe("correctLooseContribution / deleteLooseContribution", () => {
     expect(updates).toHaveLength(1);
     expect(result.after.amount.toCents()).toBe(4_000);
     expect(result.after.paymentMethod).toBe("cash");
+    expect(result.donorId).toBe("donor-1");
   });
 
   it("exclui uma entrega lançada por engano", async () => {

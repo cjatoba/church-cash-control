@@ -212,6 +212,7 @@ export function createCustodyTransferStore(db: DbClient): CustodyTransferStore {
       return {
         campaignId: row.campaignId,
         subjectName: `${row.fromUserName} para ${row.recipientName}`,
+        donorId: null,
         fields: {
           fromUserId: row.fromUserId,
           recipientName: row.recipientName,

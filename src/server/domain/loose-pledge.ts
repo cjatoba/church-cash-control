@@ -85,6 +85,7 @@ export interface LoosePledgeContributionDetail {
 
 export interface LoosePledgeDetail {
   id: string;
+  donorId: string;
   donorName: string;
   pledgeTypeName: string;
   status: LoosePledgeStatus;

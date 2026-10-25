@@ -14,6 +14,10 @@ export interface DonorState extends Donor {
 
 export const ANONYMIZED_DONOR_NAME = "Doador removido";
 
+// Texto que substitui o nome no registro de atividades (escolha do usuário,
+// diferente do nome exibido no cadastro).
+export const ANONYMIZED_DONOR_ACTIVITY_NAME = "Doador anonimizado";
+
 export function parseDonor(input: unknown): Donor {
   return donorInputSchema.parse(input);
 }

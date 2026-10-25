@@ -17,6 +17,7 @@ function createDependencies(balanceByUser: Record<string, number>) {
           ? {
               campaignId: "campaign-1",
               subjectName: "Tesouraria",
+              donorId: null,
               fields: {
                 fromUserId: "user-a",
                 recipientName: "Tesouraria",

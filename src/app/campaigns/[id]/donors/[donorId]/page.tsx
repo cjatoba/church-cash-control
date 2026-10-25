@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { describeChanges } from "@/server/domain/activity-log";
 import { logActivity } from "@/app/_lib/log-activity";
+import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { auth } from "@/auth";
 import { anonymizeDonor } from "@/server/application/anonymize-donor";
 import { getDonor } from "@/server/application/get-donor";
@@ -96,6 +97,7 @@ export default async function DonorDetailPage({
       actorUserId: actionSession.user.id,
       action: "donor_updated",
       subjectName: trimmedName,
+      donorId,
       details: describeChanges([{ label: "Nome", before: currentName, after: trimmedName }]),
     });
 
@@ -113,7 +115,11 @@ export default async function DonorDetailPage({
     const db = createDbClient();
     const donorRepository = createDonorRepository(db);
     await anonymizeDonor(
-      { donorStateReader: donorRepository, donorAnonymizeRepository: donorRepository },
+      {
+        donorStateReader: donorRepository,
+        donorAnonymizeRepository: donorRepository,
+        activityRedactor: createActivityLogRepository(db),
+      },
       donorId,
     );
     // Nunca o nome: a pessoa pediu para apagar os próprios dados.
@@ -121,6 +127,7 @@ export default async function DonorDetailPage({
       actorUserId: actionSession.user.id,
       action: "donor_anonymized",
       subjectName: "um doador (nome removido)",
+      donorId,
     });
 
     redirect(`/campaigns/${campaignId}/donors/${donorId}`);

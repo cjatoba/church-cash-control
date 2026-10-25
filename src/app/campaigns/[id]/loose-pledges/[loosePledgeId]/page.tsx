@@ -53,6 +53,7 @@ export default async function LoosePledgeDetailPage({
     notFound();
   }
   const donorName = loosePledge.donorName;
+  const donorId = loosePledge.donorId;
 
   async function addContribution(
     _prevState: AddContributionState,
@@ -86,6 +87,7 @@ export default async function LoosePledgeDetailPage({
         actorUserId: actionSession.user.id,
         action: "loose_contribution_created",
         subjectName: donorName,
+        donorId,
         amountCents: Math.round(Number(input.amount) * 100),
       });
     } catch (error) {
@@ -122,6 +124,7 @@ export default async function LoosePledgeDetailPage({
       actorUserId: actionSession.user.id,
       action: "loose_pledge_closed",
       subjectName: donorName,
+      donorId,
     });
 
     redirect(`/campaigns/${campaignId}/loose-pledges/${loosePledgeId}`);
@@ -142,6 +145,7 @@ export default async function LoosePledgeDetailPage({
       actorUserId: actionSession.user.id,
       action: "loose_pledge_reopened",
       subjectName: donorName,
+      donorId,
     });
 
     redirect(`/campaigns/${campaignId}/loose-pledges/${loosePledgeId}`);

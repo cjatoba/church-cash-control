@@ -37,6 +37,7 @@ export function createLooseContributionStore(db: DbClient): LooseContributionSto
       const [row] = await db
         .select({
           campaignId: loosePledges.campaignId,
+          donorId: loosePledges.donorId,
           donorName: donors.name,
           amountCents: loosePledgeContributions.amountCents,
           date: loosePledgeContributions.date,
@@ -54,6 +55,7 @@ export function createLooseContributionStore(db: DbClient): LooseContributionSto
       return {
         campaignId: row.campaignId,
         subjectName: row.donorName,
+        donorId: row.donorId,
         fields: {
           amount: Money.fromCents(row.amountCents),
           date: row.date,

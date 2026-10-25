@@ -169,6 +169,13 @@
       "when": 1792899173531,
       "tag": "0023_add-activity-log-details-and-actions",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792923586970,
+      "tag": "0024_add-activity-log-donor-link",
+      "breakpoints": true
     }
   ]
 }

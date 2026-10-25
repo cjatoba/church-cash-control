@@ -67,6 +67,7 @@ export default async function CorrectLooseContributionPage({
         actorUserId: actionSession.user.id,
         action: "loose_contribution_corrected",
         subjectName: result.subjectName,
+        donorId: result.donorId,
         amountCents: result.after.amount.toCents(),
         details: describeEntryCorrection(result.before, result.after, names),
       });
@@ -95,6 +96,7 @@ export default async function CorrectLooseContributionPage({
         actorUserId: actionSession.user.id,
         action: "loose_contribution_deleted",
         subjectName: deleted.subjectName,
+        donorId: deleted.donorId,
         amountCents: deleted.fields.amount.toCents(),
       });
     } catch (error) {

@@ -16,6 +16,7 @@ function optionalString(value: FormDataEntryValue | null): string | undefined {
 }
 
 export interface PledgeTypeChangeLogContext {
+  donorId: string;
   donorName: string;
   currentTypeName: string;
   typeNames: Record<string, string>;
@@ -55,6 +56,7 @@ export async function submitPledgeTypeChange(
       actorUserId: session.user.id,
       action: "pledge_type_changed",
       subjectName: logContext.donorName,
+      donorId: logContext.donorId,
       details: describeChanges([
         {
           label: "Tipo",

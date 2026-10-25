@@ -1,5 +1,6 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import type { ActivityLogRepository } from "@/server/application/record-activity";
+import type { DonorActivityRedactor } from "@/server/application/anonymize-donor";
 import type { ActivityLogListRepository } from "@/server/application/list-activity-log";
 import { ACTIVITY_LOG_ACTIONS, type ActivityLogAction } from "@/server/domain/activity-log";
 import { Money } from "@/server/domain/money";
@@ -18,7 +19,7 @@ function toActivityLogAction(value: string): ActivityLogAction {
 
 export function createActivityLogRepository(
   db: DbClient,
-): ActivityLogRepository & ActivityLogListRepository {
+): ActivityLogRepository & ActivityLogListRepository & DonorActivityRedactor {
   return {
     async create(entry) {
       await db.insert(activityLog).values({
@@ -27,8 +28,21 @@ export function createActivityLogRepository(
         subjectName: entry.subjectName,
         amountCents: entry.amount?.toCents() ?? null,
         details: entry.details,
+        donorId: entry.donorId,
         occurredAt: entry.occurredAt,
       });
+    },
+
+    // Só "donor_updated" tem nome do doador no detalhe ("Nome: A → B"); nas
+    // demais ações o detalhe fala de valor, data, forma ou quem recebeu.
+    async redactDonor(donorId, replacementName) {
+      await db
+        .update(activityLog)
+        .set({
+          subjectName: replacementName,
+          details: sql`case when ${activityLog.action} = 'donor_updated' then null else ${activityLog.details} end`,
+        })
+        .where(eq(activityLog.donorId, donorId));
     },
 
     async findAll() {

@@ -15,6 +15,7 @@ describe("getPledgeDetail", () => {
   it("retorna o carnê com as parcelas", async () => {
     const pledge: PledgeDetail = {
       id: "pledge-1",
+      donorId: "donor-1",
       donorName: "Maria Souza",
       pledgeTypeName: "Prata",
       installmentValue: Money.fromReais(100),
