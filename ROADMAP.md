@@ -1035,7 +1035,21 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Doações sem carnê na lista de doadores** — PR #85 (pedido do usuário:
+  quem doou sem carnê não aparecia em "Doadores e carnês"). Opção
+  escolhida com o usuário entre três (seção própria na mesma tela, tela
+  própria, ou ligar a doação a um doador cadastrado); mockup aprovado. A
+  tela ganha as seções "Carnês" e "Doações sem carnê", cada uma com a
+  contagem no título; a doação mostra nome (ou "Anônimo"), data, forma de
+  pagamento e valor, da mais recente para a mais antiga
+  (`listOneOffDonations`, TDD), e abre a tela de corrigir já existente
+  para quem recebe arrecadação. A pesquisa pelo nome filtra as duas
+  seções. Fica fora de "Escolha o doador" (caminho de "Registrar
+  recebimento"). A doação continua sem vínculo com cadastro de doador
+  (nome em texto livre), então não entra em "Ver dados do doador". Uma
+  consulta a mais ao abrir a tela, em paralelo com as dos carnês. Ajuda
+  ("Registrar doação sem carnê" e "Corrigir ou excluir uma doação,
+  entrega ou repasse") atualizada.
 
 ## Backlog (próximas fatias, em ordem)
 
