@@ -4,6 +4,7 @@ import { createCampaign } from "@/server/application/create-campaign";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { CampaignForm, type CreateCampaignState } from "../_components/campaign-form";
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -38,6 +39,11 @@ export default async function NewCampaignPage() {
       const db = createDbClient();
       const repository = createCampaignRepository(db);
       await createCampaign(repository, input);
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "campaign_created",
+        subjectName: toStringValue(input.name),
+      });
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(

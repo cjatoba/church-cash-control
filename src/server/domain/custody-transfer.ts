@@ -51,3 +51,27 @@ export function assertTransferWithinBalance(
     throw new Error("Data do repasse não pode ser no futuro");
   }
 }
+
+export interface TransferAmount {
+  fromUserId: string;
+  amount: Money;
+}
+
+/**
+ * Ao corrigir um repasse, o valor original volta para o saldo de quem o
+ * tinha feito antes de conferir se o valor novo cabe no saldo.
+ */
+export function assertTransferCorrectionWithinBalance(
+  before: TransferAmount,
+  after: TransferAmount & { transferDate: Date },
+  newSenderBalance: Money,
+  today: Date = new Date(),
+): void {
+  const returnedCents = after.fromUserId === before.fromUserId ? before.amount.toCents() : 0;
+  assertTransferWithinBalance(
+    after.amount,
+    Money.fromCents(newSenderBalance.toCents() + returnedCents),
+    after.transferDate,
+    today,
+  );
+}

@@ -48,13 +48,20 @@ export function addLoosePledgeContribution(
     throw new Error("Carnê avulso encerrado — reabra para registrar uma nova contribuição");
   }
 
+  return { ...parseContributionCorrection(input), registeredByUserId };
+}
+
+export type ContributionCorrection = Omit<LoosePledgeContribution, "registeredByUserId">;
+
+// Corrigir uma entrega já registrada vale mesmo com o carnê encerrado: é
+// ajuste de algo lançado errado, não uma entrega nova.
+export function parseContributionCorrection(input: unknown): ContributionCorrection {
   const data = contributionInputSchema.parse(input);
   return {
     amount: Money.fromReais(data.amount),
     date: data.date,
     paymentMethod: parsePaymentMethod(data.paymentMethod),
     receivedByUserId: data.receivedByUserId,
-    registeredByUserId,
   };
 }
 

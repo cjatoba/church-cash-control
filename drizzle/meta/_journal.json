@@ -162,6 +162,13 @@
       "when": 1792878613331,
       "tag": "0022_add-user-password-set-by-user",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792899173531,
+      "tag": "0023_add-activity-log-details-and-actions",
+      "breakpoints": true
     }
   ]
 }

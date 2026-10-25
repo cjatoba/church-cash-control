@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getCampaign } from "@/server/application/get-campaign";
@@ -7,7 +8,11 @@ import { createCustodyTransfer } from "@/server/application/create-custody-trans
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createCustodyRepository } from "@/server/infrastructure/db/custody-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
+import { listUsers } from "@/server/application/list-users";
+import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
+import { ChevronRightIcon } from "@/app/_components/icons";
 import { formatCurrency } from "@/app/_lib/format";
 import { Money } from "@/server/domain/money";
 import { PageShell } from "@/app/_components/page-shell";
@@ -17,6 +22,12 @@ import { Tabs } from "@/app/_components/tabs";
 import { TransferButton, type TransferState } from "./_components/transfer-button";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
+
+function describeCounts(entryCount: number, transferCount: number): string {
+  const entries = entryCount === 1 ? "1 entrada" : `${String(entryCount)} entradas`;
+  const transfers = transferCount === 1 ? "1 repasse" : `${String(transferCount)} repasses`;
+  return `${entries} · ${transfers}`;
+}
 
 function toStringValue(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value : "";
@@ -71,6 +82,14 @@ export default async function MoneyInHandPage({
         input,
         registeredByUserId,
       );
+      const users = await listUsers(createUserListRepository(db));
+      const fromUserName = users.find((user) => user.id === input.fromUserId)?.name ?? "";
+      await logActivity(db, {
+        actorUserId: registeredByUserId,
+        action: "custody_transfer_created",
+        subjectName: `${fromUserName} para ${toStringValue(input.recipientName)}`,
+        amountCents: Math.round(Number(input.amount) * 100),
+      });
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(
@@ -102,22 +121,35 @@ export default async function MoneyInHandPage({
         Ninguém recebeu dinheiro nesta campanha ainda.
       </p>
     ) : (
-      <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
-        {balances.map((balance) => {
-          const isCurrentUser = balance.userId === session.user.id;
-          return (
-            <li
-              key={balance.userId}
-              className="flex min-h-14 items-center justify-between gap-3 px-4 py-3"
-            >
-              <span className={isCurrentUser ? "text-[17px] font-semibold" : "text-[17px]"}>
-                {isCurrentUser ? `${balance.userLabel} (você)` : balance.userLabel}
-              </span>
-              <span className="text-[17px] font-semibold">{formatCurrency(balance.balance)}</span>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="flex flex-col gap-2">
+        <ul className="flex flex-col divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+          {balances.map((balance) => {
+            const isCurrentUser = balance.userId === session.user.id;
+            return (
+              <li key={balance.userId}>
+                <Link
+                  href={`/campaigns/${campaignId}/money-in-hand/${balance.userId}`}
+                  className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                >
+                  <span className="flex flex-1 flex-col gap-0.5">
+                    <span className="text-[17px] font-semibold">
+                      {isCurrentUser ? `${balance.userLabel} (você)` : balance.userLabel}
+                    </span>
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {describeCounts(balance.entryCount, balance.transferCount)}
+                    </span>
+                  </span>
+                  <span className="text-[17px] font-bold">{formatCurrency(balance.balance)}</span>
+                  <ChevronRightIcon className="h-5 w-5 shrink-0 text-zinc-400" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="px-1 text-[15px] text-zinc-600 dark:text-zinc-400">
+          Toque numa pessoa para ver de onde veio cada valor e corrigir o que foi lançado errado.
+        </p>
+      </div>
     );
 
   const transfersList =

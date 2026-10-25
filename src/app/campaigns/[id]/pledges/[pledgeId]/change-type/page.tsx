@@ -41,12 +41,18 @@ export default async function ChangeFixedPledgeTypePage({
     notFound();
   }
 
+  const logContext = {
+    donorName: pledge.donorName,
+    currentTypeName: pledge.pledgeTypeName,
+    typeNames: Object.fromEntries(pledgeTypes.map((type) => [type.id, type.name])),
+  };
+
   async function change(
     _prevState: ChangePledgeTypeState,
     formData: FormData,
   ): Promise<ChangePledgeTypeState> {
     "use server";
-    return submitPledgeTypeChange(campaignId, "fixed", pledgeId, formData);
+    return submitPledgeTypeChange(campaignId, "fixed", pledgeId, formData, logContext);
   }
 
   const paidCount = pledge.installments.filter((installment) => installment.paidAt).length;

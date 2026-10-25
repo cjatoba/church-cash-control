@@ -26,6 +26,7 @@ describe("getPledgeDetail", () => {
           paidAt: null,
           paidAmount: null,
           paymentMethod: null,
+          receivedByUserId: null,
           receivedByLabel: null,
           registeredByLabel: null,
         },

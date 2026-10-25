@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseActivityLogEntry } from "@/server/domain/activity-log";
+import { describeChanges, parseActivityLogEntry } from "@/server/domain/activity-log";
 import { Money } from "@/server/domain/money";
 
 describe("parseActivityLogEntry", () => {
@@ -19,6 +19,16 @@ describe("parseActivityLogEntry", () => {
     expect(entry.subjectName).toBe("Maria Souza");
     expect(entry.amount?.equals(Money.fromReais(100))).toBe(true);
     expect(entry.occurredAt).toEqual(occurredAt);
+    expect(entry.details).toBeNull();
+  });
+
+  it("guarda o detalhe do que mudou numa correção", () => {
+    const entry = parseActivityLogEntry(
+      { ...validInput, action: "one_off_donation_corrected", details: "Recebido por: A → B" },
+      occurredAt,
+    );
+
+    expect(entry.details).toBe("Recebido por: A → B");
   });
 
   it("aceita registro sem valor monetário associado (ex.: arquivar campanha)", () => {
@@ -46,5 +56,21 @@ describe("parseActivityLogEntry", () => {
 
   it("rejeita ação desconhecida", () => {
     expect(() => parseActivityLogEntry({ ...validInput, action: "unknown_action" })).toThrow();
+  });
+});
+
+describe("describeChanges", () => {
+  it("lista só os campos que mudaram, com o antes e o depois", () => {
+    expect(
+      describeChanges([
+        { label: "Recebido por", before: "Carlos", after: "Ana" },
+        { label: "Valor", before: "R$ 50,00", after: "R$ 50,00" },
+        { label: "Forma", before: "Pix", after: "Dinheiro" },
+      ]),
+    ).toBe("Recebido por: Carlos → Ana · Forma: Pix → Dinheiro");
+  });
+
+  it("devolve null quando nada mudou", () => {
+    expect(describeChanges([{ label: "Valor", before: "R$ 1,00", after: "R$ 1,00" }])).toBeNull();
   });
 });

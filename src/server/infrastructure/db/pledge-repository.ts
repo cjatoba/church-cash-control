@@ -177,6 +177,7 @@ export function createPledgeRepository(
           paidAt: installments.paidAt,
           paidAmountCents: installments.paidAmountCents,
           paymentMethod: installments.paymentMethod,
+          receivedByUserId: installments.receivedByUserId,
           receivedByName: receivedByUser.name,
           registeredByName: registeredByUser.name,
         })
@@ -200,6 +201,7 @@ export function createPledgeRepository(
             paidAt: row.paidAt,
             paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
             paymentMethod: toPaymentMethod(row.paymentMethod),
+            receivedByUserId: row.receivedByUserId,
             receivedByLabel: row.receivedByName,
             registeredByLabel: row.registeredByName,
           }))

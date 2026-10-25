@@ -11,12 +11,16 @@ describe("getMoneyInHand", () => {
             userLabel: "clayton@example.com",
             receivedCents: 48000,
             transferredCents: 30000,
+            entryCount: 6,
+            transferCount: 1,
           },
           {
             userId: "user-2",
             userLabel: "voluntario2@example.com",
             receivedCents: 12000,
             transferredCents: 0,
+            entryCount: 2,
+            transferCount: 0,
           },
         ]);
       },
@@ -29,5 +33,7 @@ describe("getMoneyInHand", () => {
     expect(balances[0]?.userLabel).toBe("clayton@example.com");
     expect(balances[0]?.balance.toCents()).toBe(18000);
     expect(balances[1]?.balance.toCents()).toBe(12000);
+    expect(balances[0]?.entryCount).toBe(6);
+    expect(balances[0]?.transferCount).toBe(1);
   });
 });

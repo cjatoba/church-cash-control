@@ -1,7 +1,9 @@
 import { and, eq, gte, lt } from "drizzle-orm";
 import type { OneOffDonationRepository } from "@/server/application/create-one-off-donation";
+import type { OneOffDonationStore } from "@/server/application/correct-received-entry";
 import type { OneOffDonationsForMonthReader } from "@/server/application/get-monthly-progress";
 import { Money } from "@/server/domain/money";
+import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
 import { oneOffDonations } from "./schema";
 
@@ -47,6 +49,53 @@ export function createOneOffDonationRepository(
         donorName: row.donorName,
         amount: Money.fromCents(row.amountCents),
       }));
+    },
+  };
+}
+
+function toPaymentMethod(value: string | null): PaymentMethod | null {
+  return value === "pix" || value === "cash" ? value : null;
+}
+
+export function createOneOffDonationStore(db: DbClient): OneOffDonationStore {
+  return {
+    async findById(id) {
+      const [row] = await db
+        .select()
+        .from(oneOffDonations)
+        .where(eq(oneOffDonations.id, id))
+        .limit(1);
+      if (!row) {
+        return null;
+      }
+      return {
+        campaignId: row.campaignId,
+        subjectName: row.donorName ?? "Doação anônima",
+        fields: {
+          donorName: row.donorName,
+          amount: Money.fromCents(row.amountCents),
+          date: row.date,
+          paymentMethod: toPaymentMethod(row.paymentMethod),
+          receivedByUserId: row.receivedByUserId,
+        },
+      };
+    },
+
+    async update(id, fields) {
+      await db
+        .update(oneOffDonations)
+        .set({
+          donorName: fields.donorName,
+          amountCents: fields.amount.toCents(),
+          date: fields.date,
+          paymentMethod: fields.paymentMethod,
+          receivedByUserId: fields.receivedByUserId,
+        })
+        .where(eq(oneOffDonations.id, id));
+    },
+
+    async remove(id) {
+      await db.delete(oneOffDonations).where(eq(oneOffDonations.id, id));
     },
   };
 }

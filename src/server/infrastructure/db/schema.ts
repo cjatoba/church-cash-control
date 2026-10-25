@@ -8,6 +8,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { ACTIVITY_LOG_ACTIONS } from "../../domain/activity-log";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -137,16 +138,7 @@ export const installments = pgTable("installments", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const activityLogActionEnum = pgEnum("activity_log_action", [
-  "installment_paid",
-  "installment_payment_corrected",
-  "installment_payment_reverted",
-  "campaign_updated",
-  "campaign_archived",
-  "campaign_restored",
-  "transaction_category_archived",
-  "transaction_category_restored",
-]);
+export const activityLogActionEnum = pgEnum("activity_log_action", ACTIVITY_LOG_ACTIONS);
 
 // subjectName/amountCents são um retrato do momento da ação (não FK para
 // campanha/categoria/parcela): esses registros podem ser depois renomeados,
@@ -161,6 +153,8 @@ export const activityLog = pgTable("activity_log", {
   action: activityLogActionEnum("action").notNull(),
   subjectName: varchar("subject_name", { length: 255 }).notNull(),
   amountCents: integer("amount_cents"),
+  // Numa correção, o que era antes e o que ficou (ex.: "Recebido por: A → B").
+  details: varchar("details", { length: 500 }),
   occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
 });
 

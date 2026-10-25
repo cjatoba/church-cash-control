@@ -2,12 +2,13 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getPledgeDetail } from "@/server/application/get-pledge-detail";
 import { payInstallment } from "@/server/application/pay-installment";
-import { correctInstallmentPaymentDate } from "@/server/application/correct-installment-payment-date";
+import { correctInstallmentPayment } from "@/server/application/correct-installment-payment";
 import { revertInstallmentPayment } from "@/server/application/revert-installment-payment";
 import { listUsers } from "@/server/application/list-users";
 import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { describeEntryCorrection, toNameMap } from "@/app/_lib/entry-change-details";
 import { CheckCircleIcon, ClockIcon, PencilIcon } from "@/app/_components/icons";
 import { PageShell } from "@/app/_components/page-shell";
 import { NavListItem, NavSection } from "@/app/_components/nav-list";
@@ -24,7 +25,10 @@ import { createUserListRepository } from "@/server/infrastructure/db/user-reposi
 import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { PayInstallmentButton } from "../_components/pay-installment-button";
-import { EditPaymentDateButton } from "../_components/edit-payment-date-button";
+import {
+  CorrectPaymentButton,
+  type CorrectPaymentState,
+} from "../_components/correct-payment-button";
 
 const paymentMethodLabels: Record<string, string> = {
   pix: "Pix",
@@ -105,7 +109,10 @@ export default async function PledgeDetailPage({
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
 
-  async function correctPaymentDate(formData: FormData): Promise<void> {
+  async function correctPayment(
+    _prevState: CorrectPaymentState,
+    formData: FormData,
+  ): Promise<CorrectPaymentState> {
     "use server";
 
     const actionSession = await auth();
@@ -115,32 +122,52 @@ export default async function PledgeDetailPage({
 
     const installmentId = formData.get("installmentId");
     const donorName = formData.get("donorName");
-    const amountCentsValue = formData.get("amountCents");
-    const paidAtValue = formData.get("paidAt");
-    if (
-      typeof installmentId !== "string" ||
-      typeof donorName !== "string" ||
-      typeof amountCentsValue !== "string" ||
-      typeof paidAtValue !== "string"
-    ) {
-      throw new Error("Dados inválidos para corrigir a data de pagamento");
+    if (typeof installmentId !== "string" || typeof donorName !== "string") {
+      throw new Error("Dados inválidos para corrigir o pagamento");
     }
 
     const db = createDbClient();
     const installmentRepository = createInstallmentRepository(db);
-    await correctInstallmentPaymentDate(
-      { installmentReader: installmentRepository, installmentRepository },
-      installmentId,
-      new Date(paidAtValue),
-    );
-
-    const activityLogRepository = createActivityLogRepository(db);
-    await recordActivity(activityLogRepository, {
-      actorUserId: actionSession.user.id,
-      action: "installment_payment_corrected",
-      subjectName: donorName,
-      amountCents: Number(amountCentsValue),
-    });
+    try {
+      const { before, after } = await correctInstallmentPayment(
+        {
+          installmentReader: installmentRepository,
+          installmentRepository,
+          balanceReader: createCustodyRepository(db),
+        },
+        campaignId,
+        installmentId,
+        {
+          paidAt: formData.get("paidAt"),
+          paymentMethod: formData.get("paymentMethod"),
+          receivedByUserId: formData.get("receivedByUserId"),
+        },
+      );
+      const names = toNameMap(await listUsers(createUserListRepository(db)));
+      await recordActivity(createActivityLogRepository(db), {
+        actorUserId: actionSession.user.id,
+        action: "installment_payment_corrected",
+        subjectName: donorName,
+        amountCents: after.paidAmount.toCents(),
+        details: describeEntryCorrection(
+          {
+            amount: before.amount,
+            date: before.paidAt ?? after.paidAt,
+            paymentMethod: before.paymentMethod,
+            receivedByUserId: before.receivedByUserId,
+          },
+          {
+            amount: after.paidAmount,
+            date: after.paidAt,
+            paymentMethod: after.paymentMethod,
+            receivedByUserId: after.receivedByUserId,
+          },
+          names,
+        ),
+      });
+    } catch (error) {
+      return { error: toFriendlyErrorMessage(error, "Não foi possível corrigir o pagamento.") };
+    }
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
   }
@@ -293,13 +320,18 @@ export default async function PledgeDetailPage({
                 </span>
               ) : null}
               {session.user.canReceiveFunds ? (
-                <EditPaymentDateButton
+                <CorrectPaymentButton
                   installmentId={installment.id}
                   donorName={pledge.donorName}
                   amountCents={(installment.paidAmount ?? installment.amount).toCents()}
+                  amountLabel={formatCurrency(installment.paidAmount ?? installment.amount)}
+                  monthLabel={formatMonthLabel(installment.dueDate)}
                   currentPaidAtIso={installment.paidAt.toISOString().slice(0, 10)}
+                  currentPaymentMethod={installment.paymentMethod ?? "pix"}
+                  currentReceivedByUserId={installment.receivedByUserId ?? session.user.id}
+                  users={users}
                   todayIso={todayIso}
-                  correctAction={correctPaymentDate}
+                  correctAction={correctPayment}
                   revertAction={revertPayment}
                 />
               ) : null}

@@ -60,7 +60,7 @@ export function buildTutorialSteps(greeting: string): TutorialStep[] {
     {
       id: "money-in-hand",
       title: "Dinheiro em mãos",
-      text: "Mostra com quem está cada valor recebido e os repasses de uma pessoa para outra, para ninguém perder a conta.",
+      text: "Mostra com quem está cada valor recebido e os repasses de uma pessoa para outra, para ninguém perder a conta. Toque numa pessoa para ver de onde veio cada valor e corrigir o que foi lançado errado.",
       icon: <BanknotesIcon className={iconClassName} />,
       tone: "violet",
     },

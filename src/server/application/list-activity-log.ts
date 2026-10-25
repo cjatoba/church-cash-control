@@ -6,6 +6,7 @@ export interface ActivityLogListEntry {
   action: ActivityLogAction;
   subjectName: string;
   amount: Money | null;
+  details: string | null;
   occurredAt: Date;
 }
 

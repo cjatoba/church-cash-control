@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { describeChanges } from "@/server/domain/activity-log";
+import { logActivity } from "@/app/_lib/log-activity";
 import { auth } from "@/auth";
 import { anonymizeDonor } from "@/server/application/anonymize-donor";
 import { getDonor } from "@/server/application/get-donor";
@@ -71,6 +73,8 @@ export default async function DonorDetailPage({
     })),
   ];
 
+  const currentName = donor.name;
+
   async function saveName(formData: FormData): Promise<void> {
     "use server";
 
@@ -86,6 +90,14 @@ export default async function DonorDetailPage({
       donorId,
       { name: formData.get("name") },
     );
+    const newName = formData.get("name");
+    const trimmedName = typeof newName === "string" ? newName.trim() : "";
+    await logActivity(db, {
+      actorUserId: actionSession.user.id,
+      action: "donor_updated",
+      subjectName: trimmedName,
+      details: describeChanges([{ label: "Nome", before: currentName, after: trimmedName }]),
+    });
 
     redirect(`/campaigns/${campaignId}/donors/${donorId}`);
   }
@@ -104,6 +116,12 @@ export default async function DonorDetailPage({
       { donorStateReader: donorRepository, donorAnonymizeRepository: donorRepository },
       donorId,
     );
+    // Nunca o nome: a pessoa pediu para apagar os próprios dados.
+    await logActivity(db, {
+      actorUserId: actionSession.user.id,
+      action: "donor_anonymized",
+      subjectName: "um doador (nome removido)",
+    });
 
     redirect(`/campaigns/${campaignId}/donors/${donorId}`);
   }

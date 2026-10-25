@@ -10,6 +10,7 @@ import { createUserManagementRepository } from "@/server/infrastructure/db/user-
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { ResetPasswordForm, type ResetPasswordState } from "./reset-password-form";
 
 export default async function ResetPasswordPage({
@@ -47,6 +48,11 @@ export default async function ResetPasswordPage({
         { generateTemporaryPassword, hashPassword, loginUrl, appName },
         userId,
       );
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "user_password_reset",
+        subjectName: result.name,
+      });
 
       return {
         result: {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertTransferCorrectionWithinBalance,
   assertTransferWithinBalance,
   calculateAvailableBalance,
   parseCustodyTransferInput,
@@ -86,5 +87,55 @@ describe("assertTransferWithinBalance", () => {
         new Date("2026-03-10"),
       );
     }).toThrow();
+  });
+});
+
+describe("assertTransferCorrectionWithinBalance", () => {
+  const original = { fromUserId: "user-a", amount: Money.fromReais(200) };
+  const today = new Date("2026-03-10");
+
+  it("devolve o valor original ao saldo de quem repassou antes de conferir o valor novo", () => {
+    expect(() => {
+      assertTransferCorrectionWithinBalance(
+        original,
+        { fromUserId: "user-a", amount: Money.fromReais(250), transferDate: today },
+        Money.fromReais(50),
+        today,
+      );
+    }).not.toThrow();
+    expect(() => {
+      assertTransferCorrectionWithinBalance(
+        original,
+        { fromUserId: "user-a", amount: Money.fromReais(260), transferDate: today },
+        Money.fromReais(50),
+        today,
+      );
+    }).toThrow("Valor do repasse maior que o saldo disponível");
+  });
+
+  it("confere o saldo inteiro da nova pessoa quando quem repassou muda", () => {
+    expect(() => {
+      assertTransferCorrectionWithinBalance(
+        original,
+        { fromUserId: "user-b", amount: Money.fromReais(200), transferDate: today },
+        Money.fromReais(150),
+        today,
+      );
+    }).toThrow("Valor do repasse maior que o saldo disponível");
+  });
+
+  it("rejeita data de repasse no futuro", () => {
+    expect(() => {
+      assertTransferCorrectionWithinBalance(
+        original,
+        {
+          fromUserId: "user-a",
+          amount: Money.fromReais(200),
+          transferDate: new Date("2026-03-11"),
+        },
+        Money.fromReais(0),
+        today,
+      );
+    }).toThrow("no futuro");
   });
 });

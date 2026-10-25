@@ -23,6 +23,7 @@ describe("listActivityLog", () => {
       action: "installment_paid",
       subjectName: "Maria Souza",
       amount: Money.fromReais(100),
+      details: null,
       occurredAt: new Date("2026-03-10"),
     };
     const repository = createInMemoryActivityLogListRepository([entry]);

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { addLoosePledgeContribution, parseLoosePledgeInput } from "@/server/domain/loose-pledge";
+import {
+  addLoosePledgeContribution,
+  parseContributionCorrection,
+  parseLoosePledgeInput,
+} from "@/server/domain/loose-pledge";
 
 describe("parseLoosePledgeInput", () => {
   const validInput = {
@@ -99,6 +103,33 @@ describe("addLoosePledgeContribution", () => {
         { ...validInput, receivedByUserId: "" },
         registeredByUserId,
       ),
+    ).toThrow();
+  });
+});
+
+describe("parseContributionCorrection", () => {
+  it("lê os campos que podem ser corrigidos numa entrega já registrada, mesmo com o carnê encerrado", () => {
+    const correction = parseContributionCorrection({
+      amount: "75",
+      date: "2026-03-08",
+      paymentMethod: "cash",
+      receivedByUserId: "user-2",
+    });
+
+    expect(correction.amount.toCents()).toBe(7500);
+    expect(correction.date).toEqual(new Date("2026-03-08"));
+    expect(correction.paymentMethod).toBe("cash");
+    expect(correction.receivedByUserId).toBe("user-2");
+  });
+
+  it("rejeita recebedor vazio", () => {
+    expect(() =>
+      parseContributionCorrection({
+        amount: "75",
+        date: "2026-03-08",
+        paymentMethod: "cash",
+        receivedByUserId: "",
+      }),
     ).toThrow();
   });
 });

@@ -1,15 +1,30 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { PencilIcon, TrashIcon } from "@/app/_components/icons";
+import {
+  ErrorMessage,
+  PaymentMethodPicker,
+  fieldInputClassName,
+  fieldLabelClassName,
+} from "../../_components/correction-form-parts";
 import type { RevertPaymentState } from "../[pledgeId]/page";
 
-export function EditPaymentDateButton({
+export interface CorrectPaymentState {
+  error?: string;
+}
+
+export function CorrectPaymentButton({
   installmentId,
   donorName,
   amountCents,
+  amountLabel,
+  monthLabel,
   currentPaidAtIso,
+  currentPaymentMethod,
+  currentReceivedByUserId,
+  users,
   todayIso,
   correctAction,
   revertAction,
@@ -17,13 +32,27 @@ export function EditPaymentDateButton({
   installmentId: string;
   donorName: string;
   amountCents: number;
+  amountLabel: string;
+  monthLabel: string;
   currentPaidAtIso: string;
+  currentPaymentMethod: string;
+  currentReceivedByUserId: string;
+  users: { id: string; name: string }[];
   todayIso: string;
-  correctAction: (formData: FormData) => Promise<void>;
+  correctAction: (
+    prevState: CorrectPaymentState,
+    formData: FormData,
+  ) => Promise<CorrectPaymentState>;
   revertAction: (prevState: RevertPaymentState, formData: FormData) => Promise<RevertPaymentState>;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [confirmingRevert, setConfirmingRevert] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(currentPaymentMethod);
+  const [receivedByUserId, setReceivedByUserId] = useState(currentReceivedByUserId);
+  const [correctState, correctFormAction, isCorrecting] = useActionState<
+    CorrectPaymentState,
+    FormData
+  >(correctAction, {});
   const [revertState, revertFormAction] = useActionState<RevertPaymentState, FormData>(
     revertAction,
     {},
@@ -31,6 +60,8 @@ export function EditPaymentDateButton({
 
   function openDialog() {
     setConfirmingRevert(false);
+    setPaymentMethod(currentPaymentMethod);
+    setReceivedByUserId(currentReceivedByUserId);
     dialogRef.current?.showModal();
   }
 
@@ -48,12 +79,25 @@ export function EditPaymentDateButton({
         ref={dialogRef}
         className="w-[min(92vw,24rem)] rounded-2xl border border-zinc-200 bg-white p-6 text-base text-zinc-900 shadow-xl backdrop:bg-black/50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
       >
-        <form action={correctAction} className="flex flex-col gap-4">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            startTransition(() => {
+              correctFormAction(formData);
+            });
+          }}
+          className="flex flex-col gap-4"
+        >
           <input type="hidden" name="installmentId" value={installmentId} />
           <input type="hidden" name="donorName" value={donorName} />
           <input type="hidden" name="amountCents" value={amountCents} />
-          <p className="text-lg font-semibold">Corrigir pagamento</p>
-          <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
+          <p className="text-lg font-semibold">Corrigir pagamento — {monthLabel}</p>
+          <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+            Valor da parcela: {amountLabel}
+          </p>
+          <ErrorMessage message={correctState.error} />
+          <label className={fieldLabelClassName}>
             Data do pagamento
             <input
               type="date"
@@ -61,9 +105,26 @@ export function EditPaymentDateButton({
               defaultValue={currentPaidAtIso}
               max={todayIso}
               required
-              autoFocus
-              className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className={fieldInputClassName}
             />
+          </label>
+          <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
+          <label className={fieldLabelClassName}>
+            Recebido por
+            <select
+              name="receivedByUserId"
+              value={receivedByUserId}
+              onChange={(event) => {
+                setReceivedByUserId(event.target.value);
+              }}
+              className={fieldInputClassName}
+            >
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
           </label>
           <div className="flex justify-end gap-3">
             <button
@@ -73,7 +134,9 @@ export function EditPaymentDateButton({
             >
               Cancelar
             </button>
-            <SubmitButton pendingLabel="Salvando…">Salvar</SubmitButton>
+            <SubmitButton pendingLabel="Salvando…" pending={isCorrecting}>
+              Salvar correção
+            </SubmitButton>
           </div>
         </form>
 

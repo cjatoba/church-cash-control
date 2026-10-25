@@ -6,6 +6,8 @@ export interface UserCustodyTotals {
   userLabel: string;
   receivedCents: number;
   transferredCents: number;
+  entryCount: number;
+  transferCount: number;
 }
 
 export interface MoneyInHandReader {
@@ -16,6 +18,8 @@ export interface MoneyInHandBalance {
   userId: string;
   userLabel: string;
   balance: Money;
+  entryCount: number;
+  transferCount: number;
 }
 
 export async function getMoneyInHand(
@@ -27,5 +31,7 @@ export async function getMoneyInHand(
     userId: total.userId,
     userLabel: total.userLabel,
     balance: calculateAvailableBalance(total.receivedCents, total.transferredCents),
+    entryCount: total.entryCount,
+    transferCount: total.transferCount,
   }));
 }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getLoosePledgeDetail } from "@/server/application/get-loose-pledge-detail";
@@ -9,6 +10,7 @@ import { createLoosePledgeContributionRepository } from "@/server/infrastructure
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { PageShell } from "@/app/_components/page-shell";
 import { NavListItem, NavSection } from "@/app/_components/nav-list";
 import { PageHeader } from "@/app/_components/page-header";
@@ -16,6 +18,7 @@ import { Card, SectionTitle } from "@/app/_components/card";
 import { formatCurrency } from "@/app/_lib/format";
 import { Money } from "@/server/domain/money";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
 import { ArchiveBoxIcon, ArrowPathIcon, PencilIcon } from "@/app/_components/icons";
 import {
   AddContributionButton,
@@ -49,6 +52,7 @@ export default async function LoosePledgeDetailPage({
   if (!loosePledge) {
     notFound();
   }
+  const donorName = loosePledge.donorName;
 
   async function addContribution(
     _prevState: AddContributionState,
@@ -78,6 +82,12 @@ export default async function LoosePledgeDetailPage({
         input,
         actionSession.user.id,
       );
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "loose_contribution_created",
+        subjectName: donorName,
+        amountCents: Math.round(Number(input.amount) * 100),
+      });
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(
@@ -108,6 +118,11 @@ export default async function LoosePledgeDetailPage({
     const db = createDbClient();
     const loosePledgeRepository = createLoosePledgeRepository(db);
     await closeLoosePledge(loosePledgeRepository, loosePledgeId);
+    await logActivity(db, {
+      actorUserId: actionSession.user.id,
+      action: "loose_pledge_closed",
+      subjectName: donorName,
+    });
 
     redirect(`/campaigns/${campaignId}/loose-pledges/${loosePledgeId}`);
   }
@@ -123,6 +138,11 @@ export default async function LoosePledgeDetailPage({
     const db = createDbClient();
     const loosePledgeRepository = createLoosePledgeRepository(db);
     await reopenLoosePledge(loosePledgeRepository, loosePledgeId);
+    await logActivity(db, {
+      actorUserId: actionSession.user.id,
+      action: "loose_pledge_reopened",
+      subjectName: donorName,
+    });
 
     redirect(`/campaigns/${campaignId}/loose-pledges/${loosePledgeId}`);
   }
@@ -196,6 +216,15 @@ export default async function LoosePledgeDetailPage({
                   <span className="text-[15px] text-amber-800 dark:text-amber-300">
                     Registrado por {contribution.registeredByLabel}
                   </span>
+                ) : null}
+                {session.user.canReceiveFunds ? (
+                  <Link
+                    href={`/campaigns/${campaignId}/loose-pledges/${loosePledgeId}/contributions/${contribution.id}`}
+                    className={`${buttonBaseClassName} ${buttonClassNames.outline} mt-1 self-start`}
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                    Corrigir
+                  </Link>
                 ) : null}
               </li>
             ))}

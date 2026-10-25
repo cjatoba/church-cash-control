@@ -8,6 +8,7 @@ import { createUserManagementRepository } from "@/server/infrastructure/db/user-
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { InviteUserForm, type InviteUserState } from "./invite-user-form";
 
 function toStringValue(value: FormDataEntryValue | null | undefined): string {
@@ -47,6 +48,11 @@ export default async function NewUserPage() {
         { generateTemporaryPassword, hashPassword, loginUrl, appName },
         input,
       );
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "user_invited",
+        subjectName: result.name,
+      });
 
       return {
         result: {
