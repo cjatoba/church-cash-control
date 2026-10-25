@@ -963,8 +963,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     mãos" e "Registro de atividades" atualizados; tutorial ("Dinheiro em
     mãos") também.
 
-## Em andamento (PRs abertas)
-
 - **Apagar o nome do doador também do registro de atividades** — PR #79
   (lacuna de LGPD notada durante a PR #77, anterior a ela): o registro de
   atividades guarda o nome do doador como retrato do momento
@@ -989,6 +987,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   - A confirmação de "Excluir dados do doador" passa a avisar que o nome
     sai também do registro de atividades. Ajuda e tutorial sem mudança
     (não falam desse detalhe).
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
