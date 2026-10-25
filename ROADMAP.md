@@ -988,8 +988,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     sai também do registro de atividades. Ajuda e tutorial sem mudança
     (não falam desse detalhe).
 
-## Em andamento (PRs abertas)
-
 - **Barra fixa inferior de navegação (Início e Menu em todas as telas)**
   — PR #81 (pedido do usuário): hoje o menu só abre pela tela inicial, e
   voltar ao início a partir de uma tela funda (ex.: carnê → corrigir tipo)
@@ -1017,6 +1015,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   - Ajuda (tópicos que diziam "botão de menu"; o botão "Abrir o menu" do
     tópico de modo escuro agora abre a folha) e tutorial (passo "Precisa
     de ajuda?") atualizados.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
