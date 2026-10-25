@@ -2,6 +2,7 @@ import { and, eq, gte, lt } from "drizzle-orm";
 import type { OneOffDonationRepository } from "@/server/application/create-one-off-donation";
 import type { OneOffDonationStore } from "@/server/application/correct-received-entry";
 import type { OneOffDonationsForMonthReader } from "@/server/application/get-monthly-progress";
+import type { OneOffDonationListRepository } from "@/server/application/list-one-off-donations";
 import { Money } from "@/server/domain/money";
 import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
@@ -9,7 +10,7 @@ import { oneOffDonations } from "./schema";
 
 export function createOneOffDonationRepository(
   db: DbClient,
-): OneOffDonationRepository & OneOffDonationsForMonthReader {
+): OneOffDonationRepository & OneOffDonationsForMonthReader & OneOffDonationListRepository {
   return {
     async create(donation) {
       const [row] = await db
@@ -29,6 +30,27 @@ export function createOneOffDonationRepository(
         throw new Error("Falha ao registrar doação avulsa");
       }
       return row;
+    },
+
+    async findAllByCampaign(campaignId) {
+      const rows = await db
+        .select({
+          id: oneOffDonations.id,
+          donorName: oneOffDonations.donorName,
+          amountCents: oneOffDonations.amountCents,
+          date: oneOffDonations.date,
+          paymentMethod: oneOffDonations.paymentMethod,
+        })
+        .from(oneOffDonations)
+        .where(eq(oneOffDonations.campaignId, campaignId));
+
+      return rows.map((row) => ({
+        id: row.id,
+        donorName: row.donorName,
+        amount: Money.fromCents(row.amountCents),
+        date: row.date,
+        paymentMethod: toPaymentMethod(row.paymentMethod),
+      }));
     },
 
     async findInMonth(campaignId, month) {

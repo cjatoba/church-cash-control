@@ -50,3 +50,11 @@ export function parseOneOffDonation(input: unknown, registeredByUserId: string):
   const data = oneOffDonationInputSchema.parse(input);
   return { campaignId: data.campaignId, ...toFields(data), registeredByUserId };
 }
+
+export interface OneOffDonationSummary {
+  id: string;
+  donorName: string | null;
+  amount: Money;
+  date: Date;
+  paymentMethod: PaymentMethod | null;
+}
