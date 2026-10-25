@@ -1016,8 +1016,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     tópico de modo escuro agora abre a folha) e tutorial (passo "Precisa
     de ajuda?") atualizados.
 
-## Em andamento (PRs abertas)
-
 - **Pesquisar doador pelo nome** — PR #83 (pedido do usuário: com mais
   doadores, ficou difícil achar o certo na hora de dar baixa). Mockup
   aprovado: campo "Pesquisar pelo nome" no topo da lista em "Escolha o
@@ -1034,6 +1032,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   significado para ela comparar, e exigiria mandar o nome dos doadores a
   um serviço de IA externo (LGPD, custo e lentidão). Ajuda ("Dar baixa
   numa parcela" e "Registrar entrega de carnê avulso") atualizada.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
