@@ -916,8 +916,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     "Dinheiro em mãos" não mudam (mesmo dinheiro, mesmo recebedor). O
     aviso da tela mostra o resultado antes de salvar, com a mesma regra.
 
-## Em andamento (PRs abertas)
-
 - **Corrigir entradas, rastrear "Dinheiro em mãos" e registro de
   atividades completo** — PR #77 (pedido do usuário ao usar em
   produção: uma entrada registrada para a pessoa errada não tinha como ser
@@ -964,6 +962,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     repasse"; "Corrigir ou desfazer uma baixa", "Dar baixa", "Dinheiro em
     mãos" e "Registro de atividades" atualizados; tutorial ("Dinheiro em
     mãos") também.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
