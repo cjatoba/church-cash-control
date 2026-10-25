@@ -10,12 +10,13 @@ import { createUserListRepository } from "@/server/infrastructure/db/user-reposi
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
 import { PageShell } from "@/app/_components/page-shell";
+import { NavListItem, NavSection } from "@/app/_components/nav-list";
 import { PageHeader } from "@/app/_components/page-header";
 import { Card, SectionTitle } from "@/app/_components/card";
 import { formatCurrency } from "@/app/_lib/format";
 import { Money } from "@/server/domain/money";
 import { SubmitButton } from "@/app/_components/submit-button";
-import { ArchiveBoxIcon, ArrowPathIcon } from "@/app/_components/icons";
+import { ArchiveBoxIcon, ArrowPathIcon, PencilIcon } from "@/app/_components/icons";
 import {
   AddContributionButton,
   type AddContributionState,
@@ -228,6 +229,16 @@ export default async function LoosePledgeDetailPage({
             )}
           </div>
         </section>
+      ) : null}
+      {session.user.canReceiveFunds ? (
+        <NavSection title="Ajustes do carnê">
+          <NavListItem
+            href={`/campaigns/${campaignId}/loose-pledges/${loosePledgeId}/change-type`}
+            title="Corrigir tipo de carnê"
+            description="Use se escolheu o tipo errado no cadastro"
+            icon={<PencilIcon className="h-6 w-6" />}
+          />
+        </NavSection>
       ) : null}
     </PageShell>
   );

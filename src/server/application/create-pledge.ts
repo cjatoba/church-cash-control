@@ -4,6 +4,7 @@ import {
   parsePledgeInput,
   selectFirstInstallments,
   toMonthKey,
+  type Installment,
   type Pledge,
 } from "../domain/pledge";
 import type { Money } from "../domain/money";
@@ -43,16 +44,47 @@ export async function createPledge(
     throw new Error("Este tipo de carnê é avulso — use o cadastro de carnê avulso");
   }
 
-  const campaign = await dependencies.campaignReader.findPeriodById(data.campaignId);
+  const installments = await planPledgeInstallments(dependencies.campaignReader, {
+    campaignId: data.campaignId,
+    installmentValue: pledgeType.installmentValue,
+    firstInstallmentMonth: data.firstInstallmentMonth,
+    installmentCount: data.installmentCount,
+    now,
+  });
+
+  return dependencies.pledgeRepository.create({
+    campaignId: data.campaignId,
+    donorId: data.donorId,
+    pledgeTypeId: data.pledgeTypeId,
+    installments,
+  });
+}
+
+/**
+ * Parcelas de um carnê de valor fixo a partir do mês escolhido (padrão: o mês
+ * atual), até o fim da campanha ou pela quantidade informada — usado tanto no
+ * cadastro quanto ao converter um carnê avulso em valor fixo.
+ */
+export async function planPledgeInstallments(
+  campaignReader: CampaignPeriodReader,
+  params: {
+    campaignId: string;
+    installmentValue: Money;
+    firstInstallmentMonth?: string;
+    installmentCount?: number;
+    now: Date;
+  },
+): Promise<Installment[]> {
+  const campaign = await campaignReader.findPeriodById(params.campaignId);
   if (!campaign) {
     throw new Error("Campanha não encontrada");
   }
 
   const firstMonth =
-    data.firstInstallmentMonth === undefined
-      ? now
-      : listFirstInstallmentMonths(campaign.startDate, campaign.endDate, now).find(
-          (month) => toMonthKey(month) === data.firstInstallmentMonth,
+    params.firstInstallmentMonth === undefined
+      ? params.now
+      : listFirstInstallmentMonths(campaign.startDate, campaign.endDate, params.now).find(
+          (month) => toMonthKey(month) === params.firstInstallmentMonth,
         );
   if (!firstMonth) {
     throw new Error("Mês da primeira parcela deve estar entre o início da campanha e o mês atual");
@@ -61,20 +93,14 @@ export async function createPledge(
   const installments = generateInstallments({
     startDate: firstMonth,
     campaignEndDate: campaign.endDate,
-    installmentValue: pledgeType.installmentValue,
+    installmentValue: params.installmentValue,
   });
 
   if (installments.length === 0) {
     throw new Error("Campanha já encerrada — não é possível gerar parcelas");
   }
 
-  return dependencies.pledgeRepository.create({
-    campaignId: data.campaignId,
-    donorId: data.donorId,
-    pledgeTypeId: data.pledgeTypeId,
-    installments:
-      data.installmentCount === undefined
-        ? installments
-        : selectFirstInstallments(installments, data.installmentCount),
-  });
+  return params.installmentCount === undefined
+    ? installments
+    : selectFirstInstallments(installments, params.installmentCount);
 }

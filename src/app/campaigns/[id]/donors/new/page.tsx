@@ -6,11 +6,7 @@ import { createPledge } from "@/server/application/create-pledge";
 import { createLoosePledge } from "@/server/application/create-loose-pledge";
 import { getCampaign } from "@/server/application/get-campaign";
 import { listPledgeTypes } from "@/server/application/list-pledge-types";
-import {
-  countRemainingInstallments,
-  listFirstInstallmentMonths,
-  toMonthKey,
-} from "@/server/domain/pledge";
+import { countRemainingInstallments } from "@/server/domain/pledge";
 import { createCampaignRepository } from "@/server/infrastructure/db/campaign-repository";
 import { createDonorRepository } from "@/server/infrastructure/db/donor-repository";
 import { createPledgeRepository } from "@/server/infrastructure/db/pledge-repository";
@@ -18,6 +14,7 @@ import { createLoosePledgeRepository } from "@/server/infrastructure/db/loose-pl
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { buildFirstMonthOptions } from "../../_lib/first-month-options";
 import { DonorForm, type CreateDonorState } from "./donor-form";
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -58,20 +55,7 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
   }
 
   const now = new Date();
-  const currentMonthKey = toMonthKey(now);
-  const firstMonthOptions = listFirstInstallmentMonths(
-    campaign.startDate,
-    campaign.endDate,
-    now,
-  ).map((month) => {
-    const value = toMonthKey(month);
-    const label = formatMonthLabel(month).replace("/", " de ");
-    return {
-      value,
-      label: value === currentMonthKey ? `${label} (mês atual)` : label,
-      maxInstallmentCount: countRemainingInstallments(month, campaign.endDate),
-    };
-  });
+  const firstMonthOptions = buildFirstMonthOptions(campaign, now);
   const maxInstallmentCount = countRemainingInstallments(now, campaign.endDate);
 
   async function create(
