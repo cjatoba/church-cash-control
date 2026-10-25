@@ -1018,7 +1018,22 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Pesquisar doador pelo nome** — PR #83 (pedido do usuário: com mais
+  doadores, ficou difícil achar o certo na hora de dar baixa). Mockup
+  aprovado: campo "Pesquisar pelo nome" no topo da lista em "Escolha o
+  doador" (aberta por "Registrar recebimento") e em "Doadores e carnês",
+  filtrando enquanto se digita: cada palavra digitada é procurada em
+  qualquer parte do nome, em qualquer ordem ("maria silva" acha "Maria da
+  Silva"), ignorando acento e maiúscula (`matchesDonorName`, domínio
+  `donor-search.ts`, TDD), com contagem de encontrados e "Limpar
+  pesquisa". Filtra no próprio celular a lista que a tela já carregava
+  inteira — sem consulta nova ao banco por letra digitada. Decisões
+  tomadas com o usuário: o teclado não abre sozinho, a pesquisa é
+  esquecida ao sair da tela, e "Quem pagou no mês"/"Dinheiro em mãos"
+  ficam fora. Busca semântica descartada: nome próprio não tem
+  significado para ela comparar, e exigiria mandar o nome dos doadores a
+  um serviço de IA externo (LGPD, custo e lentidão). Ajuda ("Dar baixa
+  numa parcela" e "Registrar entrega de carnê avulso") atualizada.
 
 ## Backlog (próximas fatias, em ordem)
 

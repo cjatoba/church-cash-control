@@ -92,7 +92,7 @@ export const helpTopics: HelpTopic[] = [
     steps: [
       "Na tela inicial, toque na campanha.",
       'Toque em "Registrar recebimento" e escolha "Parcela de carnê".',
-      "Encontre o doador na lista e toque no nome dele.",
+      'Digite o nome do doador em "Pesquisar pelo nome" (ou procure na lista) e toque no nome dele.',
       'Na aba "A pagar", toque em "Dar baixa" na parcela.',
       "Confira a data, a forma de pagamento (Pix ou dinheiro) e quem recebeu, e confirme.",
     ],
@@ -108,7 +108,7 @@ export const helpTopics: HelpTopic[] = [
     steps: [
       "Na tela inicial, toque na campanha.",
       'Toque em "Registrar recebimento" e escolha "Entrega de carnê avulso".',
-      "Toque no nome do doador.",
+      'Digite o nome do doador em "Pesquisar pelo nome" (ou procure na lista) e toque no nome dele.',
       'Toque em "Registrar entrega" e informe o valor, a data, a forma de pagamento e quem recebeu.',
     ],
     tip: 'Quando o doador não for entregar mais nada, toque em "Encerrar carnê". Dá para reabrir depois, se precisar.',

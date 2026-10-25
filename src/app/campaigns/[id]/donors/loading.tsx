@@ -7,6 +7,7 @@ export default function DonorsLoading() {
     <PageShell>
       <SkeletonPageHeader />
       <Skeleton className="h-12 w-full rounded-full" />
+      <Skeleton className="h-14 w-full rounded-full" />
       <SkeletonList rows={5} />
     </PageShell>
   );
