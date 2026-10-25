@@ -8,8 +8,9 @@ import { listUsers } from "@/server/application/list-users";
 import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
-import { CheckCircleIcon, ClockIcon } from "@/app/_components/icons";
+import { CheckCircleIcon, ClockIcon, PencilIcon } from "@/app/_components/icons";
 import { PageShell } from "@/app/_components/page-shell";
+import { NavListItem, NavSection } from "@/app/_components/nav-list";
 import { PageHeader } from "@/app/_components/page-header";
 import { Card } from "@/app/_components/card";
 import { ProgressBar } from "@/app/_components/progress-bar";
@@ -344,6 +345,16 @@ export default async function PledgeDetailPage({
           { id: "paid", label: `Pagas (${String(paidInstallments.length)})`, content: paidList },
         ]}
       />
+      {session.user.canReceiveFunds ? (
+        <NavSection title="Ajustes do carnê">
+          <NavListItem
+            href={`/campaigns/${campaignId}/pledges/${pledgeId}/change-type`}
+            title="Corrigir tipo de carnê"
+            description="Use se escolheu o tipo errado no cadastro"
+            icon={<PencilIcon className="h-6 w-6" />}
+          />
+        </NavSection>
+      ) : null}
     </PageShell>
   );
 }

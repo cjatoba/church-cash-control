@@ -881,7 +881,28 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma fatia em andamento no momento.
+- **Corrigir tipo de carnê de um doador** — PR a abrir (pedido do usuário
+  ao cadastrar em produção: não havia como ajustar um carnê cadastrado com
+  o tipo errado). Mockup aprovado e decisões tomadas com o usuário: troca
+  entre tipos do mesmo jeito (valor fixo ↔ valor fixo, avulso ↔ avulso) a
+  qualquer momento — as parcelas a pagar ganham o valor novo e as já
+  pagas continuam com o valor pago; troca entre valor fixo e avulso só
+  enquanto nada foi pago/entregue, refazendo o carnê do zero (de avulso
+  para valor fixo, com mês da primeira parcela e quantidade, como no
+  cadastro). Corrigir mês/quantidade de um carnê já cadastrado ficou de
+  fora, a pedido do usuário. Regras em `planPledgeTypeChange` (domínio
+  `pledge-type-change.ts`) e `changePledgeType` (aplicação, TDD); a
+  geração de parcelas foi extraída de `createPledge` para
+  `planPledgeInstallments`, usada pelos dois. As conversões apagam o
+  carnê antigo e criam o novo numa única transação (`db.batch` do
+  `neon-http`). Telas `/campaigns/[id]/pledges/[pledgeId]/change-type` e
+  `/campaigns/[id]/loose-pledges/[loosePledgeId]/change-type`, abertas
+  por "Ajustes do carnê → Corrigir tipo de carnê" na tela de cada carnê
+  (só para quem recebe arrecadação). O formulário é enviado manualmente
+  (`onSubmit`) em vez de `action`, para o React não reiniciar os campos
+  num erro (mesmo problema da PR #67); `SubmitButton` ganhou a prop
+  `pending` para esse caso. Ajuda: tópico novo "Corrigir o tipo de carnê
+  de um doador".
 
 ## Backlog (próximas fatias, em ordem)
 

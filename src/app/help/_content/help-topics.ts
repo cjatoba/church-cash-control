@@ -67,7 +67,22 @@ export const helpTopics: HelpTopic[] = [
     ],
     tip: 'Cadastrando um carnê que a pessoa pegou antes? Escolha em "Mês da primeira parcela" o mês em que ele começou. Os meses que já passaram ficam em "A pagar" para você dar baixa com a data certa. Se não aparecer nenhum tipo de carnê, peça a quem cuida da campanha para cadastrar um antes.',
     action: toCampaigns,
-    related: ["dar-baixa", "entrega-carne-avulso"],
+    related: ["dar-baixa", "entrega-carne-avulso", "corrigir-tipo-carne"],
+  },
+  {
+    slug: "corrigir-tipo-carne",
+    requires: "canReceiveFunds",
+    title: "Corrigir o tipo de carnê de um doador",
+    summary: "Para quando o carnê foi cadastrado com o tipo errado.",
+    steps: [
+      "Abra o carnê do doador (campanha → Doadores e carnês → nome do doador).",
+      'No fim da tela, em "Ajustes do carnê", toque em "Corrigir tipo de carnê".',
+      "Escolha o tipo certo e confira o aviso que explica o que vai mudar.",
+      'Toque em "Salvar tipo novo".',
+    ],
+    tip: "Entre tipos de valor fixo, as parcelas a pagar ganham o valor novo e as já pagas continuam com o valor pago. Trocar entre valor fixo e avulso só é possível enquanto nada foi pago ou entregue.",
+    action: toCampaigns,
+    related: ["cadastrar-doador"],
   },
   {
     slug: "dar-baixa",
@@ -236,7 +251,7 @@ export const helpTopics: HelpTopic[] = [
 export const helpGroups: HelpGroup[] = [
   {
     title: "Primeiros passos",
-    topicSlugs: ["criar-campanha", "tipos-de-carne", "cadastrar-doador"],
+    topicSlugs: ["criar-campanha", "tipos-de-carne", "cadastrar-doador", "corrigir-tipo-carne"],
   },
   {
     title: "Recebimentos",

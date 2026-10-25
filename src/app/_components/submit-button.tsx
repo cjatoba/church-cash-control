@@ -8,12 +8,17 @@ export function SubmitButton({
   children,
   pendingLabel,
   variant = "primary",
+  pending: pendingOverride,
 }: {
   children: ReactNode;
   pendingLabel: string;
   variant?: ButtonVariant;
+  // Para formulários enviados manualmente (onSubmit), em que useFormStatus
+  // não enxerga o envio em andamento.
+  pending?: boolean;
 }) {
-  const { pending } = useFormStatus();
+  const formStatus = useFormStatus();
+  const pending = pendingOverride ?? formStatus.pending;
 
   return (
     <button
