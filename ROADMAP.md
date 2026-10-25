@@ -879,8 +879,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   de uma vez as parcelas passadas como pagas fica de fora até aparecer
   necessidade concreta.
 
-## Em andamento (PRs abertas)
-
 - **Corrigir tipo de carnê de um doador** — PR #75 (pedido do usuário
   ao cadastrar em produção: não havia como ajustar um carnê cadastrado com
   o tipo errado). Mockup aprovado e decisões tomadas com o usuário: troca
@@ -917,6 +915,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     pagamentos ocupam as primeiras parcelas. O total arrecadado e o
     "Dinheiro em mãos" não mudam (mesmo dinheiro, mesmo recebedor). O
     aviso da tela mostra o resultado antes de salvar, com a mesma regra.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
