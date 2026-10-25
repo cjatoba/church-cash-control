@@ -1,4 +1,5 @@
 import type { Money } from "./money";
+import { assertEntryChangeKeepsBalance } from "./money-entry-correction";
 import type { PaymentMethod } from "./payment-method";
 
 export interface InstallmentState {
@@ -40,9 +41,16 @@ export function payInstallment(
   };
 }
 
-export function correctInstallmentPaymentDate(
+export interface InstallmentPaymentCorrection {
+  paidAt: Date;
+  paymentMethod: PaymentMethod;
+  receivedByUserId: string;
+}
+
+export function correctInstallmentPayment(
   installment: InstallmentState,
-  paidAt: Date,
+  correction: InstallmentPaymentCorrection,
+  previousReceiverBalance: Money,
   today: Date = new Date(),
 ): InstallmentPayment {
   if (
@@ -53,14 +61,19 @@ export function correctInstallmentPaymentDate(
   ) {
     throw new Error("Parcela ainda não foi paga");
   }
-  if (paidAt > today) {
+  if (correction.paidAt > today) {
     throw new Error("Data de pagamento não pode ser no futuro");
   }
+  assertEntryChangeKeepsBalance(
+    { amount: installment.amount, receivedByUserId: installment.receivedByUserId },
+    { amount: installment.amount, receivedByUserId: correction.receivedByUserId },
+    previousReceiverBalance,
+  );
   return {
-    paidAt,
+    paidAt: correction.paidAt,
     paidAmount: installment.amount,
-    paymentMethod: installment.paymentMethod,
-    receivedByUserId: installment.receivedByUserId,
+    paymentMethod: correction.paymentMethod,
+    receivedByUserId: correction.receivedByUserId,
     registeredByUserId: installment.registeredByUserId,
   };
 }

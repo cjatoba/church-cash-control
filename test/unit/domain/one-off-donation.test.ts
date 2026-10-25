@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { parseOneOffDonation } from "@/server/domain/one-off-donation";
+import {
+  parseOneOffDonation,
+  parseOneOffDonationCorrection,
+} from "@/server/domain/one-off-donation";
 
 describe("parseOneOffDonation", () => {
   const validInput = {
@@ -66,6 +69,35 @@ describe("parseOneOffDonation", () => {
   it("rejeita recebedor vazio", () => {
     expect(() =>
       parseOneOffDonation({ ...validInput, receivedByUserId: "" }, registeredByUserId),
+    ).toThrow();
+  });
+});
+
+describe("parseOneOffDonationCorrection", () => {
+  it("lê os campos que podem ser corrigidos numa doação já registrada", () => {
+    const correction = parseOneOffDonationCorrection({
+      donorName: "  ",
+      amount: "500",
+      date: "2026-03-09",
+      paymentMethod: "cash",
+      receivedByUserId: "user-2",
+    });
+
+    expect(correction.donorName).toBeNull();
+    expect(correction.amount.toCents()).toBe(50000);
+    expect(correction.date).toEqual(new Date("2026-03-09"));
+    expect(correction.paymentMethod).toBe("cash");
+    expect(correction.receivedByUserId).toBe("user-2");
+  });
+
+  it("rejeita valor zero", () => {
+    expect(() =>
+      parseOneOffDonationCorrection({
+        amount: "0",
+        date: "2026-03-09",
+        paymentMethod: "cash",
+        receivedByUserId: "user-2",
+      }),
     ).toThrow();
   });
 });

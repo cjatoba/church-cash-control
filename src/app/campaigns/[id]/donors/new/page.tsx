@@ -14,6 +14,7 @@ import { createLoosePledgeRepository } from "@/server/infrastructure/db/loose-pl
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { buildFirstMonthOptions } from "../../_lib/first-month-options";
 import { DonorForm, type CreateDonorState } from "./donor-form";
 
@@ -114,6 +115,11 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
           { campaignId, donorId, pledgeTypeId },
         );
       }
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "donor_created",
+        subjectName: toStringValue(input.name),
+      });
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(

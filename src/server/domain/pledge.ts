@@ -146,6 +146,7 @@ export interface InstallmentDetail {
   paidAt: Date | null;
   paidAmount: Money | null;
   paymentMethod: PaymentMethod | null;
+  receivedByUserId: string | null;
   receivedByLabel: string | null;
   registeredByLabel: string | null;
 }

@@ -40,12 +40,18 @@ export default async function ChangeLoosePledgeTypePage({
     notFound();
   }
 
+  const logContext = {
+    donorName: loosePledge.donorName,
+    currentTypeName: loosePledge.pledgeTypeName,
+    typeNames: Object.fromEntries(pledgeTypes.map((type) => [type.id, type.name])),
+  };
+
   async function change(
     _prevState: ChangePledgeTypeState,
     formData: FormData,
   ): Promise<ChangePledgeTypeState> {
     "use server";
-    return submitPledgeTypeChange(campaignId, "loose", loosePledgeId, formData);
+    return submitPledgeTypeChange(campaignId, "loose", loosePledgeId, formData, logContext);
   }
 
   const contributionCount = loosePledge.contributions.length;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  correctInstallmentPaymentDate,
+  correctInstallmentPayment,
   payInstallment,
   revertInstallmentPayment,
 } from "@/server/domain/installment";
@@ -94,7 +94,7 @@ describe("payInstallment", () => {
   });
 });
 
-describe("correctInstallmentPaymentDate", () => {
+describe("correctInstallmentPayment", () => {
   const paidInstallment = {
     amount: Money.fromReais(100),
     paidAt: new Date("2026-03-10"),
@@ -102,39 +102,65 @@ describe("correctInstallmentPaymentDate", () => {
     receivedByUserId: "user-1",
     registeredByUserId: "user-1",
   };
+  const today = new Date("2026-03-10");
 
-  it("corrige a data de pagamento mantendo valor, forma de pagamento e recebedor", () => {
-    const payment = correctInstallmentPaymentDate(
+  it("corrige data, forma de pagamento e quem recebeu, mantendo o valor e quem registrou", () => {
+    const payment = correctInstallmentPayment(
       paidInstallment,
-      new Date("2026-03-05"),
-      new Date("2026-03-10"),
+      { paidAt: new Date("2026-03-05"), paymentMethod: "cash", receivedByUserId: "user-2" },
+      Money.fromReais(100),
+      today,
     );
 
     expect(payment.paidAt).toEqual(new Date("2026-03-05"));
     expect(payment.paidAmount.equals(Money.fromReais(100))).toBe(true);
-    expect(payment.paymentMethod).toBe("pix");
-    expect(payment.receivedByUserId).toBe("user-1");
+    expect(payment.paymentMethod).toBe("cash");
+    expect(payment.receivedByUserId).toBe("user-2");
     expect(payment.registeredByUserId).toBe("user-1");
+  });
+
+  it("não deixa trocar quem recebeu se essa pessoa já repassou o dinheiro", () => {
+    expect(() =>
+      correctInstallmentPayment(
+        paidInstallment,
+        { paidAt: new Date("2026-03-10"), paymentMethod: "pix", receivedByUserId: "user-2" },
+        Money.fromReais(40),
+        today,
+      ),
+    ).toThrow("Corrija o repasse primeiro");
+  });
+
+  it("permite corrigir só a data mesmo que o dinheiro já tenha sido repassado", () => {
+    expect(() =>
+      correctInstallmentPayment(
+        paidInstallment,
+        { paidAt: new Date("2026-03-01"), paymentMethod: "pix", receivedByUserId: "user-1" },
+        Money.fromCents(0),
+        today,
+      ),
+    ).not.toThrow();
   });
 
   it("rejeita corrigir parcela que ainda não foi paga", () => {
     expect(() =>
-      correctInstallmentPaymentDate(
+      correctInstallmentPayment(
         unpaidInstallment,
-        new Date("2026-03-05"),
-        new Date("2026-03-10"),
+        { paidAt: new Date("2026-03-05"), paymentMethod: "pix", receivedByUserId: "user-1" },
+        Money.fromCents(0),
+        today,
       ),
-    ).toThrow();
+    ).toThrow("ainda não foi paga");
   });
 
   it("rejeita nova data de pagamento no futuro", () => {
     expect(() =>
-      correctInstallmentPaymentDate(
+      correctInstallmentPayment(
         paidInstallment,
-        new Date("2026-03-11"),
-        new Date("2026-03-10"),
+        { paidAt: new Date("2026-03-11"), paymentMethod: "pix", receivedByUserId: "user-1" },
+        Money.fromReais(100),
+        today,
       ),
-    ).toThrow();
+    ).toThrow("no futuro");
   });
 });
 

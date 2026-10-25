@@ -918,11 +918,62 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Corrigir entradas, rastrear "Dinheiro em mãos" e registro de
+  atividades completo** — PR #77 (pedido do usuário ao usar em
+  produção: uma entrada registrada para a pessoa errada não tinha como ser
+  corrigida, "Dinheiro em mãos" só mostrava saldos, sem dizer de onde vinha
+  cada valor, e várias ações não entravam no registro de atividades).
+  Mockup aprovado; os três pontos numa fatia só, a pedido do usuário:
+  - Tela nova `/campaigns/[id]/money-in-hand/[userId]` (tocar numa pessoa
+    em "Dinheiro em mãos"): quanto recebeu, repassou e está em mãos, aba
+    "Recebeu" com cada parcela, doação sem carnê e entrega de carnê avulso
+    (de quem veio, data, forma, quem registrou) e aba "Repassou". Resolve
+    também a falta de uma lista de doações sem carnê. A lista de pessoas
+    mostra quantas entradas e repasses cada uma tem (contagem na mesma
+    consulta agregada que já somava os valores).
+  - Corrigir ou excluir doação sem carnê
+    (`/campaigns/[id]/one-off-donations/[donationId]`), entrega de carnê
+    avulso (`.../loose-pledges/[id]/contributions/[contributionId]`, também
+    com link "Corrigir" na tela do carnê avulso) e repasse
+    (`/campaigns/[id]/transfers/[transferId]`): quem recebeu/repassou,
+    valor, data, forma de pagamento (e nome de quem doou, na doação).
+    Exclusão com confirmação em dois passos. A janela "Editar" da parcela
+    paga ganhou forma de pagamento e "Recebido por" (o valor continua o da
+    parcela; `correctInstallmentPayment` substitui
+    `correctInstallmentPaymentDate`).
+  - Trava de saldo (`assertEntryChangeKeepsBalance`, domínio
+    `money-entry-correction.ts`; `assertTransferCorrectionWithinBalance`
+    em `custody-transfer.ts`, TDD): não dá para tirar uma entrada (trocar
+    quem recebeu, diminuir o valor ou excluir) de quem já repassou esse
+    dinheiro — o saldo em mãos ficaria negativo; a tela pede para corrigir
+    o repasse primeiro. Corrigir só a data ou a forma nunca é bloqueado.
+    Quem registrou a entrada originalmente não muda; quem corrigiu fica no
+    registro de atividades.
+  - Registro de atividades completo: além do que já era registrado, entram
+    cadastro de campanha, tipo de carnê, doador e voluntário, correção de
+    nome de doador e de voluntário, exclusão de dados de doador (sem o
+    nome, por LGPD), correção de tipo de carnê, doação sem carnê, entrega
+    de carnê avulso, encerrar/reabrir carnê avulso, repasse, liberação de
+    acesso, nova senha, desativar/reativar voluntário e personalizar o app.
+    Toda correção guarda o que era antes e o que ficou (coluna nova
+    `details` em `activity_log`, migration `0023`; enum de ações agora vem
+    de `ACTIVITY_LOG_ACTIONS` do domínio, para não divergir do banco).
+    Login, troca da própria senha e tutorial continuam fora (não são
+    ações sobre dados da igreja).
+  - Ajuda: tópico novo "Corrigir ou excluir uma doação, entrega ou
+    repasse"; "Corrigir ou desfazer uma baixa", "Dar baixa", "Dinheiro em
+    mãos" e "Registro de atividades" atualizados; tutorial ("Dinheiro em
+    mãos") também.
 
 ## Backlog (próximas fatias, em ordem)
 
-Nenhuma fatia no backlog no momento.
+1. **Anonimizar o nome do doador também no registro de atividades** —
+   lacuna de LGPD notada durante a PR #77, anterior a ela: o registro de
+   atividades guarda o nome do doador como retrato do momento
+   (`subjectName`, e agora também o "antes → depois" das correções), então
+   excluir os dados de um doador a pedido dele apaga o nome do cadastro,
+   mas não das atividades antigas. Precisa decidir com o usuário como
+   localizar esses registros (hoje não há vínculo com o doador).
 
 ## Como usar este arquivo
 

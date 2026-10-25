@@ -8,6 +8,7 @@ import { listPledgeTypes } from "@/server/application/list-pledge-types";
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { PledgeTypeForm, type CreatePledgeTypeState } from "./pledge-type-form";
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -47,6 +48,11 @@ export default async function PledgeTypesPage({
       const db = createDbClient();
       const repository = createPledgeTypeRepository(db);
       const { id } = await createPledgeType(repository, input);
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "pledge_type_created",
+        subjectName: toStringValue(input.name),
+      });
       return { success: id };
     } catch (error) {
       return {

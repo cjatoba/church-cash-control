@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { describeChanges } from "@/server/domain/activity-log";
 import { getCachedAppBranding } from "@/app/_lib/app-branding";
 import { auth } from "@/auth";
 import { updateUser } from "@/server/application/update-user";
@@ -9,6 +10,7 @@ import { createUserManagementRepository } from "@/server/infrastructure/db/user-
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { getLoginUrl } from "@/server/infrastructure/http/login-url";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { UserEditForm, type UserEditState } from "./user-edit-form";
 import { ActivateAccessForm, type ActivateAccessState } from "./activate-access-form";
 
@@ -31,6 +33,8 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
     notFound();
   }
 
+  const currentName = user.name;
+
   async function update(_prevState: UserEditState, formData: FormData): Promise<UserEditState> {
     "use server";
 
@@ -52,6 +56,13 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
       const db = createDbClient();
       const repository = createUserManagementRepository(db);
       await updateUser(repository, actionSession.user.id, userId, input);
+      const newName = toStringValue(input.name).trim();
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "user_updated",
+        subjectName: newName,
+        details: describeChanges([{ label: "Nome", before: currentName, after: newName }]),
+      });
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(
@@ -100,6 +111,11 @@ export default async function EditUserPage({ params }: PageProps<"/users/[id]/ed
         userId,
         input,
       );
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "user_access_activated",
+        subjectName: currentName,
+      });
 
       return {
         values: {

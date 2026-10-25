@@ -7,6 +7,8 @@ export const buttonClassNames = {
     "min-h-12 rounded-full border border-zinc-300 bg-white px-5 text-base font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800",
   danger:
     "min-h-14 w-full rounded-full border border-red-300 bg-white px-6 text-[17px] font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-950/40",
+  dangerSolid:
+    "min-h-12 rounded-full bg-red-700 px-6 text-base font-semibold text-white hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-500",
   text: "min-h-11 rounded px-2 text-[15px] text-zinc-700 underline hover:text-black dark:text-zinc-300 dark:hover:text-zinc-50",
 } as const;
 

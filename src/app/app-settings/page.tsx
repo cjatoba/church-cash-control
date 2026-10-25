@@ -9,6 +9,7 @@ import { PageShell } from "@/app/_components/page-shell";
 import { PageHeader } from "@/app/_components/page-header";
 import { APP_BRANDING_CACHE_TAG, getCachedAppBranding } from "@/app/_lib/app-branding";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { AppBrandingForm, type AppBrandingFormState } from "./app-branding-form";
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -47,7 +48,13 @@ export default async function AppSettingsPage() {
 
     const values = toSubmittedValues(formData, current);
     try {
-      await updateAppBranding(createAppSettingsRepository(createDbClient()), values);
+      const db = createDbClient();
+      await updateAppBranding(createAppSettingsRepository(db), values);
+      await logActivity(db, {
+        actorUserId: actionSession.user.id,
+        action: "app_branding_updated",
+        subjectName: values.name,
+      });
     } catch (error) {
       return {
         error: toFriendlyErrorMessage(

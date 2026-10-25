@@ -6,6 +6,7 @@ import { createOneOffDonationRepository } from "@/server/infrastructure/db/one-o
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
 import { OneOffDonationForm, type CreateOneOffDonationState } from "./one-off-donation-form";
 
 function toStringValue(value: FormDataEntryValue | null): string {
@@ -53,6 +54,13 @@ export default async function NewOneOffDonationPage({
       const db = createDbClient();
       const repository = createOneOffDonationRepository(db);
       const { id } = await createOneOffDonation(repository, input, registeredByUserId);
+      const donorName = toStringValue(input.donorName).trim();
+      await logActivity(db, {
+        actorUserId: registeredByUserId,
+        action: "one_off_donation_created",
+        subjectName: donorName.length > 0 ? donorName : "Doação anônima",
+        amountCents: Math.round(Number(input.amount) * 100),
+      });
       return { success: id };
     } catch (error) {
       return {

@@ -7,10 +7,18 @@ import { createPledgeTypeChangeRepository } from "@/server/infrastructure/db/ple
 import { createPledgeTypeRepository } from "@/server/infrastructure/db/pledge-type-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { logActivity } from "@/app/_lib/log-activity";
+import { describeChanges } from "@/server/domain/activity-log";
 import type { ChangePledgeTypeState } from "../_components/change-pledge-type-form";
 
 function optionalString(value: FormDataEntryValue | null): string | undefined {
   return typeof value === "string" && value !== "" ? value : undefined;
+}
+
+export interface PledgeTypeChangeLogContext {
+  donorName: string;
+  currentTypeName: string;
+  typeNames: Record<string, string>;
 }
 
 export async function submitPledgeTypeChange(
@@ -18,6 +26,7 @@ export async function submitPledgeTypeChange(
   sourceKind: PledgeKind,
   sourceId: string,
   formData: FormData,
+  logContext: PledgeTypeChangeLogContext,
 ): Promise<ChangePledgeTypeState> {
   const session = await auth();
   if (!session?.user.canReceiveFunds) {
@@ -41,6 +50,20 @@ export async function submitPledgeTypeChange(
         installmentCount: optionalString(formData.get("installmentCount")),
       },
     );
+    const newTypeId = formData.get("pledgeTypeId");
+    await logActivity(db, {
+      actorUserId: session.user.id,
+      action: "pledge_type_changed",
+      subjectName: logContext.donorName,
+      details: describeChanges([
+        {
+          label: "Tipo",
+          before: logContext.currentTypeName,
+          after:
+            (typeof newTypeId === "string" ? logContext.typeNames[newTypeId] : undefined) ?? "—",
+        },
+      ]),
+    });
   } catch (error) {
     return {
       error: toFriendlyErrorMessage(error, "Não foi possível corrigir o tipo do carnê."),

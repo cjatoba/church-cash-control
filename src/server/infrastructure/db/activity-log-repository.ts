@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import type { ActivityLogRepository } from "@/server/application/record-activity";
 import type { ActivityLogListRepository } from "@/server/application/list-activity-log";
-import type { ActivityLogAction } from "@/server/domain/activity-log";
+import { ACTIVITY_LOG_ACTIONS, type ActivityLogAction } from "@/server/domain/activity-log";
 import { Money } from "@/server/domain/money";
 import type { DbClient } from "./client";
 import { activityLog, users } from "./schema";
@@ -9,19 +9,11 @@ import { activityLog, users } from "./schema";
 const ACTIVITY_LOG_LIST_LIMIT = 200;
 
 function toActivityLogAction(value: string): ActivityLogAction {
-  if (
-    value === "installment_paid" ||
-    value === "installment_payment_corrected" ||
-    value === "installment_payment_reverted" ||
-    value === "campaign_updated" ||
-    value === "campaign_archived" ||
-    value === "campaign_restored" ||
-    value === "transaction_category_archived" ||
-    value === "transaction_category_restored"
-  ) {
-    return value;
+  const action = ACTIVITY_LOG_ACTIONS.find((known) => known === value);
+  if (!action) {
+    throw new Error("Ação de log de atividade desconhecida");
   }
-  throw new Error("Ação de log de atividade desconhecida");
+  return action;
 }
 
 export function createActivityLogRepository(
@@ -34,6 +26,7 @@ export function createActivityLogRepository(
         action: entry.action,
         subjectName: entry.subjectName,
         amountCents: entry.amount?.toCents() ?? null,
+        details: entry.details,
         occurredAt: entry.occurredAt,
       });
     },
@@ -45,6 +38,7 @@ export function createActivityLogRepository(
           action: activityLog.action,
           subjectName: activityLog.subjectName,
           amountCents: activityLog.amountCents,
+          details: activityLog.details,
           occurredAt: activityLog.occurredAt,
         })
         .from(activityLog)
@@ -57,6 +51,7 @@ export function createActivityLogRepository(
         action: toActivityLogAction(row.action),
         subjectName: row.subjectName,
         amount: row.amountCents === null ? null : Money.fromCents(row.amountCents),
+        details: row.details,
         occurredAt: row.occurredAt,
       }));
     },

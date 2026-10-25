@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { logActivity } from "@/app/_lib/log-activity";
 import { auth } from "@/auth";
 import { deactivateUser, reactivateUser } from "@/server/application/deactivate-user";
 import { listManagedUsers, type ManagedUser } from "@/server/application/list-managed-users";
@@ -19,6 +20,14 @@ function capabilityLabels(user: ManagedUser): string[] {
   if (user.canManageCampaigns) labels.push("Gerencia campanhas");
   if (user.canReceiveFunds) labels.push("Recebe arrecadação");
   return labels.length > 0 ? labels : ["Só visualização"];
+}
+
+async function findUserName(
+  repository: ReturnType<typeof createUserManagementRepository>,
+  userId: string,
+): Promise<string> {
+  const user = await repository.findById(userId);
+  return user?.name ?? "—";
 }
 
 export default async function UsersPage() {
@@ -50,6 +59,11 @@ export default async function UsersPage() {
     const db = createDbClient();
     const repository = createUserManagementRepository(db);
     await deactivateUser(repository, session.user.id, userId);
+    await logActivity(db, {
+      actorUserId: session.user.id,
+      action: "user_deactivated",
+      subjectName: await findUserName(repository, userId),
+    });
 
     redirect("/users");
   }
@@ -70,6 +84,11 @@ export default async function UsersPage() {
     const db = createDbClient();
     const repository = createUserManagementRepository(db);
     await reactivateUser(repository, userId);
+    await logActivity(db, {
+      actorUserId: session.user.id,
+      action: "user_reactivated",
+      subjectName: await findUserName(repository, userId),
+    });
 
     redirect("/users");
   }
