@@ -8,6 +8,11 @@ function normalizeForSearch(text: string): string {
     .trim();
 }
 
+// Cada palavra é procurada separadamente porque ninguém digita o "da"/"de"
+// do meio do nome: "maria silva" precisa achar "Maria da Silva".
 export function matchesDonorName(donorName: string, query: string): boolean {
-  return normalizeForSearch(donorName).includes(normalizeForSearch(query));
+  const normalizedName = normalizeForSearch(donorName);
+  return normalizeForSearch(query)
+    .split(/\s+/)
+    .every((word) => normalizedName.includes(word));
 }

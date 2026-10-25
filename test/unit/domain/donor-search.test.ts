@@ -13,6 +13,12 @@ describe("matchesDonorName", () => {
     expect(matchesDonorName("Conceição", "conceicao")).toBe(true);
   });
 
+  it("encontra cada palavra digitada em qualquer parte do nome, em qualquer ordem", () => {
+    expect(matchesDonorName("Maria da Silva", "maria silva")).toBe(true);
+    expect(matchesDonorName("Maria da Silva", "silva maria")).toBe(true);
+    expect(matchesDonorName("Maria da Silva", "maria  pereira")).toBe(false);
+  });
+
   it("ignora espaços sobrando no que foi digitado", () => {
     expect(matchesDonorName("Ana Lima", "  ana ")).toBe(true);
   });
