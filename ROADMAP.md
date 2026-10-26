@@ -1073,17 +1073,27 @@ Nenhuma PR aberta no momento.
    e outra detalhada com nomes (controle interno), e quem pode abrir cada
    uma. O relatório impresso não substitui o backup do próprio banco
    (restauração do Neon).
-2. **Aviso de sem conexão ou conexão lenta** (pedido do usuário):
-   registrar sem internet com sincronização depois (banco local no
-   celular) foi avaliado e descartado com o usuário. Exigiria rodar no
-   celular regras que hoje dependem do estado do banco (saldo em mãos,
-   parcela já paga), traria conflito entre duas pessoas registrando
-   offline, não funciona em segundo plano no iPhone (Safari não suporta
-   a Background Sync API) e deixaria nome de doador guardado em cada
-   aparelho (LGPD). No lugar: avisar quando o celular estiver sem
-   conexão e quando uma ação demorar além do normal (conexão lenta),
-   mantendo o que foi digitado no formulário para enviar de novo quando
-   a conexão voltar.
+2. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
+   com sincronização depois (banco local no celular) foi avaliado e
+   descartado com o usuário. Exigiria rodar no celular regras que hoje
+   dependem do estado do banco (saldo em mãos, parcela já paga), traria
+   conflito entre duas pessoas registrando offline, não funciona em
+   segundo plano no iPhone (Safari não suporta a Background Sync API) e
+   deixaria nome de doador guardado em cada aparelho (LGPD). No lugar:
+   avisar quando o celular estiver sem conexão, mantendo o que foi
+   digitado no formulário para enviar de novo quando a conexão voltar.
+   Aviso de conexão lenta descartado com o usuário (pouco efetivo).
+3. **Atalho junto de toda orientação "faça X antes"** (pedido do
+   usuário): telas que explicam que outra ação precisa vir antes só
+   descrevem o caminho, obrigando a pessoa a voltar e procurar. Manter o
+   texto e acrescentar um botão que leva direto à tela certa (só para
+   quem tem a capacidade de usá-la; sem ela, dizer quem pode fazer).
+   Levantamento inicial: "O que você recebeu?" ("Doador novo? Cadastre
+   primeiro em Doadores e carnês" → cadastrar doador), "Escolha o doador"
+   vazio (sem carnê em aberto → cadastrar doador), tela inicial sem
+   campanha (→ nova campanha), "Não é possível gerar senha" (sem acesso →
+   liberar acesso; desativado → voluntários e acessos). Revisar também a
+   Ajuda e o tutorial pelo mesmo critério.
 
 ## Como usar este arquivo
 
