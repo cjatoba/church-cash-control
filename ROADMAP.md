@@ -1055,7 +1055,35 @@ Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-Nenhuma fatia no backlog no momento.
+1. **Relatório de arrecadação para imprimir** (pedido do usuário): hoje
+   os números estão espalhados ("Quem pagou no mês" mostra um mês por
+   vez, "Dinheiro em mãos" por pessoa, a tela do doador um doador por
+   vez), sem uma visão consolidada. Usos citados pelo usuário: controle
+   interno, cópia guardada fora do app (caso o banco ou o app fiquem
+   indisponíveis) e prestação de contas ao pastor ou à tesouraria da
+   igreja. Decisões tomadas com o usuário: tela pensada para impressão
+   (o "Salvar como PDF" do próprio navegador gera o arquivo), sem
+   exportar planilha nem adicionar biblioteca de PDF. Proposta a
+   detalhar no mockup: período (campanha inteira ou de um mês a outro),
+   arrecadado × meta, totais por mês, por forma de pagamento e por tipo
+   de entrada (parcela, carnê avulso, doação sem carnê) e a lista das
+   entradas do período. Consultas agregadas (`SUM ... GROUP BY`), mesmo
+   padrão do total arrecadado do painel. A decidir no mockup, por causa
+   da LGPD: uma versão resumida sem nome de doador (prestação de contas)
+   e outra detalhada com nomes (controle interno), e quem pode abrir cada
+   uma. O relatório impresso não substitui o backup do próprio banco
+   (restauração do Neon).
+2. **Aviso de sem conexão ou conexão lenta** (pedido do usuário):
+   registrar sem internet com sincronização depois (banco local no
+   celular) foi avaliado e descartado com o usuário. Exigiria rodar no
+   celular regras que hoje dependem do estado do banco (saldo em mãos,
+   parcela já paga), traria conflito entre duas pessoas registrando
+   offline, não funciona em segundo plano no iPhone (Safari não suporta
+   a Background Sync API) e deixaria nome de doador guardado em cada
+   aparelho (LGPD). No lugar: avisar quando o celular estiver sem
+   conexão e quando uma ação demorar além do normal (conexão lenta),
+   mantendo o que foi digitado no formulário para enviar de novo quando
+   a conexão voltar.
 
 ## Como usar este arquivo
 
