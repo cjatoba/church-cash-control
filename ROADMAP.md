@@ -1051,7 +1051,19 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Atalho junto de toda orientação "faça X antes"** — PR #87 (pedido do
+  usuário): telas que explicavam que outra ação precisava vir antes só
+  descreviam o caminho. Mockup aprovado: o texto continua e ganha um
+  botão que leva direto à tela certa; sem permissão para a tela de
+  destino, a pessoa vê a quem pedir. Telas: "O que você recebeu?" e
+  "Escolha o doador" vazio (→ cadastrar doador), tela inicial sem
+  campanha (→ nova campanha), cadastro de doador sem tipo de carnê
+  (botão só para quem cuida da campanha), "Não é possível gerar senha"
+  (→ ativar acesso ou voluntários e acessos). O erro "corrija o repasse
+  primeiro" (corrigir/excluir entrada, desfazer baixa) ganha o botão
+  "Corrigir o repasse", que abre "Dinheiro em mãos" da pessoa na aba
+  "Repassou": `FundsAlreadyTransferredError` (domínio, TDD) carrega quem
+  recebeu o dinheiro. Ajuda atualizada.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -1083,17 +1095,6 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
-3. **Atalho junto de toda orientação "faça X antes"** (pedido do
-   usuário): telas que explicam que outra ação precisa vir antes só
-   descrevem o caminho, obrigando a pessoa a voltar e procurar. Manter o
-   texto e acrescentar um botão que leva direto à tela certa (só para
-   quem tem a capacidade de usá-la; sem ela, dizer quem pode fazer).
-   Levantamento inicial: "O que você recebeu?" ("Doador novo? Cadastre
-   primeiro em Doadores e carnês" → cadastrar doador), "Escolha o doador"
-   vazio (sem carnê em aberto → cadastrar doador), tela inicial sem
-   campanha (→ nova campanha), "Não é possível gerar senha" (sem acesso →
-   liberar acesso; desativado → voluntários e acessos). Revisar também a
-   Ajuda e o tutorial pelo mesmo critério.
 
 ## Como usar este arquivo
 
