@@ -1,13 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
 import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
 import { TrashIcon } from "@/app/_components/icons";
+import type { ActionErrorState } from "@/app/_lib/action-error-message";
 
-export interface CorrectionState {
-  error?: string;
-}
+export type CorrectionState = ActionErrorState;
 
 export type CorrectionAction = (
   prevState: CorrectionState,
@@ -20,12 +20,23 @@ export const fieldLabelClassName =
 export const fieldInputClassName =
   "min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50";
 
-export function ErrorMessage({ message }: { message?: string }) {
-  return message ? (
-    <p className="rounded-xl bg-red-50 p-3 text-[15px] text-red-800 dark:bg-red-950/50 dark:text-red-300">
-      {message}
-    </p>
-  ) : null;
+export function ErrorMessage({ state }: { state: ActionErrorState }) {
+  if (!state.error) {
+    return null;
+  }
+  return (
+    <div className="flex flex-col gap-3 rounded-xl bg-red-50 p-3 dark:bg-red-950/50">
+      <p className="text-[15px] text-red-800 dark:text-red-300">{state.error}</p>
+      {state.fixTransferHref ? (
+        <Link
+          href={state.fixTransferHref}
+          className={`${buttonBaseClassName} ${buttonClassNames.outline}`}
+        >
+          Corrigir o repasse
+        </Link>
+      ) : null}
+    </div>
+  );
 }
 
 // Botões em vez de radios: com radios, o React reiniciaria a marcação ao
@@ -96,7 +107,7 @@ export function DeleteSection({
           <span className="text-[15px] font-semibold text-red-800 dark:text-red-300">
             {confirmLabel}
           </span>
-          <ErrorMessage message={state.error} />
+          <ErrorMessage state={state} />
           <SubmitButton pendingLabel="Excluindo…" variant="dangerSolid">
             Sim, excluir
           </SubmitButton>

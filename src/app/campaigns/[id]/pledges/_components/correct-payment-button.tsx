@@ -9,11 +9,10 @@ import {
   fieldInputClassName,
   fieldLabelClassName,
 } from "../../_components/correction-form-parts";
+import type { ActionErrorState } from "@/app/_lib/action-error-message";
 import type { RevertPaymentState } from "../[pledgeId]/page";
 
-export interface CorrectPaymentState {
-  error?: string;
-}
+export type CorrectPaymentState = ActionErrorState;
 
 export function CorrectPaymentButton({
   installmentId,
@@ -96,7 +95,7 @@ export function CorrectPaymentButton({
           <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
             Valor da parcela: {amountLabel}
           </p>
-          <ErrorMessage message={correctState.error} />
+          <ErrorMessage state={correctState} />
           <label className={fieldLabelClassName}>
             Data do pagamento
             <input
@@ -164,9 +163,7 @@ export function CorrectPaymentButton({
             <p className="text-[15px] text-red-700 dark:text-red-400">
               Tem certeza? Isso vai apagar o registro de pagamento desta parcela.
             </p>
-            {revertState.error ? (
-              <p className="text-[15px] text-red-700 dark:text-red-400">{revertState.error}</p>
-            ) : null}
+            <ErrorMessage state={revertState} />
             <div className="flex justify-end gap-3">
               <button
                 type="button"

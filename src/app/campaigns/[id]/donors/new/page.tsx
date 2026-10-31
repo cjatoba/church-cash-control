@@ -147,15 +147,23 @@ export default async function NewDonorPage({ params }: PageProps<"/campaigns/[id
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
             Nenhum tipo de carnê cadastrado
           </h1>
-          <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
-            Cadastre um tipo de carnê (com valor fixo ou avulso) antes de vincular um doador.
-          </p>
-          <Link
-            href={`/campaigns/${campaignId}/pledge-types`}
-            className="self-center inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-900 px-6 text-base font-semibold text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
-            + Tipo de carnê
-          </Link>
+          {session.user.canManageCampaigns ? (
+            <>
+              <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+                Cadastre um tipo de carnê (com valor fixo ou avulso) antes de vincular um doador.
+              </p>
+              <Link
+                href={`/campaigns/${campaignId}/pledge-types`}
+                className="self-center inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-900 px-6 text-base font-semibold text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-300"
+              >
+                + Tipo de carnê
+              </Link>
+            </>
+          ) : (
+            <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+              Peça a quem cuida da campanha para cadastrar um tipo de carnê.
+            </p>
+          )}
         </div>
       </div>
     );

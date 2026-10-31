@@ -1,5 +1,17 @@
 import type { Money } from "./money";
 
+// Carrega quem recebeu o dinheiro para a tela levar direto aos repasses
+// dessa pessoa, que é onde a correção precisa começar.
+export class FundsAlreadyTransferredError extends Error {
+  constructor(
+    message: string,
+    readonly receiverUserId: string,
+  ) {
+    super(message);
+    this.name = "FundsAlreadyTransferredError";
+  }
+}
+
 export interface ReceivedAmount {
   amount: Money;
   receivedByUserId: string | null;
@@ -23,8 +35,9 @@ export function assertEntryChangeKeepsBalance(
     after?.receivedByUserId === before.receivedByUserId ? after.amount.toCents() : 0;
   const remainingCents = previousReceiverBalance.toCents() - before.amount.toCents() + keptCents;
   if (remainingCents < 0) {
-    throw new Error(
+    throw new FundsAlreadyTransferredError(
       "Não dá para fazer esta correção: parte desse dinheiro já foi repassada e o saldo em mãos de quem recebeu ficaria negativo. Corrija o repasse primeiro.",
+      before.receivedByUserId,
     );
   }
 }

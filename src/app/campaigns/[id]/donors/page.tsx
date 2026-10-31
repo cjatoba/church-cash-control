@@ -214,10 +214,22 @@ export default async function DonorsPage({
       ) : null}
 
       {rows.length === 0 && oneOffDonations.length === 0 ? (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-          {choosingForPayment
-            ? "Nenhum carnê desse tipo em aberto nesta campanha."
-            : "Nenhum doador cadastrado ainda nesta campanha."}
+        <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-6 text-center text-[15px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          {choosingForPayment ? (
+            <>
+              <p>Nenhum carnê desse tipo em aberto nesta campanha.</p>
+              <p>Doador novo? Cadastre o doador e o carnê primeiro.</p>
+              <Link
+                href={`/campaigns/${campaignId}/donors/new`}
+                className={`${buttonBaseClassName} ${buttonClassNames.outline}`}
+              >
+                <PlusIcon />
+                Cadastrar doador
+              </Link>
+            </>
+          ) : (
+            "Nenhum doador cadastrado ainda nesta campanha."
+          )}
         </div>
       ) : (
         <DonorSearchList sections={sections} />

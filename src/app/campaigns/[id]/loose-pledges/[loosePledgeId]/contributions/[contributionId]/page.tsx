@@ -10,7 +10,7 @@ import { createCustodyRepository } from "@/server/infrastructure/db/custody-repo
 import { createLooseContributionStore } from "@/server/infrastructure/db/loose-pledge-contribution-repository";
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { toActionErrorState } from "@/app/_lib/action-error-message";
 import { describeEntryCorrection, toNameMap } from "@/app/_lib/entry-change-details";
 import { formatCurrency } from "@/app/_lib/format";
 import { logActivity } from "@/app/_lib/log-activity";
@@ -72,7 +72,7 @@ export default async function CorrectLooseContributionPage({
         details: describeEntryCorrection(result.before, result.after, names),
       });
     } catch (error) {
-      return { error: toFriendlyErrorMessage(error, "Não foi possível salvar a correção.") };
+      return toActionErrorState(error, "Não foi possível salvar a correção.", campaignId);
     }
     redirect(backHref);
   }
@@ -100,7 +100,7 @@ export default async function CorrectLooseContributionPage({
         amountCents: deleted.fields.amount.toCents(),
       });
     } catch (error) {
-      return { error: toFriendlyErrorMessage(error, "Não foi possível excluir a entrega.") };
+      return toActionErrorState(error, "Não foi possível excluir a entrega.", campaignId);
     }
     redirect(backHref);
   }

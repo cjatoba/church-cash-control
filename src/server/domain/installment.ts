@@ -1,5 +1,8 @@
 import type { Money } from "./money";
-import { assertEntryChangeKeepsBalance } from "./money-entry-correction";
+import {
+  assertEntryChangeKeepsBalance,
+  FundsAlreadyTransferredError,
+} from "./money-entry-correction";
 import type { PaymentMethod } from "./payment-method";
 
 export interface InstallmentState {
@@ -86,8 +89,10 @@ export function revertInstallmentPayment(
     throw new Error("Parcela ainda não foi paga");
   }
   if (availableBalance.toCents() < installment.amount.toCents()) {
-    throw new Error(
-      "Não é possível reverter: o valor já foi repassado e reverter deixaria o saldo em mãos negativo",
-    );
+    const message =
+      "Não é possível reverter: o valor já foi repassado e reverter deixaria o saldo em mãos negativo. Corrija o repasse primeiro.";
+    throw installment.receivedByUserId
+      ? new FundsAlreadyTransferredError(message, installment.receivedByUserId)
+      : new Error(message);
   }
 }
