@@ -1049,8 +1049,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   ("Registrar doação sem carnê" e "Corrigir ou excluir uma doação,
   entrega ou repasse") atualizada.
 
-## Em andamento (PRs abertas)
-
 - **Atalho junto de toda orientação "faça X antes"** — PR #87 (pedido do
   usuário): telas que explicavam que outra ação precisava vir antes só
   descreviam o caminho. Mockup aprovado: o texto continua e ganha um
@@ -1064,6 +1062,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   "Corrigir o repasse", que abre "Dinheiro em mãos" da pessoa na aba
   "Repassou": `FundsAlreadyTransferredError` (domínio, TDD) carrega quem
   recebeu o dinheiro. Ajuda atualizada.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
