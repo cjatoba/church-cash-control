@@ -12,7 +12,7 @@ import {
 } from "@/server/infrastructure/db/custody-repository";
 import { createUserListRepository } from "@/server/infrastructure/db/user-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
-import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { toActionErrorState } from "@/app/_lib/action-error-message";
 import { describeTransferCorrection, toNameMap } from "@/app/_lib/entry-change-details";
 import { formatCurrency } from "@/app/_lib/format";
 import { logActivity } from "@/app/_lib/log-activity";
@@ -20,6 +20,7 @@ import { PageShell } from "@/app/_components/page-shell";
 import { PageHeader } from "@/app/_components/page-header";
 import { CorrectTransferForm } from "../../_components/correct-transfer-form";
 import { DeleteSection, type CorrectionState } from "../../_components/correction-form-parts";
+import { toTransferDestination } from "../../_lib/transfer-destination";
 
 function personHref(campaignId: string, userId: string): string {
   return `/campaigns/${campaignId}/money-in-hand/${userId}`;
@@ -63,7 +64,9 @@ export default async function CorrectTransferPage({
         transferId,
         {
           fromUserId: formData.get("fromUserId"),
-          recipientName: formData.get("recipientName"),
+          ...(toTransferDestination(formData.get("destination")) === "volunteer"
+            ? { toUserId: formData.get("toUserId"), recipientName: "" }
+            : { toUserId: "", recipientName: formData.get("recipientName") }),
           amount: formData.get("amount"),
           transferDate: formData.get("transferDate"),
           description: formData.get("description"),
@@ -79,7 +82,7 @@ export default async function CorrectTransferPage({
       });
       target = personHref(campaignId, result.after.fromUserId);
     } catch (error) {
-      return { error: toFriendlyErrorMessage(error, "Não foi possível salvar a correção.") };
+      return toActionErrorState(error, "Não foi possível salvar a correção.", campaignId);
     }
     redirect(target);
   }
@@ -108,7 +111,7 @@ export default async function CorrectTransferPage({
       });
       target = personHref(campaignId, deleted.fields.fromUserId);
     } catch (error) {
-      return { error: toFriendlyErrorMessage(error, "Não foi possível excluir o repasse.") };
+      return toActionErrorState(error, "Não foi possível excluir o repasse.", campaignId);
     }
     redirect(target);
   }
@@ -127,7 +130,9 @@ export default async function CorrectTransferPage({
         todayIso={new Date().toISOString().slice(0, 10)}
         initialValues={{
           fromUserId: transfer.fields.fromUserId,
-          recipientName: transfer.fields.recipientName,
+          destination: transfer.fields.toUserId ? "volunteer" : "external",
+          toUserId: transfer.fields.toUserId ?? "",
+          recipientName: transfer.fields.recipientName ?? "",
           amount: (transfer.fields.amount.toCents() / 100).toFixed(2),
           transferDate: transfer.fields.transferDate.toISOString().slice(0, 10),
           description: transfer.fields.description ?? "",
@@ -136,7 +141,11 @@ export default async function CorrectTransferPage({
       />
       <DeleteSection
         question="Registrou por engano?"
-        explanation="Excluir devolve o valor ao dinheiro em mãos de quem tinha repassado."
+        explanation={
+          transfer.fields.toUserId
+            ? "Excluir devolve o valor ao dinheiro em mãos de quem tinha repassado e tira de quem recebeu."
+            : "Excluir devolve o valor ao dinheiro em mãos de quem tinha repassado."
+        }
         buttonLabel="Excluir este repasse"
         confirmLabel={`Excluir de vez este repasse de ${amountLabel}?`}
         action={remove}

@@ -20,6 +20,7 @@ describe("listCustodyTransfers", () => {
       id: "transfer-1",
       fromUserLabel: "clayton@example.com",
       recipientName: "Responsável pela compra",
+      toVolunteer: false,
       amount: Money.fromReais(100),
       transferDate: new Date("2026-03-10"),
       registeredByUserLabel: "clayton@example.com",

@@ -19,6 +19,8 @@ import { EyeIcon, PencilIcon } from "@/app/_components/icons";
 import { PageShell } from "@/app/_components/page-shell";
 import { PageHeader } from "@/app/_components/page-header";
 import { Tabs } from "@/app/_components/tabs";
+import { Money } from "@/server/domain/money";
+import { VolunteerTransferBadge } from "../../_components/volunteer-transfer-badge";
 
 const kindLabels: Record<ReceivedEntryKind, { label: string; className: string }> = {
   installment: {
@@ -33,6 +35,10 @@ const kindLabels: Record<ReceivedEntryKind, { label: string; className: string }
     label: "Entrega de carnê avulso",
     className: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
   },
+  volunteer_transfer: {
+    label: "Repasse de voluntário",
+    className: "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
+  },
 };
 
 const emptyClassName =
@@ -46,6 +52,11 @@ function entryLink(
   entry: PersonReceivedEntry,
   canCorrect: boolean,
 ): { href: string; label: string; correct: boolean } | null {
+  if (entry.kind === "volunteer_transfer") {
+    return canCorrect
+      ? { href: `/campaigns/${campaignId}/transfers/${entry.id}`, label: "Corrigir", correct: true }
+      : null;
+  }
   if (entry.kind === "installment") {
     return entry.sourceId
       ? {
@@ -113,6 +124,9 @@ export default async function PersonMoneyInHandPage({
     notFound();
   }
   const canCorrect = session.user.canReceiveFunds;
+  const fromVolunteers = activity.received
+    .filter((entry) => entry.kind === "volunteer_transfer")
+    .reduce((sum, entry) => sum.add(entry.amount), Money.fromCents(0));
 
   const receivedList =
     activity.received.length === 0 ? (
@@ -169,7 +183,10 @@ export default async function PersonMoneyInHandPage({
         {activity.transfers.map((transfer) => (
           <li key={transfer.id} className="flex flex-col gap-1 px-4 py-3.5">
             <div className="flex items-start justify-between gap-3">
-              <span className="text-[17px] font-semibold">Para {transfer.recipientName}</span>
+              <span className="flex flex-col gap-1">
+                <span className="text-[17px] font-semibold">Para {transfer.recipientName}</span>
+                {transfer.toVolunteer ? <VolunteerTransferBadge label="Para voluntário" /> : null}
+              </span>
               <span className="text-[17px] font-bold whitespace-nowrap">
                 {formatCurrency(transfer.amount)}
               </span>
@@ -215,6 +232,12 @@ export default async function PersonMoneyInHandPage({
           </span>
         </span>
       </section>
+
+      {fromVolunteers.toCents() > 0 ? (
+        <p className="px-1 text-[15px] text-zinc-600 dark:text-zinc-400">
+          Inclui {formatCurrency(fromVolunteers)} recebidos de outros voluntários.
+        </p>
+      ) : null}
 
       <Tabs
         label="Entradas e repasses"

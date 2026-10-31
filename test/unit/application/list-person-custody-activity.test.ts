@@ -30,6 +30,17 @@ const reader: PersonCustodyActivityReader = {
         registeredByLabel: "Ana",
         dueDate: null,
       },
+      {
+        kind: "volunteer_transfer",
+        id: "v1",
+        sourceId: null,
+        donorLabel: "Bruno",
+        amount: Money.fromReais(200),
+        date: new Date("2026-09-20"),
+        paymentMethod: null,
+        registeredByLabel: "Bruno",
+        dueDate: null,
+      },
     ]);
   },
   findTransfersFrom() {
@@ -37,6 +48,7 @@ const reader: PersonCustodyActivityReader = {
       {
         id: "t1",
         recipientName: "Tesouraria",
+        toVolunteer: false,
         amount: Money.fromReais(30),
         transferDate: new Date("2026-09-01"),
         registeredByLabel: "Carlos",
@@ -49,10 +61,10 @@ describe("listPersonCustodyActivity", () => {
   it("lista de onde veio cada valor e cada repasse, do mais recente para o mais antigo, com os totais", async () => {
     const activity = await listPersonCustodyActivity(reader, "campaign-1", "user-1");
 
-    expect(activity.received.map((entry) => entry.id)).toEqual(["d1", "i1"]);
+    expect(activity.received.map((entry) => entry.id)).toEqual(["v1", "d1", "i1"]);
     expect(activity.transfers.map((transfer) => transfer.id)).toEqual(["t1"]);
-    expect(activity.receivedTotal.toCents()).toBe(505_000);
+    expect(activity.receivedTotal.toCents()).toBe(525_000);
     expect(activity.transferredTotal.toCents()).toBe(3_000);
-    expect(activity.balance.toCents()).toBe(502_000);
+    expect(activity.balance.toCents()).toBe(522_000);
   });
 });

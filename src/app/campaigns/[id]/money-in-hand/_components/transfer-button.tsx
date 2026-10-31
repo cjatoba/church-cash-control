@@ -2,11 +2,15 @@
 
 import { useActionState, useRef, useState } from "react";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { TransferRecipientFields } from "../../_components/transfer-recipient-fields";
+import type { TransferDestination } from "../../_lib/transfer-destination";
 
 export interface TransferState {
   error?: string;
   values?: {
     fromUserId: string;
+    destination: TransferDestination;
+    toUserId: string;
     amount: string;
     recipientName: string;
     transferDate: string;
@@ -87,6 +91,13 @@ export function TransferButton({
             Saldo disponível: {currencyFormatter.format(availableBalanceCents / 100)}
           </p>
 
+          <TransferRecipientFields
+            users={balances.map((balance) => ({ id: balance.userId, name: balance.userLabel }))}
+            fromUserId={fromUserId}
+            initialDestination={state.values?.destination ?? "volunteer"}
+            initialToUserId={state.values?.toUserId ?? ""}
+            initialRecipientName={state.values?.recipientName ?? ""}
+          />
           <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
             Valor a repassar (R$)
             <input
@@ -99,17 +110,7 @@ export function TransferButton({
               className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
           </label>
-          <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
-            Destinatário
-            <input
-              name="recipientName"
-              type="text"
-              placeholder="Ex.: Responsável pela compra"
-              required
-              defaultValue={state.values?.recipientName ?? ""}
-              className="min-h-12 rounded-xl border border-zinc-300 bg-white px-4 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
-            />
-          </label>
+
           <label className="flex flex-col gap-1.5 text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
             Data
             <input

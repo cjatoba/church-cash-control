@@ -2,10 +2,12 @@ import { calculateAvailableBalance } from "../domain/custody-transfer";
 import { Money } from "../domain/money";
 import type { PaymentMethod } from "../domain/payment-method";
 
-export type ReceivedEntryKind = "installment" | "one_off_donation" | "loose_contribution";
+export type ReceivedEntryKind =
+  "installment" | "one_off_donation" | "loose_contribution" | "volunteer_transfer";
 
 // sourceId aponta para o carnê de origem (parcela/entrega); doação sem carnê
-// não tem. dueDate só existe para parcela.
+// e repasse de outro voluntário não têm. dueDate só existe para parcela. Num
+// repasse recebido, donorLabel é o voluntário que repassou.
 export interface PersonReceivedEntry {
   kind: ReceivedEntryKind;
   id: string;
@@ -21,6 +23,7 @@ export interface PersonReceivedEntry {
 export interface PersonTransfer {
   id: string;
   recipientName: string;
+  toVolunteer: boolean;
   amount: Money;
   transferDate: Date;
   registeredByLabel: string;

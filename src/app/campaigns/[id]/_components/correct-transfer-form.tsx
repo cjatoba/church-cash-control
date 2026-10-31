@@ -9,9 +9,13 @@ import {
   type CorrectionAction,
   type CorrectionState,
 } from "./correction-form-parts";
+import { TransferRecipientFields } from "./transfer-recipient-fields";
+import type { TransferDestination } from "../_lib/transfer-destination";
 
 export interface TransferFormValues {
   fromUserId: string;
+  destination: TransferDestination;
+  toUserId: string;
   recipientName: string;
   amount: string;
   transferDate: string;
@@ -68,16 +72,13 @@ export function CorrectTransferForm({
             </span>
           ) : null}
         </label>
-        <label className={fieldLabelClassName}>
-          Para quem
-          <input
-            name="recipientName"
-            type="text"
-            required
-            defaultValue={initialValues.recipientName}
-            className={fieldInputClassName}
-          />
-        </label>
+        <TransferRecipientFields
+          users={users}
+          fromUserId={fromUserId}
+          initialDestination={initialValues.destination}
+          initialToUserId={initialValues.toUserId}
+          initialRecipientName={initialValues.recipientName}
+        />
         <label className={fieldLabelClassName}>
           Valor (R$)
           <input

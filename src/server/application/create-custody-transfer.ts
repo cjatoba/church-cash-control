@@ -1,9 +1,10 @@
 import {
-  assertTransferWithinBalance,
+  assertTransferChangeKeepsBalances,
+  assertTransferDateNotInFuture,
   calculateAvailableBalance,
   parseCustodyTransferInput,
 } from "../domain/custody-transfer";
-import type { Money } from "../domain/money";
+import { Money } from "../domain/money";
 
 export interface CustodyBalanceTotals {
   receivedCents: number;
@@ -17,7 +18,8 @@ export interface CustodyBalanceReader {
 export interface CustodyTransferRecord {
   campaignId: string;
   fromUserId: string;
-  recipientName: string;
+  toUserId: string | null;
+  recipientName: string | null;
   amount: Money;
   transferDate: Date;
   description: string | null;
@@ -40,12 +42,33 @@ export async function createCustodyTransfer(
   today: Date = new Date(),
 ): Promise<{ id: string }> {
   const parsed = parseCustodyTransferInput(input);
-  const totals = await dependencies.balanceReader.getAvailableBalance(
-    parsed.campaignId,
+  assertTransferDateNotInFuture(parsed.transferDate, today);
+  const balances = await readBalances(dependencies.balanceReader, parsed.campaignId, [
     parsed.fromUserId,
-  );
-  const availableBalance = calculateAvailableBalance(totals.receivedCents, totals.transferredCents);
-  assertTransferWithinBalance(parsed.amount, availableBalance, parsed.transferDate, today);
+  ]);
+  assertTransferChangeKeepsBalances(null, parsed, balanceLookup(balances));
 
   return dependencies.repository.create({ ...parsed, registeredByUserId });
+}
+
+export async function readBalances(
+  balanceReader: CustodyBalanceReader,
+  campaignId: string,
+  userIds: readonly (string | null)[],
+): Promise<Map<string, Money>> {
+  const distinct = [...new Set(userIds.filter((userId) => userId !== null))];
+  const entries = await Promise.all(
+    distinct.map(async (userId) => {
+      const totals = await balanceReader.getAvailableBalance(campaignId, userId);
+      return [
+        userId,
+        calculateAvailableBalance(totals.receivedCents, totals.transferredCents),
+      ] as const;
+    }),
+  );
+  return new Map(entries);
+}
+
+export function balanceLookup(balances: ReadonlyMap<string, Money>): (userId: string) => Money {
+  return (userId) => balances.get(userId) ?? Money.fromCents(0);
 }

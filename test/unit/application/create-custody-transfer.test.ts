@@ -62,6 +62,48 @@ describe("createCustodyTransfer", () => {
     expect(dependencies.saved[0]?.registeredByUserId).toBe("user-1");
   });
 
+  it("registra o repasse para outro voluntário com quem recebeu, sem destinatário digitado", async () => {
+    const dependencies = createDependencies({ receivedCents: 48000, transferredCents: 0 });
+
+    await createCustodyTransfer(
+      dependencies,
+      { ...validInput, recipientName: "", toUserId: "user-2" },
+      "user-1",
+      new Date("2026-03-10"),
+    );
+
+    expect(dependencies.saved[0]?.toUserId).toBe("user-2");
+    expect(dependencies.saved[0]?.recipientName).toBeNull();
+  });
+
+  it("rejeita repasse para si mesmo, sem persistir nada", async () => {
+    const dependencies = createDependencies({ receivedCents: 48000, transferredCents: 0 });
+
+    await expect(
+      createCustodyTransfer(
+        dependencies,
+        { ...validInput, recipientName: "", toUserId: "user-1" },
+        "user-1",
+        new Date("2026-03-10"),
+      ),
+    ).rejects.toThrow("pessoas diferentes");
+    expect(dependencies.saved).toHaveLength(0);
+  });
+
+  it("rejeita data no futuro, sem persistir nada", async () => {
+    const dependencies = createDependencies({ receivedCents: 48000, transferredCents: 0 });
+
+    await expect(
+      createCustodyTransfer(
+        dependencies,
+        { ...validInput, transferDate: "2026-03-11" },
+        "user-1",
+        new Date("2026-03-10"),
+      ),
+    ).rejects.toThrow("no futuro");
+    expect(dependencies.saved).toHaveLength(0);
+  });
+
   it("rejeita repasse maior que o saldo disponível, sem persistir nada", async () => {
     const dependencies = createDependencies({ receivedCents: 5000, transferredCents: 0 });
 
