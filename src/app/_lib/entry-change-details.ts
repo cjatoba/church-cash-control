@@ -57,10 +57,15 @@ export function describeEntryCorrection(
 
 interface TransferFields {
   fromUserId: string;
-  recipientName: string;
+  toUserId: string | null;
+  recipientName: string | null;
   amount: Money;
   transferDate: Date;
   description: string | null;
+}
+
+function recipientOf(transfer: TransferFields, names: ReadonlyMap<string, string>): string {
+  return transfer.toUserId ? nameOf(names, transfer.toUserId) : (transfer.recipientName ?? "—");
 }
 
 export function describeTransferCorrection(
@@ -74,7 +79,7 @@ export function describeTransferCorrection(
       before: nameOf(names, before.fromUserId),
       after: nameOf(names, after.fromUserId),
     },
-    { label: "Para", before: before.recipientName, after: after.recipientName },
+    { label: "Para", before: recipientOf(before, names), after: recipientOf(after, names) },
     { label: "Valor", before: formatCurrency(before.amount), after: formatCurrency(after.amount) },
     {
       label: "Data",

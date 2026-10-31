@@ -4,6 +4,7 @@ export interface CustodyTransferSummary {
   id: string;
   fromUserLabel: string;
   recipientName: string;
+  toVolunteer: boolean;
   amount: Money;
   transferDate: Date;
   registeredByUserLabel: string;

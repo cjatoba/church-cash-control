@@ -63,8 +63,23 @@ async function sumReceivedByUser(
     .where(eq(loosePledges.campaignId, campaignId))
     .groupBy(loosePledgeContributions.receivedByUserId);
 
+  const volunteerTransferRows = await db
+    .select({
+      userId: custodyTransfers.toUserId,
+      totalCents: sql<number>`coalesce(sum(${custodyTransfers.amountCents}), 0)::int`,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(custodyTransfers)
+    .where(and(eq(custodyTransfers.campaignId, campaignId), isNotNull(custodyTransfers.toUserId)))
+    .groupBy(custodyTransfers.toUserId);
+
   const totals = new Map<string, UserTotal>();
-  for (const row of [...installmentRows, ...donationRows, ...loosePledgeContributionRows]) {
+  for (const row of [
+    ...installmentRows,
+    ...donationRows,
+    ...loosePledgeContributionRows,
+    ...volunteerTransferRows,
+  ]) {
     if (!row.userId) {
       continue;
     }
@@ -99,7 +114,12 @@ async function sumTransferredByUser(
 }
 
 const fromUser = alias(users, "from_user");
+const toUser = alias(users, "to_user");
 const registeredByUser = alias(users, "registered_by_user");
+
+function recipientLabel(toUserName: string | null, recipientName: string | null): string {
+  return toUserName ?? recipientName ?? "—";
+}
 
 export function createCustodyRepository(
   db: DbClient,
@@ -126,6 +146,7 @@ export function createCustodyRepository(
           campaignId: transfer.campaignId,
           fromUserId: transfer.fromUserId,
           registeredByUserId: transfer.registeredByUserId,
+          toUserId: transfer.toUserId,
           recipientName: transfer.recipientName,
           amountCents: transfer.amount.toCents(),
           transferDate: transfer.transferDate,
@@ -161,6 +182,7 @@ export function createCustodyRepository(
         .select({
           id: custodyTransfers.id,
           recipientName: custodyTransfers.recipientName,
+          toUserName: toUser.name,
           amountCents: custodyTransfers.amountCents,
           transferDate: custodyTransfers.transferDate,
           fromUserName: fromUser.name,
@@ -168,6 +190,7 @@ export function createCustodyRepository(
         })
         .from(custodyTransfers)
         .innerJoin(fromUser, eq(custodyTransfers.fromUserId, fromUser.id))
+        .leftJoin(toUser, eq(custodyTransfers.toUserId, toUser.id))
         .innerJoin(registeredByUser, eq(custodyTransfers.registeredByUserId, registeredByUser.id))
         .where(eq(custodyTransfers.campaignId, campaignId));
 
@@ -175,7 +198,8 @@ export function createCustodyRepository(
         .map((row) => ({
           id: row.id,
           fromUserLabel: row.fromUserName,
-          recipientName: row.recipientName,
+          recipientName: recipientLabel(row.toUserName, row.recipientName),
+          toVolunteer: row.toUserName !== null,
           amount: Money.fromCents(row.amountCents),
           transferDate: row.transferDate,
           registeredByUserLabel: row.registeredByUserName,
@@ -197,6 +221,8 @@ export function createCustodyTransferStore(db: DbClient): CustodyTransferStore {
           campaignId: custodyTransfers.campaignId,
           fromUserId: custodyTransfers.fromUserId,
           fromUserName: fromUser.name,
+          toUserId: custodyTransfers.toUserId,
+          toUserName: toUser.name,
           recipientName: custodyTransfers.recipientName,
           amountCents: custodyTransfers.amountCents,
           transferDate: custodyTransfers.transferDate,
@@ -204,6 +230,7 @@ export function createCustodyTransferStore(db: DbClient): CustodyTransferStore {
         })
         .from(custodyTransfers)
         .innerJoin(fromUser, eq(custodyTransfers.fromUserId, fromUser.id))
+        .leftJoin(toUser, eq(custodyTransfers.toUserId, toUser.id))
         .where(eq(custodyTransfers.id, id))
         .limit(1);
       if (!row) {
@@ -211,10 +238,11 @@ export function createCustodyTransferStore(db: DbClient): CustodyTransferStore {
       }
       return {
         campaignId: row.campaignId,
-        subjectName: `${row.fromUserName} para ${row.recipientName}`,
+        subjectName: `${row.fromUserName} para ${recipientLabel(row.toUserName, row.recipientName)}`,
         donorId: null,
         fields: {
           fromUserId: row.fromUserId,
+          toUserId: row.toUserId,
           recipientName: row.recipientName,
           amount: Money.fromCents(row.amountCents),
           transferDate: row.transferDate,
@@ -228,6 +256,7 @@ export function createCustodyTransferStore(db: DbClient): CustodyTransferStore {
         .update(custodyTransfers)
         .set({
           fromUserId: fields.fromUserId,
+          toUserId: fields.toUserId,
           recipientName: fields.recipientName,
           amountCents: fields.amount.toCents(),
           transferDate: fields.transferDate,
@@ -245,70 +274,91 @@ export function createCustodyTransferStore(db: DbClient): CustodyTransferStore {
 export function createPersonCustodyActivityReader(db: DbClient): PersonCustodyActivityReader {
   return {
     async findReceivedEntries(campaignId, userId) {
-      const [installmentRows, donationRows, contributionRows] = await Promise.all([
-        db
-          .select({
-            id: installments.id,
-            pledgeId: installments.pledgeId,
-            donorName: donors.name,
-            amountCents: installments.paidAmountCents,
-            paidAt: installments.paidAt,
-            paymentMethod: installments.paymentMethod,
-            registeredByName: registeredByUser.name,
-            dueDate: installments.dueDate,
-          })
-          .from(installments)
-          .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
-          .innerJoin(donors, eq(pledges.donorId, donors.id))
-          .leftJoin(registeredByUser, eq(installments.registeredByUserId, registeredByUser.id))
-          .where(
-            and(
-              eq(pledges.campaignId, campaignId),
-              eq(installments.receivedByUserId, userId),
-              isNotNull(installments.paidAt),
+      const [installmentRows, donationRows, contributionRows, volunteerTransferRows] =
+        await Promise.all([
+          db
+            .select({
+              id: installments.id,
+              pledgeId: installments.pledgeId,
+              donorName: donors.name,
+              amountCents: installments.paidAmountCents,
+              paidAt: installments.paidAt,
+              paymentMethod: installments.paymentMethod,
+              registeredByName: registeredByUser.name,
+              dueDate: installments.dueDate,
+            })
+            .from(installments)
+            .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
+            .innerJoin(donors, eq(pledges.donorId, donors.id))
+            .leftJoin(registeredByUser, eq(installments.registeredByUserId, registeredByUser.id))
+            .where(
+              and(
+                eq(pledges.campaignId, campaignId),
+                eq(installments.receivedByUserId, userId),
+                isNotNull(installments.paidAt),
+              ),
             ),
-          ),
-        db
-          .select({
-            id: oneOffDonations.id,
-            donorName: oneOffDonations.donorName,
-            amountCents: oneOffDonations.amountCents,
-            date: oneOffDonations.date,
-            paymentMethod: oneOffDonations.paymentMethod,
-            registeredByName: registeredByUser.name,
-          })
-          .from(oneOffDonations)
-          .leftJoin(registeredByUser, eq(oneOffDonations.registeredByUserId, registeredByUser.id))
-          .where(
-            and(
-              eq(oneOffDonations.campaignId, campaignId),
-              eq(oneOffDonations.receivedByUserId, userId),
+          db
+            .select({
+              id: oneOffDonations.id,
+              donorName: oneOffDonations.donorName,
+              amountCents: oneOffDonations.amountCents,
+              date: oneOffDonations.date,
+              paymentMethod: oneOffDonations.paymentMethod,
+              registeredByName: registeredByUser.name,
+            })
+            .from(oneOffDonations)
+            .leftJoin(registeredByUser, eq(oneOffDonations.registeredByUserId, registeredByUser.id))
+            .where(
+              and(
+                eq(oneOffDonations.campaignId, campaignId),
+                eq(oneOffDonations.receivedByUserId, userId),
+              ),
             ),
-          ),
-        db
-          .select({
-            id: loosePledgeContributions.id,
-            loosePledgeId: loosePledgeContributions.loosePledgeId,
-            donorName: donors.name,
-            amountCents: loosePledgeContributions.amountCents,
-            date: loosePledgeContributions.date,
-            paymentMethod: loosePledgeContributions.paymentMethod,
-            registeredByName: registeredByUser.name,
-          })
-          .from(loosePledgeContributions)
-          .innerJoin(loosePledges, eq(loosePledgeContributions.loosePledgeId, loosePledges.id))
-          .innerJoin(donors, eq(loosePledges.donorId, donors.id))
-          .innerJoin(
-            registeredByUser,
-            eq(loosePledgeContributions.registeredByUserId, registeredByUser.id),
-          )
-          .where(
-            and(
-              eq(loosePledges.campaignId, campaignId),
-              eq(loosePledgeContributions.receivedByUserId, userId),
+          db
+            .select({
+              id: loosePledgeContributions.id,
+              loosePledgeId: loosePledgeContributions.loosePledgeId,
+              donorName: donors.name,
+              amountCents: loosePledgeContributions.amountCents,
+              date: loosePledgeContributions.date,
+              paymentMethod: loosePledgeContributions.paymentMethod,
+              registeredByName: registeredByUser.name,
+            })
+            .from(loosePledgeContributions)
+            .innerJoin(loosePledges, eq(loosePledgeContributions.loosePledgeId, loosePledges.id))
+            .innerJoin(donors, eq(loosePledges.donorId, donors.id))
+            .innerJoin(
+              registeredByUser,
+              eq(loosePledgeContributions.registeredByUserId, registeredByUser.id),
+            )
+            .where(
+              and(
+                eq(loosePledges.campaignId, campaignId),
+                eq(loosePledgeContributions.receivedByUserId, userId),
+              ),
             ),
-          ),
-      ]);
+          db
+            .select({
+              id: custodyTransfers.id,
+              fromUserName: fromUser.name,
+              amountCents: custodyTransfers.amountCents,
+              transferDate: custodyTransfers.transferDate,
+              registeredByName: registeredByUser.name,
+            })
+            .from(custodyTransfers)
+            .innerJoin(fromUser, eq(custodyTransfers.fromUserId, fromUser.id))
+            .innerJoin(
+              registeredByUser,
+              eq(custodyTransfers.registeredByUserId, registeredByUser.id),
+            )
+            .where(
+              and(
+                eq(custodyTransfers.campaignId, campaignId),
+                eq(custodyTransfers.toUserId, userId),
+              ),
+            ),
+        ]);
 
       return [
         ...installmentRows.map((row) => ({
@@ -344,6 +394,17 @@ export function createPersonCustodyActivityReader(db: DbClient): PersonCustodyAc
           registeredByLabel: row.registeredByName,
           dueDate: null,
         })),
+        ...volunteerTransferRows.map((row) => ({
+          kind: "volunteer_transfer" as const,
+          id: row.id,
+          sourceId: null,
+          donorLabel: row.fromUserName,
+          amount: Money.fromCents(row.amountCents),
+          date: row.transferDate,
+          paymentMethod: null,
+          registeredByLabel: row.registeredByName,
+          dueDate: null,
+        })),
       ];
     },
 
@@ -352,19 +413,22 @@ export function createPersonCustodyActivityReader(db: DbClient): PersonCustodyAc
         .select({
           id: custodyTransfers.id,
           recipientName: custodyTransfers.recipientName,
+          toUserName: toUser.name,
           amountCents: custodyTransfers.amountCents,
           transferDate: custodyTransfers.transferDate,
           registeredByName: registeredByUser.name,
         })
         .from(custodyTransfers)
         .innerJoin(registeredByUser, eq(custodyTransfers.registeredByUserId, registeredByUser.id))
+        .leftJoin(toUser, eq(custodyTransfers.toUserId, toUser.id))
         .where(
           and(eq(custodyTransfers.campaignId, campaignId), eq(custodyTransfers.fromUserId, userId)),
         );
 
       return rows.map((row) => ({
         id: row.id,
-        recipientName: row.recipientName,
+        recipientName: recipientLabel(row.toUserName, row.recipientName),
+        toVolunteer: row.toUserName !== null,
         amount: Money.fromCents(row.amountCents),
         transferDate: row.transferDate,
         registeredByLabel: row.registeredByName,

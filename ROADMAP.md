@@ -1065,7 +1065,24 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Repasse para outro voluntário** — PR #89 (pedido do usuário, ao
+  lançar em produção os repasses registrados num grupo de mensagens: o
+  dinheiro foi centralizado na conta de um voluntário antes de ser pago à
+  fábrica, e o app não tinha como registrar esse caminho, porque o
+  destinatário do repasse era só texto e o valor não entrava no saldo de
+  quem recebia). Mockup aprovado: "Repassar dinheiro" ganha "Para quem?"
+  — "Outro voluntário" (escolhido numa lista; o valor passa para o
+  "Dinheiro em mãos" dele) ou "Fora da equipe" (destinatário digitado,
+  como antes). A tela de cada pessoa mostra os repasses recebidos de
+  outros voluntários ("Repasse de voluntário") e marca os feitos para
+  voluntários ("Para voluntário"). Uma regra só no domínio
+  (`assertTransferChangeKeepsBalances`, TDD) cobre criar, corrigir e
+  excluir repasse sem deixar ninguém negativo — excluir passou a conferir
+  saldo, porque tirar um repasse de um voluntário que já passou o
+  dinheiro adiante o deixaria negativo (aí aparece o atalho "Corrigir o
+  repasse" da PR #87). Migration `0025`: `custody_transfers.to_user_id`
+  (opcional) e `recipient_name` opcional; repasses existentes não mudam.
+  Ajuda ("Dinheiro em mãos e repasses") atualizada.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -1097,6 +1114,16 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
+3. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
+   o histórico de arrecadação em produção): hoje "Dar baixa" sempre
+   registra o valor cheio da parcela, e um doador que entregou menos (ex.:
+   R$ 40 numa parcela de R$ 50) não tem como ser registrado no carnê — o
+   valor foi lançado como doação sem carnê até esta fatia existir. A
+   fatia deve migrar esse lançamento para a parcela certa. A definir no
+   mockup: como a parcela parcial aparece ("A pagar"/"Pagas", quanto
+   falta), se completar o restante depois é um segundo pagamento na mesma
+   parcela, e como fica em "Quem pagou no mês", na correção de tipo de
+   carnê (recontagem de parcelas pagas) e no "Dinheiro em mãos".
 
 ## Como usar este arquivo
 

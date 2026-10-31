@@ -19,7 +19,9 @@ import { PageShell } from "@/app/_components/page-shell";
 import { PageHeader } from "@/app/_components/page-header";
 import { Card } from "@/app/_components/card";
 import { Tabs } from "@/app/_components/tabs";
+import { VolunteerTransferBadge } from "../_components/volunteer-transfer-badge";
 import { TransferButton, type TransferState } from "./_components/transfer-button";
+import { toTransferDestination } from "../_lib/transfer-destination";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
@@ -65,10 +67,12 @@ export default async function MoneyInHandPage({
     }
     const registeredByUserId = actionSession.user.id;
 
+    const destination = toTransferDestination(formData.get("destination"));
     const input = {
       campaignId,
       fromUserId: formData.get("fromUserId"),
-      recipientName: formData.get("recipientName"),
+      toUserId: destination === "volunteer" ? formData.get("toUserId") : "",
+      recipientName: destination === "external" ? formData.get("recipientName") : "",
       amount: formData.get("amount"),
       transferDate: formData.get("transferDate"),
       description: formData.get("description"),
@@ -83,11 +87,14 @@ export default async function MoneyInHandPage({
         registeredByUserId,
       );
       const users = await listUsers(createUserListRepository(db));
-      const fromUserName = users.find((user) => user.id === input.fromUserId)?.name ?? "";
+      const nameOf = (userId: FormDataEntryValue | null) =>
+        users.find((user) => user.id === userId)?.name ?? "";
+      const recipientLabel =
+        destination === "volunteer" ? nameOf(input.toUserId) : toStringValue(input.recipientName);
       await logActivity(db, {
         actorUserId: registeredByUserId,
         action: "custody_transfer_created",
-        subjectName: `${fromUserName} para ${toStringValue(input.recipientName)}`,
+        subjectName: `${nameOf(input.fromUserId)} para ${recipientLabel}`,
         amountCents: Math.round(Number(input.amount) * 100),
       });
     } catch (error) {
@@ -98,6 +105,8 @@ export default async function MoneyInHandPage({
         ),
         values: {
           fromUserId: toStringValue(input.fromUserId),
+          destination,
+          toUserId: toStringValue(input.toUserId),
           amount: toStringValue(input.amount),
           recipientName: toStringValue(input.recipientName),
           transferDate: toStringValue(input.transferDate),
@@ -162,8 +171,11 @@ export default async function MoneyInHandPage({
         {transfers.map((transfer) => (
           <li key={transfer.id} className="flex flex-col gap-1 px-4 py-3.5">
             <div className="flex items-start justify-between gap-3">
-              <span className="text-[17px]">
-                {transfer.fromUserLabel} → {transfer.recipientName}
+              <span className="flex flex-col gap-1">
+                <span className="text-[17px]">
+                  {transfer.fromUserLabel} → {transfer.recipientName}
+                </span>
+                {transfer.toVolunteer ? <VolunteerTransferBadge label="Para voluntário" /> : null}
               </span>
               <span className="text-[17px] font-semibold">{formatCurrency(transfer.amount)}</span>
             </div>

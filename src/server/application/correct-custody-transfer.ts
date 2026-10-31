@@ -1,15 +1,16 @@
 import {
-  assertTransferCorrectionWithinBalance,
-  calculateAvailableBalance,
+  assertTransferChangeKeepsBalances,
+  assertTransferDateNotInFuture,
   parseCustodyTransferInput,
 } from "../domain/custody-transfer";
 import type { Money } from "../domain/money";
-import type { CustodyBalanceReader } from "./create-custody-transfer";
+import { balanceLookup, readBalances, type CustodyBalanceReader } from "./create-custody-transfer";
 import type { StoredEntry } from "./correct-received-entry";
 
 export interface CustodyTransferFields {
   fromUserId: string;
-  recipientName: string;
+  toUserId: string | null;
+  recipientName: string | null;
   amount: Money;
   transferDate: Date;
   description: string | null;
@@ -60,6 +61,7 @@ export async function correctCustodyTransfer(
   });
   const after: CustodyTransferFields = {
     fromUserId: parsed.fromUserId,
+    toUserId: parsed.toUserId,
     recipientName: parsed.recipientName,
     amount: parsed.amount,
     transferDate: parsed.transferDate,
@@ -71,26 +73,29 @@ export async function correctCustodyTransfer(
     transferId,
   );
 
-  const totals = await dependencies.balanceReader.getAvailableBalance(campaignId, after.fromUserId);
-  assertTransferCorrectionWithinBalance(
-    before,
-    after,
-    calculateAvailableBalance(totals.receivedCents, totals.transferredCents),
-    today,
-  );
+  assertTransferDateNotInFuture(after.transferDate, today);
+  const balances = await readBalances(dependencies.balanceReader, campaignId, [
+    before.fromUserId,
+    before.toUserId,
+    after.fromUserId,
+    after.toUserId,
+  ]);
+  assertTransferChangeKeepsBalances(before, after, balanceLookup(balances));
 
   await dependencies.store.update(transferId, after);
   return { subjectName, before, after };
 }
 
-// Excluir um repasse só devolve o valor ao saldo de quem repassou — nunca
-// deixa ninguém negativo, então não precisa conferir saldo.
 export async function deleteCustodyTransfer(
   dependencies: CorrectCustodyTransferDependencies,
   campaignId: string,
   transferId: string,
 ): Promise<StoredEntry<CustodyTransferFields>> {
   const transfer = await findInCampaign(dependencies.store, campaignId, transferId);
+  const balances = await readBalances(dependencies.balanceReader, campaignId, [
+    transfer.fields.toUserId,
+  ]);
+  assertTransferChangeKeepsBalances(transfer.fields, null, balanceLookup(balances));
   await dependencies.store.remove(transferId);
   return transfer;
 }

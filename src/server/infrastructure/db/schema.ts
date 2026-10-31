@@ -172,7 +172,10 @@ export const custodyTransfers = pgTable("custody_transfers", {
   registeredByUserId: uuid("registered_by_user_id")
     .notNull()
     .references(() => users.id),
-  recipientName: varchar("recipient_name", { length: 255 }).notNull(),
+  // Um dos dois: outro voluntário (o valor entra no saldo em mãos dele) ou
+  // um destinatário de fora da equipe, digitado.
+  toUserId: uuid("to_user_id").references(() => users.id),
+  recipientName: varchar("recipient_name", { length: 255 }),
   amountCents: integer("amount_cents").notNull(),
   transferDate: date("transfer_date", { mode: "date" }).notNull(),
   description: varchar("description", { length: 500 }),
