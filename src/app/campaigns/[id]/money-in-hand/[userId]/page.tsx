@@ -93,8 +93,10 @@ function describeEntry(entry: PersonReceivedEntry): string {
 
 export default async function PersonMoneyInHandPage({
   params,
+  searchParams,
 }: PageProps<"/campaigns/[id]/money-in-hand/[userId]">) {
   const { id: campaignId, userId } = await params;
+  const initialTabId = (await searchParams).tab === "transfers" ? "transfers" : "received";
   const session = await auth();
   if (!session) {
     redirect("/login");
@@ -216,7 +218,7 @@ export default async function PersonMoneyInHandPage({
 
       <Tabs
         label="Entradas e repasses"
-        initialTabId="received"
+        initialTabId={initialTabId}
         tabs={[
           {
             id: "received",

@@ -7,7 +7,7 @@ import { revertInstallmentPayment } from "@/server/application/revert-installmen
 import { listUsers } from "@/server/application/list-users";
 import { recordActivity } from "@/server/application/record-activity";
 import { parsePaymentMethod } from "@/server/domain/payment-method";
-import { toFriendlyErrorMessage } from "@/app/_lib/action-error-message";
+import { toActionErrorState, type ActionErrorState } from "@/app/_lib/action-error-message";
 import { describeEntryCorrection, toNameMap } from "@/app/_lib/entry-change-details";
 import { CheckCircleIcon, ClockIcon, PencilIcon } from "@/app/_components/icons";
 import { PageShell } from "@/app/_components/page-shell";
@@ -37,9 +37,7 @@ const paymentMethodLabels: Record<string, string> = {
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
-export interface RevertPaymentState {
-  error?: string;
-}
+export type RevertPaymentState = ActionErrorState;
 
 export default async function PledgeDetailPage({
   params,
@@ -170,7 +168,7 @@ export default async function PledgeDetailPage({
         ),
       });
     } catch (error) {
-      return { error: toFriendlyErrorMessage(error, "Não foi possível corrigir o pagamento.") };
+      return toActionErrorState(error, "Não foi possível corrigir o pagamento.", campaignId);
     }
 
     redirect(`/campaigns/${campaignId}/pledges/${pledgeId}`);
@@ -212,7 +210,7 @@ export default async function PledgeDetailPage({
         installmentId,
       );
     } catch (error) {
-      return { error: toFriendlyErrorMessage(error, "Não foi possível reverter o pagamento.") };
+      return toActionErrorState(error, "Não foi possível reverter o pagamento.", campaignId);
     }
 
     const activityLogRepository = createActivityLogRepository(db);

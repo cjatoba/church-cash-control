@@ -5,6 +5,7 @@ import {
   revertInstallmentPayment,
 } from "@/server/domain/installment";
 import { Money } from "@/server/domain/money";
+import { FundsAlreadyTransferredError } from "@/server/domain/money-entry-correction";
 
 const unpaidInstallment = {
   amount: Money.fromReais(100),
@@ -189,5 +190,14 @@ describe("revertInstallmentPayment", () => {
     expect(() => {
       revertInstallmentPayment(paidInstallment, Money.fromReais(40));
     }).toThrow();
+  });
+
+  it("ao rejeitar porque o valor já foi repassado, diz quem recebeu a parcela", () => {
+    expect(() => {
+      revertInstallmentPayment(paidInstallment, Money.fromReais(40));
+    }).toThrow(FundsAlreadyTransferredError);
+    expect(() => {
+      revertInstallmentPayment(paidInstallment, Money.fromReais(40));
+    }).toThrow(expect.objectContaining({ receiverUserId: "user-1" }));
   });
 });

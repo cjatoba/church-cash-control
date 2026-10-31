@@ -9,6 +9,7 @@ import { createCampaignRepository } from "@/server/infrastructure/db/campaign-re
 import { createActivityLogRepository } from "@/server/infrastructure/db/activity-log-repository";
 import { createDbClient } from "@/server/infrastructure/db/client";
 import { SubmitButton } from "@/app/_components/submit-button";
+import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
 import { PageShell } from "@/app/_components/page-shell";
 import { ProgressBar } from "@/app/_components/progress-bar";
 import { ArrowPathIcon, ChevronRightIcon, PlusIcon } from "@/app/_components/icons";
@@ -63,10 +64,25 @@ export default async function Home() {
       {campaigns.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-zinc-200 bg-white p-10 text-center dark:border-zinc-800 dark:bg-zinc-900">
           <h2 className="text-lg font-semibold">Nenhuma campanha ainda</h2>
-          <p className="max-w-sm text-[15px] text-zinc-600 dark:text-zinc-400">
-            Crie a primeira campanha de arrecadação para começar a cadastrar doadores e acompanhar a
-            meta.
-          </p>
+          {session?.user.canManageCampaigns ? (
+            <>
+              <p className="max-w-sm text-[15px] text-zinc-600 dark:text-zinc-400">
+                Crie a primeira campanha de arrecadação para começar a cadastrar doadores e
+                acompanhar a meta.
+              </p>
+              <Link
+                href="/campaigns/new"
+                className={`${buttonBaseClassName} ${buttonClassNames.primary} mt-2 w-full`}
+              >
+                <PlusIcon />
+                Nova campanha
+              </Link>
+            </>
+          ) : (
+            <p className="max-w-sm text-[15px] text-zinc-600 dark:text-zinc-400">
+              Peça a quem cuida das campanhas para criar a primeira.
+            </p>
+          )}
         </div>
       ) : (
         <ul className="flex flex-col gap-4">
@@ -119,7 +135,7 @@ export default async function Home() {
         </ul>
       )}
 
-      {session?.user.canManageCampaigns ? (
+      {campaigns.length > 0 && session?.user.canManageCampaigns ? (
         <Link
           href="/campaigns/new"
           className="flex min-h-14 items-center justify-center gap-2 rounded-full border-2 border-dashed border-zinc-400 text-[17px] font-semibold text-zinc-700 transition-colors hover:border-zinc-500 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:text-zinc-50"

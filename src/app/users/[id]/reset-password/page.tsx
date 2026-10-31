@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { BackLink } from "@/app/_components/back-link";
+import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-styles";
 import { getCachedAppBranding } from "@/app/_lib/app-branding";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -69,9 +71,17 @@ export default async function ResetPasswordPage({
   }
 
   if (!canRegenerateTemporaryPassword(user)) {
-    const reason = user.active
-      ? `${user.name} não tem acesso ao sistema (sem celular cadastrado) — ative o acesso antes de gerar uma nova senha.`
-      : `${user.name} está desativado — reative o usuário antes de gerar uma nova senha.`;
+    const { reason, fixHref, fixLabel } = user.active
+      ? {
+          reason: `${user.name} não tem acesso ao sistema (sem celular cadastrado). Ative o acesso antes de gerar uma nova senha.`,
+          fixHref: `/users/${user.id}/edit`,
+          fixLabel: "Ativar acesso",
+        }
+      : {
+          reason: `${user.name} está desativado. Reative antes de gerar uma nova senha.`,
+          fixHref: "/users",
+          fixLabel: "Ir para Voluntários e acessos",
+        };
     return (
       <div className="flex flex-1 justify-center bg-zinc-100 px-4 py-6 sm:items-center sm:py-10 dark:bg-black">
         <div className="flex w-full max-w-md flex-col gap-5 self-start rounded-2xl border border-zinc-200 bg-white p-6 text-zinc-900 sm:self-auto sm:p-8 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50">
@@ -80,6 +90,9 @@ export default async function ResetPasswordPage({
             Não é possível gerar senha
           </h1>
           <p className="text-[15px] text-zinc-600 dark:text-zinc-400">{reason}</p>
+          <Link href={fixHref} className={`${buttonBaseClassName} ${buttonClassNames.primary}`}>
+            {fixLabel}
+          </Link>
         </div>
       </div>
     );

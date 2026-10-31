@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { assertEntryChangeKeepsBalance } from "@/server/domain/money-entry-correction";
+import {
+  assertEntryChangeKeepsBalance,
+  FundsAlreadyTransferredError,
+} from "@/server/domain/money-entry-correction";
 import { Money } from "@/server/domain/money";
 
 const entry = { amount: Money.fromReais(5000), receivedByUserId: "user-a" };
@@ -23,6 +26,15 @@ describe("assertEntryChangeKeepsBalance", () => {
         Money.fromReais(4000),
       );
     }).toThrow("Corrija o repasse primeiro");
+  });
+
+  it("diz de quem é o saldo que ficaria negativo, para a tela levar aos repasses dessa pessoa", () => {
+    expect(() => {
+      assertEntryChangeKeepsBalance(entry, null, Money.fromReais(4000));
+    }).toThrow(expect.objectContaining({ receiverUserId: "user-a" }));
+    expect(() => {
+      assertEntryChangeKeepsBalance(entry, null, Money.fromReais(4000));
+    }).toThrow(FundsAlreadyTransferredError);
   });
 
   it("permite diminuir o valor quando a diferença ainda está em mãos", () => {
