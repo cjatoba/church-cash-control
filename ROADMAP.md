@@ -1097,6 +1097,16 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
+3. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
+   o histórico de arrecadação em produção): hoje "Dar baixa" sempre
+   registra o valor cheio da parcela, e um doador que entregou menos (ex.:
+   R$ 40 numa parcela de R$ 50) não tem como ser registrado no carnê — o
+   valor foi lançado como doação sem carnê até esta fatia existir. A
+   fatia deve migrar esse lançamento para a parcela certa. A definir no
+   mockup: como a parcela parcial aparece ("A pagar"/"Pagas", quanto
+   falta), se completar o restante depois é um segundo pagamento na mesma
+   parcela, e como fica em "Quem pagou no mês", na correção de tipo de
+   carnê (recontagem de parcelas pagas) e no "Dinheiro em mãos".
 
 ## Como usar este arquivo
 
