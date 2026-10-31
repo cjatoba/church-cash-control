@@ -1063,8 +1063,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   "Repassou": `FundsAlreadyTransferredError` (domínio, TDD) carrega quem
   recebeu o dinheiro. Ajuda atualizada.
 
-## Em andamento (PRs abertas)
-
 - **Repasse para outro voluntário** — PR #89 (pedido do usuário, ao
   lançar em produção os repasses registrados num grupo de mensagens: o
   dinheiro foi centralizado na conta de um voluntário antes de ser pago à
@@ -1083,6 +1081,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   repasse" da PR #87). Migration `0025`: `custody_transfers.to_user_id`
   (opcional) e `recipient_name` opcional; repasses existentes não mudam.
   Ajuda ("Dinheiro em mãos e repasses") atualizada.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
