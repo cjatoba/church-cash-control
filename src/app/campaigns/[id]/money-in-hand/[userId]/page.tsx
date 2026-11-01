@@ -216,21 +216,27 @@ export default async function PersonMoneyInHandPage({
         subtitle={`Dinheiro em mãos · ${campaign.name}`}
       />
 
-      <section className="grid grid-cols-3 rounded-2xl border border-zinc-200 bg-white px-2 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <span className="flex flex-col items-center gap-0.5 text-center">
-          <span className="text-sm text-zinc-600 dark:text-zinc-400">Recebeu</span>
-          <span className="text-lg font-bold">{formatCurrency(activity.receivedTotal)}</span>
-        </span>
-        <span className="flex flex-col items-center gap-0.5 border-x border-zinc-200 text-center dark:border-zinc-800">
-          <span className="text-sm text-zinc-600 dark:text-zinc-400">Repassou</span>
-          <span className="text-lg font-bold">{formatCurrency(activity.transferredTotal)}</span>
-        </span>
-        <span className="flex flex-col items-center gap-0.5 text-center">
-          <span className="text-sm text-zinc-600 dark:text-zinc-400">Em mãos</span>
-          <span className="text-lg font-bold text-green-700 dark:text-green-400">
+      <section className="flex flex-col rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex flex-col gap-0.5 p-5">
+          <span className="text-[15px] text-zinc-600 dark:text-zinc-400">Em mãos</span>
+          <span className="text-3xl font-bold break-words text-green-700 dark:text-green-400">
             {formatCurrency(activity.balance)}
           </span>
-        </span>
+        </div>
+        <dl className="flex flex-col divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+          <div className="flex items-baseline justify-between gap-3 px-5 py-3">
+            <dt className="text-[15px] text-zinc-600 dark:text-zinc-400">Recebeu</dt>
+            <dd className="text-[17px] font-semibold whitespace-nowrap">
+              {formatCurrency(activity.receivedTotal)}
+            </dd>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 px-5 py-3">
+            <dt className="text-[15px] text-zinc-600 dark:text-zinc-400">Repassou</dt>
+            <dd className="text-[17px] font-semibold whitespace-nowrap">
+              {formatCurrency(activity.transferredTotal)}
+            </dd>
+          </div>
+        </dl>
       </section>
 
       {fromVolunteers.toCents() > 0 ? (
