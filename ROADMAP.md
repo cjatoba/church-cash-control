@@ -1084,11 +1084,42 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Resumo de "Dinheiro em mãos" de uma pessoa cabendo no celular** — PR
+  #91 (achado pelo usuário em produção): na tela
+  `/campaigns/[id]/money-in-hand/[userId]`, os três valores do topo
+  ficavam em três colunas fixas e, com valores na casa dos milhares, um
+  passava por cima do outro. Mockup aprovado: "Em mãos" em destaque no
+  topo, "Recebeu" e "Repassou" em linhas abaixo (rótulo à esquerda, valor
+  à direita). Na lista de "Dinheiro em mãos", o valor fica sempre numa
+  linha e o nome quebra. As demais telas com valores lado a lado já
+  quebravam linha e ficaram como estavam.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Relatório de arrecadação para imprimir** (pedido do usuário): hoje
+1. **Lançar em produção as movimentações que ainda faltam** (pedido do
+   usuário; tarefa de dados, sem mudança de código): as doações e parcelas
+   registradas no grupo de mensagens da equipe já foram lançadas, mas
+   ainda faltam as movimentações que dependem de informação dos
+   voluntários. Pendências conhecidas, sem dados pessoais aqui:
+   - entradas recebidas por um voluntário que só aparecem como comprovante
+     (sem texto) no grupo, incluindo uma parcela 1/5 sem valor conhecido;
+   - repasses entre voluntários (centralização numa conta antes do
+     pagamento) e para fora da equipe (pagamentos à fábrica), agora que o
+     app registra repasse para outro voluntário (PR #89);
+   - origem de um valor que ficou com uma pessoa de fora da equipe, para
+     decidir se ela entra como voluntário sem acesso ou se o valor entra
+     como doação sem carnê;
+   - um pagamento combinado no grupo, ainda sem confirmação de quando e
+     por quem foi feito;
+   - uma entrada a confirmar com o próprio voluntário, citada no grupo
+     sem deixar claro se é doação.
+
+   Mesmo cuidado da primeira leva: montar a lista, o usuário aprovar,
+   conferir que nada foi lançado nesse meio-tempo e gravar tudo numa
+   única transação, com registro de atividades. Uma parcela paga com
+   valor menor fica para a fatia de pagamento não integral (item 4).
+
+2. **Relatório de arrecadação para imprimir** (pedido do usuário): hoje
    os números estão espalhados ("Quem pagou no mês" mostra um mês por
    vez, "Dinheiro em mãos" por pessoa, a tela do doador um doador por
    vez), sem uma visão consolidada. Usos citados pelo usuário: controle
@@ -1106,7 +1137,7 @@ Nenhuma PR aberta no momento.
    e outra detalhada com nomes (controle interno), e quem pode abrir cada
    uma. O relatório impresso não substitui o backup do próprio banco
    (restauração do Neon).
-2. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
+3. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
    com sincronização depois (banco local no celular) foi avaliado e
    descartado com o usuário. Exigiria rodar no celular regras que hoje
    dependem do estado do banco (saldo em mãos, parcela já paga), traria
@@ -1116,7 +1147,7 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
-3. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
+4. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
    o histórico de arrecadação em produção): hoje "Dar baixa" sempre
    registra o valor cheio da parcela, e um doador que entregou menos (ex.:
    R$ 40 numa parcela de R$ 50) não tem como ser registrado no carnê — o

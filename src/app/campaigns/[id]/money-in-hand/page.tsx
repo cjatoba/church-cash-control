@@ -140,15 +140,17 @@ export default async function MoneyInHandPage({
                   href={`/campaigns/${campaignId}/money-in-hand/${balance.userId}`}
                   className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 >
-                  <span className="flex flex-1 flex-col gap-0.5">
-                    <span className="text-[17px] font-semibold">
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="text-[17px] font-semibold break-words">
                       {isCurrentUser ? `${balance.userLabel} (você)` : balance.userLabel}
                     </span>
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">
                       {describeCounts(balance.entryCount, balance.transferCount)}
                     </span>
                   </span>
-                  <span className="text-[17px] font-bold">{formatCurrency(balance.balance)}</span>
+                  <span className="text-[17px] font-bold whitespace-nowrap">
+                    {formatCurrency(balance.balance)}
+                  </span>
                   <ChevronRightIcon className="h-5 w-5 shrink-0 text-zinc-400" />
                 </Link>
               </li>
