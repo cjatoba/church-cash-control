@@ -1088,7 +1088,17 @@ Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
-1. **Relatório de arrecadação para imprimir** (pedido do usuário): hoje
+1. **Resumo de "Dinheiro em mãos" de uma pessoa quebrando com valores
+   maiores** (achado pelo usuário em produção): na tela
+   `/campaigns/[id]/money-in-hand/[userId]`, os três valores do topo
+   ("Recebeu", "Repassou", "Em mãos") ficam em três colunas fixas
+   (`grid-cols-3`, `text-lg font-bold`) e, com valores na casa dos
+   milhares (ex.: R$ 10.390,00), não cabem na largura do celular — um
+   valor passa por cima do outro. Ajustar para os valores sempre caberem
+   e continuarem legíveis no celular (ex.: empilhar em linhas, ou reduzir
+   e quebrar o texto quando não couber), conferindo também o mesmo padrão
+   em outras telas com números lado a lado.
+2. **Relatório de arrecadação para imprimir** (pedido do usuário): hoje
    os números estão espalhados ("Quem pagou no mês" mostra um mês por
    vez, "Dinheiro em mãos" por pessoa, a tela do doador um doador por
    vez), sem uma visão consolidada. Usos citados pelo usuário: controle
@@ -1106,7 +1116,7 @@ Nenhuma PR aberta no momento.
    e outra detalhada com nomes (controle interno), e quem pode abrir cada
    uma. O relatório impresso não substitui o backup do próprio banco
    (restauração do Neon).
-2. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
+3. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
    com sincronização depois (banco local no celular) foi avaliado e
    descartado com o usuário. Exigiria rodar no celular regras que hoje
    dependem do estado do banco (saldo em mãos, parcela já paga), traria
@@ -1116,7 +1126,7 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
-3. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
+4. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
    o histórico de arrecadação em produção): hoje "Dar baixa" sempre
    registra o valor cheio da parcela, e um doador que entregou menos (ex.:
    R$ 40 numa parcela de R$ 50) não tem como ser registrado no carnê — o
