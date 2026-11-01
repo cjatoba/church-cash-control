@@ -156,7 +156,7 @@ export default async function FundraisingReportPage({
       <div className="print:hidden">
         <PageHeader
           backHref={`/campaigns/${campaignId}`}
-          title="Relatório para imprimir"
+          title="Relatório da arrecadação"
           subtitle={campaign.name}
         />
       </div>

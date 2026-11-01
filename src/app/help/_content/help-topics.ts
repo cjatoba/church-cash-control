@@ -190,12 +190,12 @@ export const helpTopics: HelpTopic[] = [
   },
   {
     slug: "relatorio-para-imprimir",
-    title: "Relatório para imprimir ou salvar em PDF",
+    title: "Relatório da arrecadação",
     summary:
       "Junta numa página a arrecadação da campanha: meta, total por mês, por tipo de entrada, por forma de pagamento e para onde foi o dinheiro.",
     steps: [
       "Na tela inicial, toque na campanha.",
-      'Em "Acompanhar", toque em "Relatório para imprimir".',
+      'Em "Acompanhar", toque em "Relatório da arrecadação".',
       'Escolha o período: "Campanha inteira" ou "Escolher meses" (de um mês até outro).',
       'Se você recebe arrecadação, escolha também "Resumido" (só totais, sem nome de doador) ou "Detalhado" (com cada entrada e o nome de quem doou).',
       'Toque em "Ver relatório" e depois em "Imprimir ou salvar PDF". Para guardar o arquivo, escolha "Salvar como PDF".',

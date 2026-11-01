@@ -1098,7 +1098,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   usuário: números espalhados entre "Quem pagou no mês", "Dinheiro em
   mãos" e a tela do doador, sem visão consolidada para controle interno,
   cópia fora do app e prestação de contas). Mockup aprovado: tela
-  `/campaigns/[id]/report` ("Relatório para imprimir", em "Acompanhar")
+  `/campaigns/[id]/report` ("Relatório da arrecadação", em "Acompanhar")
   com período (campanha inteira ou de um mês a outro) e "Imprimir ou
   salvar PDF" pelo próprio navegador, sem biblioteca de PDF. Decisões
   tomadas com o usuário:
@@ -1116,7 +1116,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     2.000 entradas o detalhado pede um período menor (limite do papel e
     do navegador do celular, não do banco). Migration `0026` cria índices
     nas colunas de ligação das tabelas de entradas e repasses.
-  - Ajuda: tópico novo "Relatório para imprimir ou salvar em PDF".
+  - Ajuda: tópico novo "Relatório da arrecadação". Nome do
+    item revisto na validação em preview, a pedido do usuário: era
+    "Relatório para imprimir", mas o relatório também serve só para
+    conferir na tela ou salvar em PDF.
 
 ## Backlog (próximas fatias, em ordem)
 

@@ -141,8 +141,8 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
         />
         <NavListItem
           href={`/campaigns/${campaignId}/report`}
-          title="Relatório para imprimir"
-          description="Resumo da arrecadação em PDF ou papel"
+          title="Relatório da arrecadação"
+          description="Totais da campanha para conferir, salvar ou imprimir"
           icon={<PrinterIcon />}
           iconTone="violet"
         />
