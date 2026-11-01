@@ -189,6 +189,22 @@ export const helpTopics: HelpTopic[] = [
     related: ["corrigir-entrada"],
   },
   {
+    slug: "relatorio-para-imprimir",
+    title: "Relatório para imprimir ou salvar em PDF",
+    summary:
+      "Junta numa página a arrecadação da campanha: meta, total por mês, por tipo de entrada, por forma de pagamento e para onde foi o dinheiro.",
+    steps: [
+      "Na tela inicial, toque na campanha.",
+      'Em "Acompanhar", toque em "Relatório para imprimir".',
+      'Escolha o período: "Campanha inteira" ou "Escolher meses" (de um mês até outro).',
+      'Se você recebe arrecadação, escolha também "Resumido" (só totais, sem nome de doador) ou "Detalhado" (com cada entrada e o nome de quem doou).',
+      'Toque em "Ver relatório" e depois em "Imprimir ou salvar PDF". Para guardar o arquivo, escolha "Salvar como PDF".',
+    ],
+    tip: "Para prestar contas, use o Resumido: ele não leva nome de doador. O Detalhado é para controle interno e não deve ser compartilhado. Se o período tiver muitas entradas, o Detalhado pede um período menor.",
+    action: toCampaigns,
+    related: ["dinheiro-em-maos", "quem-pagou-no-mes"],
+  },
+  {
     slug: "editar-arquivar-campanha",
     requires: "canManageCampaigns",
     title: "Editar ou arquivar uma campanha",
@@ -286,7 +302,12 @@ export const helpGroups: HelpGroup[] = [
   },
   {
     title: "Acompanhar",
-    topicSlugs: ["quem-pagou-no-mes", "dinheiro-em-maos", "editar-arquivar-campanha"],
+    topicSlugs: [
+      "quem-pagou-no-mes",
+      "dinheiro-em-maos",
+      "relatorio-para-imprimir",
+      "editar-arquivar-campanha",
+    ],
   },
   {
     title: "Conta e administração",

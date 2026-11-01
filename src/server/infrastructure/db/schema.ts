@@ -1,6 +1,7 @@
 import {
   boolean,
   date,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -50,93 +51,117 @@ export const donors = pgTable("donors", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const pledgeTypes = pgTable("pledge_types", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  name: varchar("name", { length: 255 }).notNull(),
-  // null = tipo de carnê avulso (valor livre, sem parcela mensal fixa).
-  installmentValueCents: integer("installment_value_cents"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const pledgeTypes = pgTable(
+  "pledge_types",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 255 }).notNull(),
+    // null = tipo de carnê avulso (valor livre, sem parcela mensal fixa).
+    installmentValueCents: integer("installment_value_cents"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("pledge_types_campaign_id_idx").on(table.campaignId)],
+);
 
-export const pledges = pgTable("pledges", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  donorId: uuid("donor_id")
-    .notNull()
-    .references(() => donors.id, { onDelete: "cascade" }),
-  pledgeTypeId: uuid("pledge_type_id")
-    .notNull()
-    .references(() => pledgeTypes.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const pledges = pgTable(
+  "pledges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    donorId: uuid("donor_id")
+      .notNull()
+      .references(() => donors.id, { onDelete: "cascade" }),
+    pledgeTypeId: uuid("pledge_type_id")
+      .notNull()
+      .references(() => pledgeTypes.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("pledges_campaign_id_idx").on(table.campaignId)],
+);
 
-export const oneOffDonations = pgTable("one_off_donations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  donorName: varchar("donor_name", { length: 255 }),
-  amountCents: integer("amount_cents").notNull(),
-  date: date("date", { mode: "date" }).notNull(),
-  paymentMethod: paymentMethodEnum("payment_method"),
-  receivedByUserId: uuid("received_by_user_id").references(() => users.id),
-  registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const oneOffDonations = pgTable(
+  "one_off_donations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    donorName: varchar("donor_name", { length: 255 }),
+    amountCents: integer("amount_cents").notNull(),
+    date: date("date", { mode: "date" }).notNull(),
+    paymentMethod: paymentMethodEnum("payment_method"),
+    receivedByUserId: uuid("received_by_user_id").references(() => users.id),
+    registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("one_off_donations_campaign_id_idx").on(table.campaignId)],
+);
 
 export const loosePledgeStatusEnum = pgEnum("loose_pledge_status", ["open", "closed"]);
 
-export const loosePledges = pgTable("loose_pledges", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  donorId: uuid("donor_id")
-    .notNull()
-    .references(() => donors.id, { onDelete: "cascade" }),
-  pledgeTypeId: uuid("pledge_type_id")
-    .notNull()
-    .references(() => pledgeTypes.id, { onDelete: "cascade" }),
-  status: loosePledgeStatusEnum("status").notNull().default("open"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const loosePledges = pgTable(
+  "loose_pledges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    donorId: uuid("donor_id")
+      .notNull()
+      .references(() => donors.id, { onDelete: "cascade" }),
+    pledgeTypeId: uuid("pledge_type_id")
+      .notNull()
+      .references(() => pledgeTypes.id, { onDelete: "cascade" }),
+    status: loosePledgeStatusEnum("status").notNull().default("open"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("loose_pledges_campaign_id_idx").on(table.campaignId)],
+);
 
-export const loosePledgeContributions = pgTable("loose_pledge_contributions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  loosePledgeId: uuid("loose_pledge_id")
-    .notNull()
-    .references(() => loosePledges.id, { onDelete: "cascade" }),
-  amountCents: integer("amount_cents").notNull(),
-  date: date("date", { mode: "date" }).notNull(),
-  paymentMethod: paymentMethodEnum("payment_method").notNull(),
-  receivedByUserId: uuid("received_by_user_id")
-    .notNull()
-    .references(() => users.id),
-  registeredByUserId: uuid("registered_by_user_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const loosePledgeContributions = pgTable(
+  "loose_pledge_contributions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    loosePledgeId: uuid("loose_pledge_id")
+      .notNull()
+      .references(() => loosePledges.id, { onDelete: "cascade" }),
+    amountCents: integer("amount_cents").notNull(),
+    date: date("date", { mode: "date" }).notNull(),
+    paymentMethod: paymentMethodEnum("payment_method").notNull(),
+    receivedByUserId: uuid("received_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    registeredByUserId: uuid("registered_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("loose_pledge_contributions_loose_pledge_id_idx").on(table.loosePledgeId)],
+);
 
-export const installments = pgTable("installments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  pledgeId: uuid("pledge_id")
-    .notNull()
-    .references(() => pledges.id, { onDelete: "cascade" }),
-  dueDate: date("due_date", { mode: "date" }).notNull(),
-  amountCents: integer("amount_cents").notNull(),
-  paidAt: timestamp("paid_at", { withTimezone: true }),
-  paidAmountCents: integer("paid_amount_cents"),
-  paymentMethod: paymentMethodEnum("payment_method"),
-  receivedByUserId: uuid("received_by_user_id").references(() => users.id),
-  registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const installments = pgTable(
+  "installments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    pledgeId: uuid("pledge_id")
+      .notNull()
+      .references(() => pledges.id, { onDelete: "cascade" }),
+    dueDate: date("due_date", { mode: "date" }).notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    paidAmountCents: integer("paid_amount_cents"),
+    paymentMethod: paymentMethodEnum("payment_method"),
+    receivedByUserId: uuid("received_by_user_id").references(() => users.id),
+    registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("installments_pledge_id_idx").on(table.pledgeId)],
+);
 
 export const activityLogActionEnum = pgEnum("activity_log_action", ACTIVITY_LOG_ACTIONS);
 
@@ -161,26 +186,30 @@ export const activityLog = pgTable("activity_log", {
   occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
 });
 
-export const custodyTransfers = pgTable("custody_transfers", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  campaignId: uuid("campaign_id")
-    .notNull()
-    .references(() => campaigns.id, { onDelete: "cascade" }),
-  fromUserId: uuid("from_user_id")
-    .notNull()
-    .references(() => users.id),
-  registeredByUserId: uuid("registered_by_user_id")
-    .notNull()
-    .references(() => users.id),
-  // Um dos dois: outro voluntário (o valor entra no saldo em mãos dele) ou
-  // um destinatário de fora da equipe, digitado.
-  toUserId: uuid("to_user_id").references(() => users.id),
-  recipientName: varchar("recipient_name", { length: 255 }),
-  amountCents: integer("amount_cents").notNull(),
-  transferDate: date("transfer_date", { mode: "date" }).notNull(),
-  description: varchar("description", { length: 500 }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const custodyTransfers = pgTable(
+  "custody_transfers",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    fromUserId: uuid("from_user_id")
+      .notNull()
+      .references(() => users.id),
+    registeredByUserId: uuid("registered_by_user_id")
+      .notNull()
+      .references(() => users.id),
+    // Um dos dois: outro voluntário (o valor entra no saldo em mãos dele) ou
+    // um destinatário de fora da equipe, digitado.
+    toUserId: uuid("to_user_id").references(() => users.id),
+    recipientName: varchar("recipient_name", { length: 255 }),
+    amountCents: integer("amount_cents").notNull(),
+    transferDate: date("transfer_date", { mode: "date" }).notNull(),
+    description: varchar("description", { length: 500 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("custody_transfers_campaign_id_idx").on(table.campaignId)],
+);
 
 // Linha única (id fixo "app"): configuração da própria instalação do sistema.
 // Ícone e cor ficam como texto validado no domínio, para incluir uma opção

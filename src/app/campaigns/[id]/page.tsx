@@ -17,6 +17,7 @@ import { buttonBaseClassName, buttonClassNames } from "@/app/_components/button-
 import {
   ArchiveBoxIcon,
   BanknotesIcon,
+  PrinterIcon,
   CalendarIcon,
   DocumentIcon,
   PencilIcon,
@@ -137,6 +138,13 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
           description="Quem está com quanto e repasses"
           icon={<BanknotesIcon />}
           iconTone="green"
+        />
+        <NavListItem
+          href={`/campaigns/${campaignId}/report`}
+          title="Relatório para imprimir"
+          description="Resumo da arrecadação em PDF ou papel"
+          icon={<PrinterIcon />}
+          iconTone="violet"
         />
       </NavSection>
 
