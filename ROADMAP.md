@@ -1094,7 +1094,32 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Relatório de arrecadação para imprimir** — PR #93 (pedido do
+  usuário: números espalhados entre "Quem pagou no mês", "Dinheiro em
+  mãos" e a tela do doador, sem visão consolidada para controle interno,
+  cópia fora do app e prestação de contas). Mockup aprovado: tela
+  `/campaigns/[id]/report` ("Relatório da arrecadação", em "Acompanhar")
+  com período (campanha inteira ou de um mês a outro) e "Imprimir ou
+  salvar PDF" pelo próprio navegador, sem biblioteca de PDF. Decisões
+  tomadas com o usuário:
+  - Versão resumida (todos): meta × arrecadado, total por mês, por tipo
+    de entrada, por forma de pagamento e "Para onde foi o dinheiro" (pago
+    para fora da equipe no período e quem está com quanto hoje), sem nome
+    de doador. Versão detalhada (só quem recebe arrecadação, por LGPD):
+    cada entrada por mês com subtotal e os repasses do período.
+  - A entrada conta no mês em que o dinheiro foi recebido. Na campanha
+    inteira não há filtro de data, para o total bater com o painel.
+  - Desempenho: sem geração assíncrona (fila, arquivo guardado e aviso
+    seriam infraestrutura e risco de LGPD desproporcionais); o resumo só
+    usa somas no banco e carrega primeiro, e a lista do detalhado vem
+    depois (`Suspense`). Trava por quantidade, não por período: acima de
+    2.000 entradas o detalhado pede um período menor (limite do papel e
+    do navegador do celular, não do banco). Migration `0026` cria índices
+    nas colunas de ligação das tabelas de entradas e repasses.
+  - Ajuda: tópico novo "Relatório da arrecadação". Nome do
+    item revisto na validação em preview, a pedido do usuário: era
+    "Relatório para imprimir", mas o relatório também serve só para
+    conferir na tela ou salvar em PDF.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -1119,27 +1144,9 @@ Nenhuma PR aberta no momento.
    Mesmo cuidado da primeira leva: montar a lista, o usuário aprovar,
    conferir que nada foi lançado nesse meio-tempo e gravar tudo numa
    única transação, com registro de atividades. Uma parcela paga com
-   valor menor fica para a fatia de pagamento não integral (item 4).
+   valor menor fica para a fatia de pagamento não integral (item 3).
 
-2. **Relatório de arrecadação para imprimir** (pedido do usuário): hoje
-   os números estão espalhados ("Quem pagou no mês" mostra um mês por
-   vez, "Dinheiro em mãos" por pessoa, a tela do doador um doador por
-   vez), sem uma visão consolidada. Usos citados pelo usuário: controle
-   interno, cópia guardada fora do app (caso o banco ou o app fiquem
-   indisponíveis) e prestação de contas ao pastor ou à tesouraria da
-   igreja. Decisões tomadas com o usuário: tela pensada para impressão
-   (o "Salvar como PDF" do próprio navegador gera o arquivo), sem
-   exportar planilha nem adicionar biblioteca de PDF. Proposta a
-   detalhar no mockup: período (campanha inteira ou de um mês a outro),
-   arrecadado × meta, totais por mês, por forma de pagamento e por tipo
-   de entrada (parcela, carnê avulso, doação sem carnê) e a lista das
-   entradas do período. Consultas agregadas (`SUM ... GROUP BY`), mesmo
-   padrão do total arrecadado do painel. A decidir no mockup, por causa
-   da LGPD: uma versão resumida sem nome de doador (prestação de contas)
-   e outra detalhada com nomes (controle interno), e quem pode abrir cada
-   uma. O relatório impresso não substitui o backup do próprio banco
-   (restauração do Neon).
-3. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
+2. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
    com sincronização depois (banco local no celular) foi avaliado e
    descartado com o usuário. Exigiria rodar no celular regras que hoje
    dependem do estado do banco (saldo em mãos, parcela já paga), traria
@@ -1149,7 +1156,7 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
-4. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
+3. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
    o histórico de arrecadação em produção): hoje "Dar baixa" sempre
    registra o valor cheio da parcela, e um doador que entregou menos (ex.:
    R$ 40 numa parcela de R$ 50) não tem como ser registrado no carnê — o

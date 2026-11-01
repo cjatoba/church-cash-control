@@ -86,3 +86,20 @@ input[type="radio"] {
     animation: none;
   }
 }
+
+/*
+ * Impressão (ex.: relatório de arrecadação) sempre em papel branco, mesmo
+ * com o app em modo escuro.
+ */
+@media print {
+  :root,
+  body {
+    --background: #ffffff;
+    --foreground: #171717;
+    color-scheme: light;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}

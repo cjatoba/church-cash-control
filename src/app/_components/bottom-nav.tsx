@@ -24,10 +24,10 @@ export function BottomNav({ menu }: { menu: ReactNode }) {
 
   return (
     <>
-      <div aria-hidden="true" className={`shrink-0 ${BAR_HEIGHT_CLASS_NAME}`} />
+      <div aria-hidden="true" className={`shrink-0 print:hidden ${BAR_HEIGHT_CLASS_NAME}`} />
       <nav
         aria-label="Navegação principal"
-        className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-zinc-800 dark:bg-zinc-900"
+        className="fixed inset-x-0 bottom-0 z-10 border-t print:hidden border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-zinc-800 dark:bg-zinc-900"
       >
         <ul className="mx-auto grid h-[4.75rem] w-full max-w-xl grid-cols-2 gap-2 px-6">
           <li className="flex">
