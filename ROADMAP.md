@@ -1092,9 +1092,7 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   linha e o nome quebra. As demais telas com valores lado a lado já
   quebravam linha e ficaram como estavam.
 
-## Em andamento (PRs abertas)
-
-- **Relatório de arrecadação para imprimir** — PR #93 (pedido do
+- **Relatório da arrecadação (conferir, imprimir ou salvar em PDF)** — PR #93 (pedido do
   usuário: números espalhados entre "Quem pagou no mês", "Dinheiro em
   mãos" e a tela do doador, sem visão consolidada para controle interno,
   cópia fora do app e prestação de contas). Mockup aprovado: tela
@@ -1120,6 +1118,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     item revisto na validação em preview, a pedido do usuário: era
     "Relatório para imprimir", mas o relatório também serve só para
     conferir na tela ou salvar em PDF.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
