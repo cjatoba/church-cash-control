@@ -1082,8 +1082,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   (opcional) e `recipient_name` opcional; repasses existentes não mudam.
   Ajuda ("Dinheiro em mãos e repasses") atualizada.
 
-## Em andamento (PRs abertas)
-
 - **Resumo de "Dinheiro em mãos" de uma pessoa cabendo no celular** — PR
   #91 (achado pelo usuário em produção): na tela
   `/campaigns/[id]/money-in-hand/[userId]`, os três valores do topo
@@ -1093,6 +1091,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   à direita). Na lista de "Dinheiro em mãos", o valor fica sempre numa
   linha e o nome quebra. As demais telas com valores lado a lado já
   quebravam linha e ficaram como estavam.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
