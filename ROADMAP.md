@@ -1119,8 +1119,6 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
     "Relatório para imprimir", mas o relatório também serve só para
     conferir na tela ou salvar em PDF.
 
-## Em andamento (PRs abertas)
-
 - **Pagamento em partes de uma parcela** — PR #95 (pedido do usuário, ao
   lançar o histórico em produção: um doador que entregou menos que a
   parcela não tinha como ser registrado no carnê). Mockup aprovado;
@@ -1144,6 +1142,10 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   - Depois do deploy (tarefa de dados, com aprovação do usuário): passar
     para a parcela certa o valor parcial lançado antes como doação sem
     carnê.
+
+## Em andamento (PRs abertas)
+
+Nenhuma PR aberta no momento.
 
 ## Backlog (próximas fatias, em ordem)
 
