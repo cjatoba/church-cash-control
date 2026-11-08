@@ -33,18 +33,20 @@ function createDependencies(source: {
       id: "i1",
       dueDate: new Date("2026-01-01"),
       amountCents: 5000,
-      payment: source.hasPayments
-        ? {
-            paidAt: new Date("2026-01-10"),
-            paidAmountCents: 10000,
-            paymentMethod: "cash",
-            receivedByUserId: "user-1",
-            registeredByUserId: "user-1",
-          }
-        : null,
+      payments: source.hasPayments
+        ? [
+            {
+              paidAt: new Date("2026-01-10"),
+              paidAmountCents: 10000,
+              paymentMethod: "cash",
+              receivedByUserId: "user-1",
+              registeredByUserId: "user-1",
+            },
+          ]
+        : [],
     },
-    { id: "i2", dueDate: new Date("2026-02-01"), amountCents: 5000, payment: null },
-    { id: "i3", dueDate: new Date("2026-03-01"), amountCents: 5000, payment: null },
+    { id: "i2", dueDate: new Date("2026-02-01"), amountCents: 5000, payments: [] },
+    { id: "i3", dueDate: new Date("2026-03-01"), amountCents: 5000, payments: [] },
   ];
   const repository: PledgeTypeChangeRepository = {
     findSource(kind, id) {
@@ -105,7 +107,7 @@ describe("changePledgeType", () => {
     expect(result).toEqual({ kind: "fixed", id: "pledge-1" });
     expect(dependencies.calls).toEqual(["reprice pledge-1 type-50"]);
     const installments = dependencies.repriced[0] ?? [];
-    expect(installments.map((item) => item.payment?.paidAmountCents ?? "a pagar")).toEqual([
+    expect(installments.map((item) => item.payments[0]?.paidAmountCents ?? "a pagar")).toEqual([
       5000,
       5000,
       "a pagar",
@@ -258,6 +260,10 @@ describe("listPledgeInstallmentSlots", () => {
 
     const slots = await listPledgeInstallmentSlots(repository, "pledge-1");
 
-    expect(slots.map((slot) => slot.payment?.paidAmountCents ?? null)).toEqual([10000, null, null]);
+    expect(slots.map((slot) => slot.payments[0]?.paidAmountCents ?? null)).toEqual([
+      10000,
+      null,
+      null,
+    ]);
   });
 });

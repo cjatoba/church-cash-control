@@ -65,8 +65,8 @@ describe("updateCampaign", () => {
 
   it("remove parcelas pendentes que ficaram fora do novo período ao encurtar a campanha", async () => {
     const dependencies = createDependencies([
-      { id: "installment-1", dueDate: new Date("2026-12-01"), paidAt: null },
-      { id: "installment-2", dueDate: new Date("2027-01-01"), paidAt: null },
+      { id: "installment-1", dueDate: new Date("2026-12-01"), hasPayments: false },
+      { id: "installment-2", dueDate: new Date("2027-01-01"), hasPayments: false },
     ]);
 
     const outcome = await updateCampaign(
@@ -83,7 +83,7 @@ describe("updateCampaign", () => {
 
   it("nunca remove parcela já paga, mesmo fora do novo período", async () => {
     const dependencies = createDependencies([
-      { id: "installment-1", dueDate: new Date("2027-01-01"), paidAt: new Date("2027-01-05") },
+      { id: "installment-1", dueDate: new Date("2027-01-01"), hasPayments: true },
     ]);
 
     const outcome = await updateCampaign(
@@ -99,7 +99,7 @@ describe("updateCampaign", () => {
 
   it("sinaliza período estendido quando o novo fim é depois do antigo e já existem parcelas", async () => {
     const dependencies = createDependencies([
-      { id: "installment-1", dueDate: new Date("2026-06-01"), paidAt: null },
+      { id: "installment-1", dueDate: new Date("2026-06-01"), hasPayments: false },
     ]);
 
     const outcome = await updateCampaign(
@@ -127,7 +127,7 @@ describe("updateCampaign", () => {
 
   it("não sinaliza período estendido quando o novo fim não é depois do antigo", async () => {
     const dependencies = createDependencies([
-      { id: "installment-1", dueDate: new Date("2026-06-01"), paidAt: null },
+      { id: "installment-1", dueDate: new Date("2026-06-01"), hasPayments: false },
     ]);
 
     const outcome = await updateCampaign(

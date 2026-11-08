@@ -14,11 +14,17 @@ import type { RevertPaymentState } from "../[pledgeId]/page";
 
 export type CorrectPaymentState = ActionErrorState;
 
+function toReaisInput(cents: number): string {
+  return (cents / 100).toFixed(2);
+}
+
 export function CorrectPaymentButton({
   installmentId,
+  paymentId,
   donorName,
   amountCents,
-  amountLabel,
+  maxAmountCents,
+  installmentAmountLabel,
   monthLabel,
   currentPaidAtIso,
   currentPaymentMethod,
@@ -29,9 +35,11 @@ export function CorrectPaymentButton({
   revertAction,
 }: {
   installmentId: string;
+  paymentId: string;
   donorName: string;
   amountCents: number;
-  amountLabel: string;
+  maxAmountCents: number;
+  installmentAmountLabel: string;
   monthLabel: string;
   currentPaidAtIso: string;
   currentPaymentMethod: string;
@@ -89,13 +97,30 @@ export function CorrectPaymentButton({
           className="flex flex-col gap-4"
         >
           <input type="hidden" name="installmentId" value={installmentId} />
+          <input type="hidden" name="paymentId" value={paymentId} />
           <input type="hidden" name="donorName" value={donorName} />
-          <input type="hidden" name="amountCents" value={amountCents} />
           <p className="text-lg font-semibold">Corrigir pagamento — {monthLabel}</p>
           <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
-            Valor da parcela: {amountLabel}
+            Valor da parcela: {installmentAmountLabel}
           </p>
           <ErrorMessage state={correctState} />
+          <label className={fieldLabelClassName}>
+            Valor recebido (R$)
+            <input
+              type="number"
+              name="amount"
+              step="0.01"
+              min="0.01"
+              max={toReaisInput(maxAmountCents)}
+              required
+              defaultValue={toReaisInput(amountCents)}
+              className={fieldInputClassName}
+            />
+            <span className="text-[14px] font-normal text-zinc-500 dark:text-zinc-400">
+              Registrou um valor errado? Troque aqui. Se ficar menos que a parcela, ela volta para
+              &quot;A pagar&quot;.
+            </span>
+          </label>
           <label className={fieldLabelClassName}>
             Data do pagamento
             <input
@@ -143,7 +168,9 @@ export function CorrectPaymentButton({
 
         {!confirmingRevert ? (
           <div className="flex flex-col gap-2">
-            <p className="text-[15px] text-zinc-600 dark:text-zinc-400">Deu baixa sem querer?</p>
+            <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+              Registrou este pagamento sem querer?
+            </p>
             <button
               type="button"
               onClick={() => {
@@ -152,16 +179,17 @@ export function CorrectPaymentButton({
               className="flex items-center justify-center gap-1.5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-red-300 bg-white px-5 text-base font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-950/40"
             >
               <TrashIcon className="h-4 w-4" />
-              Reverter para pendente
+              Excluir este pagamento
             </button>
           </div>
         ) : (
           <form action={revertFormAction} className="flex flex-col gap-3">
             <input type="hidden" name="installmentId" value={installmentId} />
+            <input type="hidden" name="paymentId" value={paymentId} />
             <input type="hidden" name="donorName" value={donorName} />
-            <input type="hidden" name="amountCents" value={amountCents} />
             <p className="text-[15px] text-red-700 dark:text-red-400">
-              Tem certeza? Isso vai apagar o registro de pagamento desta parcela.
+              Tem certeza? Isso vai apagar só este pagamento. Se era o único, a parcela volta para
+              &quot;A pagar&quot;.
             </p>
             <ErrorMessage state={revertState} />
             <div className="flex justify-end gap-3">
@@ -174,7 +202,7 @@ export function CorrectPaymentButton({
               >
                 Cancelar
               </button>
-              <SubmitButton pendingLabel="Revertendo…">Sim, reverter para pendente</SubmitButton>
+              <SubmitButton pendingLabel="Excluindo…">Sim, excluir este pagamento</SubmitButton>
             </div>
           </form>
         )}

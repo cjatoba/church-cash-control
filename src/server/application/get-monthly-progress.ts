@@ -12,8 +12,7 @@ export interface CampaignGoalPeriodReader {
 export interface InstallmentDueInMonth {
   donorName: string;
   amount: Money;
-  paidAt: Date | null;
-  paidAmount: Money | null;
+  paidAmount: Money;
 }
 
 export interface InstallmentsForMonthReader {
@@ -52,22 +51,34 @@ export async function getMonthlyProgress(
     dependencies.oneOffDonationsReader.findInMonth(campaignId, month),
   ]);
 
+  const withPayment = installmentsDue.filter((installment) => installment.paidAmount.toCents() > 0);
+  const withRemaining = installmentsDue.filter(
+    (installment) => installment.paidAmount.toCents() < installment.amount.toCents(),
+  );
+  const partialOf = (installment: InstallmentDueInMonth) =>
+    installment.paidAmount.toCents() > 0 &&
+    installment.paidAmount.toCents() < installment.amount.toCents()
+      ? installment.amount
+      : null;
+
   const paid: MonthlyContribution[] = [
-    ...installmentsDue
-      .filter((installment) => installment.paidAt)
-      .map((installment) => ({
-        donorName: installment.donorName,
-        amount: installment.paidAmount ?? installment.amount,
-      })),
+    ...withPayment.map((installment) => ({
+      donorName: installment.donorName,
+      amount: installment.paidAmount,
+      partialOf: partialOf(installment),
+    })),
     ...oneOffDonations.map((donation) => ({
       donorName: donation.donorName ?? "Anônimo",
       amount: donation.amount,
+      partialOf: null,
     })),
   ];
 
-  const pending: MonthlyContribution[] = installmentsDue
-    .filter((installment) => !installment.paidAt)
-    .map((installment) => ({ donorName: installment.donorName, amount: installment.amount }));
+  const pending: MonthlyContribution[] = withRemaining.map((installment) => ({
+    donorName: installment.donorName,
+    amount: installment.amount.subtract(installment.paidAmount),
+    partialOf: partialOf(installment),
+  }));
 
   const receivedTotal = paid.reduce(
     (sum, contribution) => sum.add(contribution.amount),

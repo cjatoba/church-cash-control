@@ -14,6 +14,7 @@ import type { DbClient } from "./client";
 import {
   custodyTransfers,
   donors,
+  installmentPayments,
   installments,
   loosePledgeContributions,
   loosePledges,
@@ -33,14 +34,15 @@ async function sumReceivedByUser(
 ): Promise<Map<string, UserTotal>> {
   const installmentRows = await db
     .select({
-      userId: installments.receivedByUserId,
-      totalCents: sql<number>`coalesce(sum(${installments.paidAmountCents}), 0)::int`,
+      userId: installmentPayments.receivedByUserId,
+      totalCents: sql<number>`coalesce(sum(${installmentPayments.amountCents}), 0)::int`,
       count: sql<number>`count(*)::int`,
     })
-    .from(installments)
+    .from(installmentPayments)
+    .innerJoin(installments, eq(installmentPayments.installmentId, installments.id))
     .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
-    .where(and(eq(pledges.campaignId, campaignId), isNotNull(installments.paidAt)))
-    .groupBy(installments.receivedByUserId);
+    .where(eq(pledges.campaignId, campaignId))
+    .groupBy(installmentPayments.receivedByUserId);
 
   const donationRows = await db
     .select({
@@ -278,24 +280,27 @@ export function createPersonCustodyActivityReader(db: DbClient): PersonCustodyAc
         await Promise.all([
           db
             .select({
-              id: installments.id,
+              id: installmentPayments.id,
               pledgeId: installments.pledgeId,
               donorName: donors.name,
-              amountCents: installments.paidAmountCents,
-              paidAt: installments.paidAt,
-              paymentMethod: installments.paymentMethod,
+              amountCents: installmentPayments.amountCents,
+              paidAt: installmentPayments.paidAt,
+              paymentMethod: installmentPayments.paymentMethod,
               registeredByName: registeredByUser.name,
               dueDate: installments.dueDate,
             })
-            .from(installments)
+            .from(installmentPayments)
+            .innerJoin(installments, eq(installmentPayments.installmentId, installments.id))
             .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
             .innerJoin(donors, eq(pledges.donorId, donors.id))
-            .leftJoin(registeredByUser, eq(installments.registeredByUserId, registeredByUser.id))
+            .leftJoin(
+              registeredByUser,
+              eq(installmentPayments.registeredByUserId, registeredByUser.id),
+            )
             .where(
               and(
                 eq(pledges.campaignId, campaignId),
-                eq(installments.receivedByUserId, userId),
-                isNotNull(installments.paidAt),
+                eq(installmentPayments.receivedByUserId, userId),
               ),
             ),
           db
@@ -366,8 +371,8 @@ export function createPersonCustodyActivityReader(db: DbClient): PersonCustodyAc
           id: row.id,
           sourceId: row.pledgeId,
           donorLabel: row.donorName,
-          amount: Money.fromCents(row.amountCents ?? 0),
-          date: row.paidAt ?? row.dueDate,
+          amount: Money.fromCents(row.amountCents),
+          date: row.paidAt,
           paymentMethod: toPaymentMethod(row.paymentMethod),
           registeredByLabel: row.registeredByName,
           dueDate: row.dueDate,

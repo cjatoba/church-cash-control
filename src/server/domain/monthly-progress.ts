@@ -13,9 +13,12 @@ export function calculateMonthlyGoal(goal: Money, startDate: Date, endDate: Date
   return Money.fromCents(Math.round(goal.toCents() / months));
 }
 
+// partialOf é o valor da parcela quando ela foi paga só em parte: em "pagos"
+// amount é o que já entrou, em "pendentes" é o que ainda falta.
 export interface MonthlyContribution {
   donorName: string;
   amount: Money;
+  partialOf: Money | null;
 }
 
 export interface MonthlyProgress {

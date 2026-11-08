@@ -139,16 +139,23 @@ export function isPledgeClosed(pledge: PledgeSummary): boolean {
   return pledge.totalInstallments > 0 && pledge.paidInstallments === pledge.totalInstallments;
 }
 
+export interface InstallmentPaymentDetail {
+  id: string;
+  amount: Money;
+  paidAt: Date;
+  paymentMethod: PaymentMethod | null;
+  receivedByUserId: string | null;
+  receivedByLabel: string | null;
+  registeredByLabel: string | null;
+}
+
+// paidAt: quando a parcela ficou paga por inteiro (null enquanto falta algo).
 export interface InstallmentDetail {
   id: string;
   dueDate: Date;
   amount: Money;
   paidAt: Date | null;
-  paidAmount: Money | null;
-  paymentMethod: PaymentMethod | null;
-  receivedByUserId: string | null;
-  receivedByLabel: string | null;
-  registeredByLabel: string | null;
+  payments: InstallmentPaymentDetail[];
 }
 
 export interface PledgeDetail {
@@ -163,13 +170,13 @@ export interface PledgeDetail {
 export interface PendingInstallmentCandidate {
   id: string;
   dueDate: Date;
-  paidAt: Date | null;
+  hasPayments: boolean;
 }
 
 /**
- * Ao encurtar o período de uma campanha, as parcelas ainda não pagas que
- * caíam fora do novo fim devem ser removidas — parcelas pagas nunca são
- * removidas, pois são histórico financeiro.
+ * Ao encurtar o período de uma campanha, as parcelas sem nenhum pagamento que
+ * caíam fora do novo fim devem ser removidas — parcela com pagamento, mesmo
+ * em parte, nunca é removida, pois é histórico financeiro.
  */
 export function selectInstallmentsOutsidePeriod(
   installments: PendingInstallmentCandidate[],
@@ -177,6 +184,6 @@ export function selectInstallmentsOutsidePeriod(
 ): string[] {
   const end = firstDayOfMonth(campaignEndDate);
   return installments
-    .filter((installment) => !installment.paidAt && installment.dueDate > end)
+    .filter((installment) => !installment.hasPayments && installment.dueDate > end)
     .map((installment) => installment.id);
 }

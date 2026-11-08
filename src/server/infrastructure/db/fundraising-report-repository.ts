@@ -1,4 +1,4 @@
-import { and, eq, gte, isNotNull, isNull, lt, sql, type SQL } from "drizzle-orm";
+import { and, eq, gte, isNull, lt, sql, type SQL } from "drizzle-orm";
 import { alias, type PgColumn } from "drizzle-orm/pg-core";
 import type {
   DetailedReportReader,
@@ -15,6 +15,7 @@ import type { DbClient } from "./client";
 import {
   custodyTransfers,
   donors,
+  installmentPayments,
   installments,
   loosePledgeContributions,
   loosePledges,
@@ -67,7 +68,7 @@ export function createFundraisingReportRepository(
 ): FundraisingReportReader & DetailedReportReader {
   return {
     async sumEntries(campaignId, range) {
-      const installmentMonth = monthOf(installments.paidAt);
+      const installmentMonth = monthOf(installmentPayments.paidAt);
       const donationMonth = monthOfDate(oneOffDonations.date);
       const contributionMonth = monthOfDate(loosePledgeContributions.date);
 
@@ -75,20 +76,17 @@ export function createFundraisingReportRepository(
         db
           .select({
             month: installmentMonth,
-            paymentMethod: installments.paymentMethod,
-            totalCents: sql<number>`coalesce(sum(${installments.paidAmountCents}), 0)::int`,
+            paymentMethod: installmentPayments.paymentMethod,
+            totalCents: sql<number>`coalesce(sum(${installmentPayments.amountCents}), 0)::int`,
             count: sql<number>`count(*)::int`,
           })
-          .from(installments)
+          .from(installmentPayments)
+          .innerJoin(installments, eq(installmentPayments.installmentId, installments.id))
           .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
           .where(
-            and(
-              eq(pledges.campaignId, campaignId),
-              isNotNull(installments.paidAt),
-              withinRange(installments.paidAt, range),
-            ),
+            and(eq(pledges.campaignId, campaignId), withinRange(installmentPayments.paidAt, range)),
           )
-          .groupBy(installmentMonth, installments.paymentMethod),
+          .groupBy(installmentMonth, installmentPayments.paymentMethod),
         db
           .select({
             month: donationMonth,
@@ -150,22 +148,19 @@ export function createFundraisingReportRepository(
         db
           .select({
             donorName: donors.name,
-            amountCents: installments.paidAmountCents,
-            paidAt: installments.paidAt,
+            amountCents: installmentPayments.amountCents,
+            paidAt: installmentPayments.paidAt,
             dueDate: installments.dueDate,
-            paymentMethod: installments.paymentMethod,
+            paymentMethod: installmentPayments.paymentMethod,
             receivedByName: receivedByUser.name,
           })
-          .from(installments)
+          .from(installmentPayments)
+          .innerJoin(installments, eq(installmentPayments.installmentId, installments.id))
           .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
           .innerJoin(donors, eq(pledges.donorId, donors.id))
-          .leftJoin(receivedByUser, eq(installments.receivedByUserId, receivedByUser.id))
+          .leftJoin(receivedByUser, eq(installmentPayments.receivedByUserId, receivedByUser.id))
           .where(
-            and(
-              eq(pledges.campaignId, campaignId),
-              isNotNull(installments.paidAt),
-              withinRange(installments.paidAt, range),
-            ),
+            and(eq(pledges.campaignId, campaignId), withinRange(installmentPayments.paidAt, range)),
           ),
         db
           .select({
@@ -209,11 +204,11 @@ export function createFundraisingReportRepository(
       return [
         ...installmentRows.map((row) => ({
           kind: "installment" as const,
-          date: row.paidAt ?? row.dueDate,
+          date: row.paidAt,
           donorLabel: row.donorName,
           paymentMethod: toPaymentMethod(row.paymentMethod),
           receivedByLabel: row.receivedByName,
-          amount: Money.fromCents(row.amountCents ?? 0),
+          amount: Money.fromCents(row.amountCents),
           dueDate: row.dueDate,
         })),
         ...donationRows.map((row) => ({

@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { CampaignRepository } from "@/server/application/create-campaign";
 import type { CampaignListRepository } from "@/server/application/list-campaigns";
 import type { CampaignPeriodReader } from "@/server/application/create-pledge";
@@ -12,6 +12,7 @@ import type { DbClient } from "./client";
 import {
   campaigns,
   installments,
+  installmentPayments,
   loosePledgeContributions,
   loosePledges,
   oneOffDonations,
@@ -25,16 +26,12 @@ async function sumRaisedByCampaign(
   const installmentRows = await db
     .select({
       campaignId: pledges.campaignId,
-      totalCents: sql<number>`coalesce(sum(${installments.paidAmountCents}), 0)::int`,
+      totalCents: sql<number>`coalesce(sum(${installmentPayments.amountCents}), 0)::int`,
     })
-    .from(installments)
+    .from(installmentPayments)
+    .innerJoin(installments, eq(installmentPayments.installmentId, installments.id))
     .innerJoin(pledges, eq(installments.pledgeId, pledges.id))
-    .where(
-      and(
-        isNotNull(installments.paidAt),
-        onlyCampaignId ? eq(pledges.campaignId, onlyCampaignId) : undefined,
-      ),
-    )
+    .where(onlyCampaignId ? eq(pledges.campaignId, onlyCampaignId) : undefined)
     .groupBy(pledges.campaignId);
 
   const donationRows = await db

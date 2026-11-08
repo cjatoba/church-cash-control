@@ -1,6 +1,8 @@
 import type { PaymentMethod } from "./payment-method";
 
-export interface InstallmentPayment {
+// id existe para pagamentos já gravados; os que a recontagem cria nascem sem.
+export interface SlotPayment {
+  id?: string;
   paidAt: Date;
   paidAmountCents: number;
   paymentMethod: PaymentMethod | null;
@@ -12,15 +14,22 @@ export interface InstallmentSlot {
   id: string;
   dueDate: Date;
   amountCents: number;
-  payment: InstallmentPayment | null;
+  payments: SlotPayment[];
+}
+
+interface SingleSlot {
+  id: string;
+  dueDate: Date;
+  amountCents: number;
+  payment: SlotPayment | null;
 }
 
 interface PaidUnit {
   amountCents: number;
-  payment: InstallmentPayment;
+  payment: SlotPayment;
 }
 
-function samePaymentOrigin(a: InstallmentPayment, b: InstallmentPayment): boolean {
+function samePaymentOrigin(a: SlotPayment, b: SlotPayment): boolean {
   return (
     a.paidAt.toISOString().slice(0, 10) === b.paidAt.toISOString().slice(0, 10) &&
     a.paymentMethod === b.paymentMethod &&
@@ -29,8 +38,8 @@ function samePaymentOrigin(a: InstallmentPayment, b: InstallmentPayment): boolea
   );
 }
 
-function groupConsecutive(paid: InstallmentSlot[]): InstallmentSlot[][] {
-  const groups: InstallmentSlot[][] = [];
+function groupConsecutive(paid: SingleSlot[]): SingleSlot[][] {
+  const groups: SingleSlot[][] = [];
   for (const slot of paid) {
     const last = groups.at(-1);
     const lastPayment = last?.at(-1)?.payment;
@@ -43,11 +52,44 @@ function groupConsecutive(paid: InstallmentSlot[]): InstallmentSlot[][] {
   return groups;
 }
 
-function toUnits(groupPayment: InstallmentPayment, totalCents: number, valueCents: number) {
+function toUnits(groupPayment: SlotPayment, totalCents: number, valueCents: number): PaidUnit[] {
+  const { paidAt, paymentMethod, receivedByUserId, registeredByUserId } = groupPayment;
   return Array.from({ length: totalCents / valueCents }, () => ({
     amountCents: valueCents,
-    payment: { ...groupPayment, paidAmountCents: valueCents },
+    payment: {
+      paidAt,
+      paidAmountCents: valueCents,
+      paymentMethod,
+      receivedByUserId,
+      registeredByUserId,
+    },
   }));
+}
+
+// Parcela paga em parte ou em mais de uma vez fica como está: o doador
+// completa o que combinou naquele mês, e não há como recontar pagamentos
+// parciais num valor novo sem inventar para onde vai a diferença.
+function keepsItsPayments(slot: InstallmentSlot): boolean {
+  const [first, ...others] = slot.payments;
+  return first !== undefined && (others.length > 0 || first.paidAmountCents < slot.amountCents);
+}
+
+function toSingle(slot: InstallmentSlot): SingleSlot {
+  return {
+    id: slot.id,
+    dueDate: slot.dueDate,
+    amountCents: slot.amountCents,
+    payment: slot.payments[0] ?? null,
+  };
+}
+
+function fromSingle(slot: SingleSlot): InstallmentSlot {
+  return {
+    id: slot.id,
+    dueDate: slot.dueDate,
+    amountCents: slot.amountCents,
+    payments: slot.payment ? [slot.payment] : [],
+  };
 }
 
 /**
@@ -62,6 +104,23 @@ export function repriceInstallments(
   installments: InstallmentSlot[],
   newValueCents: number,
 ): { installments: InstallmentSlot[]; paymentsRedistributed: boolean } {
+  const kept = installments.filter(keepsItsPayments);
+  const repriced = repriceSingles(
+    installments.filter((slot) => !keepsItsPayments(slot)).map(toSingle),
+    newValueCents,
+  );
+  return {
+    installments: [...kept, ...repriced.installments.map(fromSingle)].sort(
+      (a, b) => a.dueDate.getTime() - b.dueDate.getTime(),
+    ),
+    paymentsRedistributed: repriced.paymentsRedistributed,
+  };
+}
+
+function repriceSingles(
+  installments: SingleSlot[],
+  newValueCents: number,
+): { installments: SingleSlot[]; paymentsRedistributed: boolean } {
   const ordered = [...installments].sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
   const keepPaidAsIs = {
     installments: ordered.map((slot) =>

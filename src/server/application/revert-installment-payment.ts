@@ -1,43 +1,46 @@
-import { revertInstallmentPayment as assertCanRevert } from "../domain/installment";
 import { calculateAvailableBalance } from "../domain/custody-transfer";
-import type { InstallmentState } from "../domain/installment";
-
-export interface InstallmentReader {
-  findById(installmentId: string): Promise<InstallmentState | null>;
-}
-
-export interface InstallmentUnpayRepository {
-  markAsUnpaid(installmentId: string): Promise<void>;
-}
-
-export interface RevertBalanceReader {
-  getAvailableBalance(
-    campaignId: string,
-    userId: string,
-  ): Promise<{ receivedCents: number; transferredCents: number }>;
-}
+import {
+  findInstallmentPayment,
+  remainingToPay,
+  removeInstallmentPayment,
+  type InstallmentPaymentRecord,
+} from "../domain/installment";
+import type { Money } from "../domain/money";
+import type { CustodyBalanceReader } from "./create-custody-transfer";
+import {
+  findInstallmentOrFail,
+  type InstallmentPaymentWriter,
+  type InstallmentReader,
+} from "./pay-installment";
 
 export interface RevertInstallmentPaymentDependencies {
   installmentReader: InstallmentReader;
-  installmentRepository: InstallmentUnpayRepository;
-  balanceReader: RevertBalanceReader;
+  paymentWriter: Pick<InstallmentPaymentWriter, "removePayment">;
+  balanceReader: CustodyBalanceReader;
 }
 
 export async function revertInstallmentPayment(
   dependencies: RevertInstallmentPaymentDependencies,
   campaignId: string,
   installmentId: string,
-): Promise<void> {
-  const installment = await dependencies.installmentReader.findById(installmentId);
-  if (!installment) {
-    throw new Error("Parcela não encontrada");
-  }
+  paymentId: string,
+): Promise<{ removed: InstallmentPaymentRecord; remaining: Money }> {
+  const installment = await findInstallmentOrFail(dependencies.installmentReader, installmentId);
+  const payment = findInstallmentPayment(installment, paymentId);
 
-  const totals = installment.receivedByUserId
-    ? await dependencies.balanceReader.getAvailableBalance(campaignId, installment.receivedByUserId)
+  const totals = payment.receivedByUserId
+    ? await dependencies.balanceReader.getAvailableBalance(campaignId, payment.receivedByUserId)
     : { receivedCents: 0, transferredCents: 0 };
-  const availableBalance = calculateAvailableBalance(totals.receivedCents, totals.transferredCents);
+  removeInstallmentPayment(
+    installment,
+    paymentId,
+    calculateAvailableBalance(totals.receivedCents, totals.transferredCents),
+  );
 
-  assertCanRevert(installment, availableBalance);
-  await dependencies.installmentRepository.markAsUnpaid(installmentId);
+  await dependencies.paymentWriter.removePayment(paymentId);
+  const payments = installment.payments.filter((candidate) => candidate.id !== paymentId);
+  return {
+    removed: payment,
+    remaining: remainingToPay({ amount: installment.amount, payments }),
+  };
 }
