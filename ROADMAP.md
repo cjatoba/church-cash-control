@@ -1121,7 +1121,29 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
 
 ## Em andamento (PRs abertas)
 
-Nenhuma PR aberta no momento.
+- **Pagamento em partes de uma parcela** — PR #95 (pedido do usuário, ao
+  lançar o histórico em produção: um doador que entregou menos que a
+  parcela não tinha como ser registrado no carnê). Mockup aprovado;
+  decisões tomadas com o usuário:
+  - A parcela fica em aberto até completar: "Dar baixa" ganha "Valor
+    recebido" (vem com o que falta, não aceita mais que isso); com valor
+    menor a parcela segue em "A pagar" com "Falta R$ X" e o botão
+    "Registrar o restante". Cada pagamento tem o próprio "Editar"
+    (valor, data, forma, quem recebeu ou "Excluir este pagamento"), com a
+    mesma trava de saldo de antes. "Quem pagou no mês" mostra a parcela
+    nas duas abas.
+  - Corrigir tipo de carnê continua liberado: parcela paga em parte ou em
+    mais de uma vez mantém o valor antigo e o mesmo que falta; as demais
+    seguem a regra de antes. Inicialmente proposto bloquear, revisto com o
+    usuário.
+  - Migration `0027`: tabela `installment_payments` (vários pagamentos por
+    parcela), cópia dos pagamentos existentes e remoção das colunas de
+    pagamento de `installments`; `installments.paid_at` passa a dizer quando
+    a parcela ficou paga por inteiro. Dinheiro em mãos, relatório,
+    arrecadado e "Quem pagou no mês" somam os pagamentos.
+  - Depois do deploy (tarefa de dados, com aprovação do usuário): passar
+    para a parcela certa o valor parcial lançado antes como doação sem
+    carnê.
 
 ## Backlog (próximas fatias, em ordem)
 
@@ -1146,7 +1168,7 @@ Nenhuma PR aberta no momento.
    Mesmo cuidado da primeira leva: montar a lista, o usuário aprovar,
    conferir que nada foi lançado nesse meio-tempo e gravar tudo numa
    única transação, com registro de atividades. Uma parcela paga com
-   valor menor fica para a fatia de pagamento não integral (item 3).
+   valor menor entra como pagamento em parte (PR #95).
 
 2. **Aviso de sem conexão** (pedido do usuário): registrar sem internet
    com sincronização depois (banco local no celular) foi avaliado e
@@ -1158,16 +1180,6 @@ Nenhuma PR aberta no momento.
    avisar quando o celular estiver sem conexão, mantendo o que foi
    digitado no formulário para enviar de novo quando a conexão voltar.
    Aviso de conexão lenta descartado com o usuário (pouco efetivo).
-3. **Pagamento não integral de parcela** (pedido do usuário, ao lançar
-   o histórico de arrecadação em produção): hoje "Dar baixa" sempre
-   registra o valor cheio da parcela, e um doador que entregou menos (ex.:
-   R$ 40 numa parcela de R$ 50) não tem como ser registrado no carnê — o
-   valor foi lançado como doação sem carnê até esta fatia existir. A
-   fatia deve migrar esse lançamento para a parcela certa. A definir no
-   mockup: como a parcela parcial aparece ("A pagar"/"Pagas", quanto
-   falta), se completar o restante depois é um segundo pagamento na mesma
-   parcela, e como fica em "Quem pagou no mês", na correção de tipo de
-   carnê (recontagem de parcelas pagas) e no "Dinheiro em mãos".
 
 ## Como usar este arquivo
 
