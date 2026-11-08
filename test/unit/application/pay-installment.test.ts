@@ -1,134 +1,108 @@
 import { describe, expect, it } from "vitest";
 import {
   payInstallment,
+  type InstallmentPaymentWriter,
   type InstallmentReader,
-  type InstallmentRepository,
 } from "@/server/application/pay-installment";
 import { Money } from "@/server/domain/money";
-import type { InstallmentPayment, InstallmentState } from "@/server/domain/installment";
+import type { InstallmentState, NewInstallmentPayment } from "@/server/domain/installment";
 
 function createDependencies(installment: InstallmentState | null) {
-  const paidPayments: ({ installmentId: string } & InstallmentPayment)[] = [];
+  const added: ({ installmentId: string } & NewInstallmentPayment)[] = [];
   const installmentReader: InstallmentReader = {
-    findById() {
-      return Promise.resolve(installment);
-    },
+    findById: () => Promise.resolve(installment),
   };
-  const installmentRepository: InstallmentRepository = {
-    markAsPaid(installmentId, payment) {
-      paidPayments.push({ installmentId, ...payment });
+  const paymentWriter: Pick<InstallmentPaymentWriter, "addPayment"> = {
+    addPayment(installmentId, payment) {
+      added.push({ installmentId, ...payment });
       return Promise.resolve();
     },
   };
-
-  return { installmentReader, installmentRepository, paidPayments };
+  return { installmentReader, paymentWriter, added };
 }
 
-const unpaidInstallment: InstallmentState = {
-  amount: Money.fromReais(100),
-  paidAt: null,
-  paymentMethod: null,
-  receivedByUserId: null,
-  registeredByUserId: null,
+const unpaid: InstallmentState = { amount: Money.fromReais(50), payments: [] };
+const input = {
+  amount: "50",
+  paidAt: "2026-10-05",
+  paymentMethod: "pix",
+  receivedByUserId: "user-2",
 };
 
 describe("payInstallment", () => {
-  it("marca a parcela como paga com data, forma de pagamento e recebedor informados", async () => {
-    const dependencies = createDependencies(unpaidInstallment);
+  it("registra o pagamento com valor, data, forma, quem recebeu e quem registrou", async () => {
+    const dependencies = createDependencies(unpaid);
 
-    await payInstallment(
+    const result = await payInstallment(
       dependencies,
       "installment-1",
-      new Date("2026-03-01"),
-      "pix",
+      input,
       "user-1",
-      "user-1",
-      new Date("2026-03-10"),
+      new Date("2026-10-20"),
     );
 
-    expect(dependencies.paidPayments).toEqual([
+    expect(dependencies.added).toEqual([
       {
         installmentId: "installment-1",
-        paidAt: new Date("2026-03-01"),
-        paidAmount: Money.fromReais(100),
+        amount: Money.fromReais(50),
+        paidAt: new Date("2026-10-05"),
         paymentMethod: "pix",
-        receivedByUserId: "user-1",
+        receivedByUserId: "user-2",
         registeredByUserId: "user-1",
       },
     ]);
+    expect(result.remaining.toCents()).toBe(0);
   });
 
-  it("mantém quem de fato registrou quando o recebedor é outra pessoa", async () => {
-    const dependencies = createDependencies(unpaidInstallment);
+  it("registra um valor menor e informa quanto ainda falta", async () => {
+    const dependencies = createDependencies(unpaid);
 
-    await payInstallment(
+    const result = await payInstallment(
       dependencies,
       "installment-1",
-      new Date("2026-03-01"),
-      "cash",
-      "user-2",
+      { ...input, amount: "40" },
       "user-1",
-      new Date("2026-03-10"),
+      new Date("2026-10-20"),
     );
 
-    expect(dependencies.paidPayments[0]?.receivedByUserId).toBe("user-2");
-    expect(dependencies.paidPayments[0]?.registeredByUserId).toBe("user-1");
+    expect(dependencies.added[0]?.amount.toCents()).toBe(4000);
+    expect(result.remaining.toCents()).toBe(1000);
   });
 
-  it("rejeita quando a parcela não existe", async () => {
+  it("não grava nada quando o valor passa do que falta", async () => {
+    const dependencies = createDependencies(unpaid);
+
+    await expect(
+      payInstallment(
+        dependencies,
+        "installment-1",
+        { ...input, amount: "60" },
+        "user-1",
+        new Date("2026-10-20"),
+      ),
+    ).rejects.toThrow("O valor passa do que falta pagar nesta parcela");
+    expect(dependencies.added).toEqual([]);
+  });
+
+  it("rejeita forma de pagamento inválida", async () => {
+    const dependencies = createDependencies(unpaid);
+
+    await expect(
+      payInstallment(
+        dependencies,
+        "installment-1",
+        { ...input, paymentMethod: "cheque" },
+        "user-1",
+        new Date("2026-10-20"),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("rejeita parcela que não existe", async () => {
     const dependencies = createDependencies(null);
 
     await expect(
-      payInstallment(
-        dependencies,
-        "installment-1",
-        new Date("2026-03-10"),
-        "pix",
-        "user-1",
-        "user-1",
-        new Date("2026-03-10"),
-      ),
-    ).rejects.toThrow();
-    expect(dependencies.paidPayments).toHaveLength(0);
-  });
-
-  it("rejeita quando a parcela já está paga", async () => {
-    const dependencies = createDependencies({
-      amount: Money.fromReais(100),
-      paidAt: new Date("2026-03-01"),
-      paymentMethod: "pix",
-      receivedByUserId: "user-1",
-      registeredByUserId: "user-1",
-    });
-
-    await expect(
-      payInstallment(
-        dependencies,
-        "installment-1",
-        new Date("2026-03-10"),
-        "pix",
-        "user-1",
-        "user-1",
-        new Date("2026-03-10"),
-      ),
-    ).rejects.toThrow();
-    expect(dependencies.paidPayments).toHaveLength(0);
-  });
-
-  it("rejeita data de pagamento no futuro", async () => {
-    const dependencies = createDependencies(unpaidInstallment);
-
-    await expect(
-      payInstallment(
-        dependencies,
-        "installment-1",
-        new Date("2026-03-11"),
-        "pix",
-        "user-1",
-        "user-1",
-        new Date("2026-03-10"),
-      ),
-    ).rejects.toThrow();
-    expect(dependencies.paidPayments).toHaveLength(0);
+      payInstallment(dependencies, "installment-x", input, "user-1", new Date("2026-10-20")),
+    ).rejects.toThrow("Parcela não encontrada");
   });
 });

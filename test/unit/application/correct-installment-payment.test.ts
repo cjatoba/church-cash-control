@@ -4,67 +4,74 @@ import {
   type CorrectInstallmentPaymentDependencies,
 } from "@/server/application/correct-installment-payment";
 import { Money } from "@/server/domain/money";
-import type { InstallmentPayment, InstallmentState } from "@/server/domain/installment";
+import { FundsAlreadyTransferredError } from "@/server/domain/money-entry-correction";
+import type { InstallmentPaymentRecord, InstallmentState } from "@/server/domain/installment";
 
-const paidInstallment: InstallmentState = {
-  amount: Money.fromReais(100),
-  paidAt: new Date("2026-03-10"),
-  paymentMethod: "pix",
-  receivedByUserId: "user-1",
-  registeredByUserId: "user-1",
+const partial: InstallmentState = {
+  amount: Money.fromReais(50),
+  payments: [
+    {
+      id: "payment-1",
+      amount: Money.fromReais(40),
+      paidAt: new Date("2026-10-05"),
+      paymentMethod: "pix",
+      receivedByUserId: "user-1",
+      registeredByUserId: "user-1",
+    },
+  ],
 };
 
 function createDependencies(
   installment: InstallmentState | null,
-  previousReceiverTotals = { receivedCents: 10_000, transferredCents: 0 },
+  receiverBalance: { receivedCents: number; transferredCents: number },
 ) {
-  const saved: { installmentId: string; payment: InstallmentPayment }[] = [];
-  const balanceRequests: string[] = [];
+  const updated: InstallmentPaymentRecord[] = [];
   const dependencies: CorrectInstallmentPaymentDependencies = {
     installmentReader: { findById: () => Promise.resolve(installment) },
-    installmentRepository: {
-      markAsPaid(installmentId, payment) {
-        saved.push({ installmentId, payment });
+    paymentWriter: {
+      updatePayment(payment) {
+        updated.push(payment);
         return Promise.resolve();
       },
     },
-    balanceReader: {
-      getAvailableBalance(_campaignId, userId) {
-        balanceRequests.push(userId);
-        return Promise.resolve(previousReceiverTotals);
-      },
-    },
+    balanceReader: { getAvailableBalance: () => Promise.resolve(receiverBalance) },
   };
-  return { dependencies, saved, balanceRequests };
+  return { dependencies, updated };
 }
 
-const today = new Date("2026-03-10");
+const input = {
+  amount: "50",
+  paidAt: "2026-10-05",
+  paymentMethod: "pix",
+  receivedByUserId: "user-1",
+};
 
 describe("correctInstallmentPayment", () => {
-  it("troca forma de pagamento e quem recebeu, devolvendo o antes e o depois para o registro", async () => {
-    const { dependencies, saved, balanceRequests } = createDependencies(paidInstallment);
+  it("corrige o valor registrado por engano, completando a parcela", async () => {
+    const { dependencies, updated } = createDependencies(partial, {
+      receivedCents: 4000,
+      transferredCents: 0,
+    });
 
     const result = await correctInstallmentPayment(
       dependencies,
       "campaign-1",
       "installment-1",
-      { paidAt: "2026-03-08", paymentMethod: "cash", receivedByUserId: "user-2" },
-      today,
+      "payment-1",
+      input,
+      new Date("2026-10-20"),
     );
 
-    expect(balanceRequests).toEqual(["user-1"]);
-    expect(saved[0]?.installmentId).toBe("installment-1");
-    expect(saved[0]?.payment.receivedByUserId).toBe("user-2");
-    expect(saved[0]?.payment.paymentMethod).toBe("cash");
-    expect(saved[0]?.payment.paidAt).toEqual(new Date("2026-03-08"));
-    expect(result.before.receivedByUserId).toBe("user-1");
-    expect(result.after.receivedByUserId).toBe("user-2");
+    expect(updated[0]?.amount.toCents()).toBe(5000);
+    expect(result.before.amount.toCents()).toBe(4000);
+    expect(result.after.amount.toCents()).toBe(5000);
+    expect(result.remaining.toCents()).toBe(0);
   });
 
-  it("não salva quando quem recebeu já repassou o dinheiro", async () => {
-    const { dependencies, saved } = createDependencies(paidInstallment, {
-      receivedCents: 10_000,
-      transferredCents: 10_000,
+  it("não grava a correção que deixaria o saldo de quem recebeu negativo", async () => {
+    const { dependencies, updated } = createDependencies(partial, {
+      receivedCents: 4000,
+      transferredCents: 4000,
     });
 
     await expect(
@@ -72,38 +79,30 @@ describe("correctInstallmentPayment", () => {
         dependencies,
         "campaign-1",
         "installment-1",
-        { paidAt: "2026-03-10", paymentMethod: "pix", receivedByUserId: "user-2" },
-        today,
+        "payment-1",
+        { ...input, amount: "30" },
+        new Date("2026-10-20"),
       ),
-    ).rejects.toThrow("Corrija o repasse primeiro");
-    expect(saved).toHaveLength(0);
+    ).rejects.toThrow(FundsAlreadyTransferredError);
+    expect(updated).toEqual([]);
   });
 
-  it("rejeita quando a parcela não existe", async () => {
-    const { dependencies } = createDependencies(null);
+  it("rejeita parcela que não existe", async () => {
+    const { dependencies } = createDependencies(null, { receivedCents: 0, transferredCents: 0 });
 
     await expect(
-      correctInstallmentPayment(
-        dependencies,
-        "campaign-1",
-        "installment-1",
-        { paidAt: "2026-03-10", paymentMethod: "pix", receivedByUserId: "user-1" },
-        today,
-      ),
+      correctInstallmentPayment(dependencies, "campaign-1", "installment-x", "payment-1", input),
     ).rejects.toThrow("Parcela não encontrada");
   });
 
-  it("rejeita forma de pagamento desconhecida", async () => {
-    const { dependencies } = createDependencies(paidInstallment);
+  it("rejeita valor que não é número", async () => {
+    const { dependencies } = createDependencies(partial, { receivedCents: 0, transferredCents: 0 });
 
     await expect(
-      correctInstallmentPayment(
-        dependencies,
-        "campaign-1",
-        "installment-1",
-        { paidAt: "2026-03-10", paymentMethod: "cheque", receivedByUserId: "user-1" },
-        today,
-      ),
+      correctInstallmentPayment(dependencies, "campaign-1", "installment-1", "payment-1", {
+        ...input,
+        amount: "abc",
+      }),
     ).rejects.toThrow();
   });
 });

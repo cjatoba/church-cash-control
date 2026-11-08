@@ -193,7 +193,7 @@ describe("selectInstallmentsOutsidePeriod", () => {
     return {
       id: "installment-1",
       dueDate: new Date("2026-01-01"),
-      paidAt: null,
+      hasPayments: false,
       ...overrides,
     };
   }
@@ -209,13 +209,9 @@ describe("selectInstallmentsOutsidePeriod", () => {
     expect(result).toEqual(["installment-2"]);
   });
 
-  it("nunca seleciona parcela já paga, mesmo fora do novo período", () => {
+  it("nunca seleciona parcela com pagamento, inteiro ou em parte, mesmo fora do novo período", () => {
     const installments = [
-      candidate({
-        id: "installment-1",
-        dueDate: new Date("2026-02-01"),
-        paidAt: new Date("2026-02-05"),
-      }),
+      candidate({ id: "installment-1", dueDate: new Date("2026-02-01"), hasPayments: true }),
     ];
 
     const result = selectInstallmentsOutsidePeriod(installments, new Date("2026-01-31"));

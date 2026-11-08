@@ -25,11 +25,7 @@ describe("getPledgeDetail", () => {
           dueDate: new Date("2026-03-01"),
           amount: Money.fromReais(100),
           paidAt: null,
-          paidAmount: null,
-          paymentMethod: null,
-          receivedByUserId: null,
-          receivedByLabel: null,
-          registeredByLabel: null,
+          payments: [],
         },
       ],
     };

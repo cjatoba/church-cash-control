@@ -27,26 +27,47 @@ type SourceSummary =
     }
   | { kind: "loose"; contributionCount: number };
 
+function isPartiallyPaid(slot: InstallmentSlot): boolean {
+  const paidCents = slot.payments.reduce((sum, payment) => sum + payment.paidAmountCents, 0);
+  return paidCents > 0 && paidCents < slot.amountCents;
+}
+
+function describePartial(count: number): string {
+  if (count === 0) {
+    return "";
+  }
+  return count === 1
+    ? " A parcela paga em parte continua com o valor antigo e o mesmo que falta."
+    : ` As ${String(count)} parcelas pagas em parte continuam com o valor antigo e o mesmo que falta.`;
+}
+
 function describeChange(source: SourceSummary, target: PledgeTypeOption): string {
   if (source.kind === "fixed") {
+    const partialCount = source.installments.filter(isPartiallyPaid).length;
+    const partialNote = describePartial(partialCount);
     if (target.installmentValueLabel === null) {
       return `As ${String(source.pendingCount)} parcelas deste carnê serão apagadas e ele vira um carnê avulso, para registrar entregas de valor livre.`;
     }
     if (target.installmentValueCents !== null) {
       const repriced = repriceInstallments(source.installments, target.installmentValueCents);
       if (repriced.paymentsRedistributed) {
-        const paidAfter = repriced.installments.filter((slot) => slot.payment).length;
-        const pendingAfter = repriced.installments.length - paidAfter;
+        const paidAfter = repriced.installments.filter(
+          (slot) => slot.payments.length > 0 && !isPartiallyPaid(slot),
+        ).length;
+        const pendingAfter = repriced.installments.length - paidAfter - partialCount;
         const paidText = paidAfter === 1 ? "1 parcela paga" : `${String(paidAfter)} parcelas pagas`;
         const pendingText =
           pendingAfter === 0
             ? "Não fica nenhuma parcela a pagar."
             : `${pendingAfter === 1 ? "Fica 1 parcela" : `Ficam ${String(pendingAfter)} parcelas`} a pagar de ${target.installmentValueLabel}.`;
-        return `O que já foi pago passa a contar como ${paidText} de ${target.installmentValueLabel}, com a mesma data e quem recebeu. ${pendingText}`;
+        return `O que já foi pago passa a contar como ${paidText} de ${target.installmentValueLabel}, com a mesma data e quem recebeu. ${pendingText}${partialNote}`;
       }
     }
-    if (source.pendingCount === 0) {
-      return "Todas as parcelas já foram pagas e continuam com o valor que foi pago. Só o tipo do carnê muda.";
+    const repricedCount = source.pendingCount - partialCount;
+    if (repricedCount === 0) {
+      return partialCount === 0
+        ? "Todas as parcelas já foram pagas e continuam com o valor que foi pago. Só o tipo do carnê muda."
+        : `Nenhuma parcela muda de valor.${partialNote}`;
     }
     const paidNote =
       source.paidCount === 0
@@ -55,10 +76,10 @@ function describeChange(source: SourceSummary, target: PledgeTypeOption): string
           ? " A parcela já paga continua com o valor que foi pago."
           : ` As ${String(source.paidCount)} já pagas continuam com o valor que foi pago.`;
     const pendingText =
-      source.pendingCount === 1
+      repricedCount === 1
         ? "A parcela a pagar passa"
-        : `As ${String(source.pendingCount)} parcelas a pagar passam`;
-    return `${pendingText} de ${source.installmentValueLabel} para ${target.installmentValueLabel}.${paidNote}`;
+        : `As ${String(repricedCount)} parcelas a pagar passam`;
+    return `${pendingText} de ${source.installmentValueLabel} para ${target.installmentValueLabel}.${paidNote}${partialNote}`;
   }
   if (target.installmentValueLabel === null) {
     return "Só o tipo do carnê muda. As entregas já registradas continuam como estão.";

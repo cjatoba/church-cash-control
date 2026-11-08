@@ -1,18 +1,22 @@
 import { randomUUID } from "node:crypto";
-import { asc, eq, isNotNull, sql } from "drizzle-orm";
+import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { PledgeTypeChangeRepository } from "@/server/application/change-pledge-type";
-import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
-import { installments, loosePledgeContributions, loosePledges, pledges } from "./schema";
+import { syncInstallmentPaidAt, toPaymentMethod } from "./installment-repository";
+import {
+  installmentPayments,
+  installments,
+  loosePledgeContributions,
+  loosePledges,
+  pledges,
+} from "./schema";
 
+// Pagamento em parte também conta: converter o carnê apagaria esse dinheiro.
 const hasPaidInstallment = sql<boolean>`exists (
-  select 1 from ${installments}
-  where ${installments.pledgeId} = ${pledges.id} and ${isNotNull(installments.paidAt)}
+  select 1 from ${installmentPayments}
+  join ${installments} on ${installments.id} = ${installmentPayments.installmentId}
+  where ${installments.pledgeId} = ${pledges.id}
 )`;
-
-function toPaymentMethod(value: string | null): PaymentMethod | null {
-  return value === "pix" || value === "cash" ? value : null;
-}
 
 const hasContribution = sql<boolean>`exists (
   select 1 from ${loosePledgeContributions}
@@ -52,53 +56,75 @@ export function createPledgeTypeChangeRepository(db: DbClient): PledgeTypeChange
     },
 
     async findInstallments(pledgeId) {
-      const rows = await db
-        .select({
-          id: installments.id,
-          dueDate: installments.dueDate,
-          amountCents: installments.amountCents,
-          paidAt: installments.paidAt,
-          paidAmountCents: installments.paidAmountCents,
-          paymentMethod: installments.paymentMethod,
-          receivedByUserId: installments.receivedByUserId,
-          registeredByUserId: installments.registeredByUserId,
-        })
-        .from(installments)
-        .where(eq(installments.pledgeId, pledgeId))
-        .orderBy(asc(installments.dueDate));
+      const [slots, payments] = await Promise.all([
+        db
+          .select({
+            id: installments.id,
+            dueDate: installments.dueDate,
+            amountCents: installments.amountCents,
+          })
+          .from(installments)
+          .where(eq(installments.pledgeId, pledgeId))
+          .orderBy(asc(installments.dueDate)),
+        db
+          .select({
+            id: installmentPayments.id,
+            installmentId: installmentPayments.installmentId,
+            paidAt: installmentPayments.paidAt,
+            paidAmountCents: installmentPayments.amountCents,
+            paymentMethod: installmentPayments.paymentMethod,
+            receivedByUserId: installmentPayments.receivedByUserId,
+            registeredByUserId: installmentPayments.registeredByUserId,
+          })
+          .from(installmentPayments)
+          .innerJoin(installments, eq(installments.id, installmentPayments.installmentId))
+          .where(eq(installments.pledgeId, pledgeId))
+          .orderBy(asc(installmentPayments.paidAt), asc(installmentPayments.createdAt)),
+      ]);
 
-      return rows.map((row) => ({
-        id: row.id,
-        dueDate: row.dueDate,
-        amountCents: row.amountCents,
-        payment: row.paidAt
-          ? {
-              paidAt: row.paidAt,
-              paidAmountCents: row.paidAmountCents ?? row.amountCents,
-              paymentMethod: toPaymentMethod(row.paymentMethod),
-              receivedByUserId: row.receivedByUserId,
-              registeredByUserId: row.registeredByUserId,
-            }
-          : null,
+      return slots.map((slot) => ({
+        ...slot,
+        payments: payments
+          .filter((payment) => payment.installmentId === slot.id)
+          .map((payment) => ({
+            id: payment.id,
+            paidAt: payment.paidAt,
+            paidAmountCents: payment.paidAmountCents,
+            paymentMethod: toPaymentMethod(payment.paymentMethod),
+            receivedByUserId: payment.receivedByUserId,
+            registeredByUserId: payment.registeredByUserId,
+          })),
       }));
     },
 
+    // Os pagamentos do carnê são regravados como a recontagem deixou: os que
+    // continuam iguais mantêm o id, os redistribuídos nascem de novo.
     async repriceFixed(pledgeId, pledgeTypeId, repricedInstallments) {
+      const installmentIds = repricedInstallments.map((installment) => installment.id);
+      const payments = repricedInstallments.flatMap((installment) =>
+        installment.payments.map((payment) => ({
+          ...(payment.id ? { id: payment.id } : {}),
+          installmentId: installment.id,
+          amountCents: payment.paidAmountCents,
+          paidAt: payment.paidAt,
+          paymentMethod: payment.paymentMethod,
+          receivedByUserId: payment.receivedByUserId,
+          registeredByUserId: payment.registeredByUserId,
+        })),
+      );
       await db.batch([
         db.update(pledges).set({ pledgeTypeId }).where(eq(pledges.id, pledgeId)),
+        db
+          .delete(installmentPayments)
+          .where(inArray(installmentPayments.installmentId, installmentIds)),
+        ...(payments.length > 0 ? [db.insert(installmentPayments).values(payments)] : []),
         ...repricedInstallments.map((installment) =>
           db
             .update(installments)
-            .set({
-              amountCents: installment.amountCents,
-              paidAt: installment.payment?.paidAt ?? null,
-              paidAmountCents: installment.payment?.paidAmountCents ?? null,
-              paymentMethod: installment.payment?.paymentMethod ?? null,
-              receivedByUserId: installment.payment?.receivedByUserId ?? null,
-              registeredByUserId: installment.payment?.registeredByUserId ?? null,
-            })
+            .set({ amountCents: installment.amountCents })
             .where(eq(installments.id, installment.id)),
         ),
+        ...installmentIds.map((installmentId) => syncInstallmentPaidAt(db, installmentId)),
       ]);
     },
 

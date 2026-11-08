@@ -59,10 +59,9 @@ describe("getMonthlyProgress", () => {
         {
           donorName: "Maria Souza",
           amount: Money.fromReais(100),
-          paidAt: new Date("2026-09-03"),
           paidAmount: Money.fromReais(100),
         },
-        { donorName: "Ana Lima", amount: Money.fromReais(200), paidAt: null, paidAmount: null },
+        { donorName: "Ana Lima", amount: Money.fromReais(200), paidAmount: Money.fromCents(0) },
       ],
       oneOffDonations: [{ donorName: "João Pereira", amount: Money.fromReais(200) }],
     });
@@ -70,11 +69,31 @@ describe("getMonthlyProgress", () => {
     const progress = await getMonthlyProgress(dependencies, campaignId, month);
 
     expect(progress.paid).toEqual([
-      { donorName: "Maria Souza", amount: Money.fromReais(100) },
-      { donorName: "João Pereira", amount: Money.fromReais(200) },
+      { donorName: "Maria Souza", amount: Money.fromReais(100), partialOf: null },
+      { donorName: "João Pereira", amount: Money.fromReais(200), partialOf: null },
     ]);
-    expect(progress.pending).toEqual([{ donorName: "Ana Lima", amount: Money.fromReais(200) }]);
+    expect(progress.pending).toEqual([
+      { donorName: "Ana Lima", amount: Money.fromReais(200), partialOf: null },
+    ]);
     expect(progress.receivedTotal.toCents()).toBe(30000);
+  });
+
+  it("mostra a parcela paga em parte nos dois lados: o que pagou e o que falta", async () => {
+    const dependencies = createDependencies({
+      installmentsDue: [
+        { donorName: "Maria Souza", amount: Money.fromReais(50), paidAmount: Money.fromReais(40) },
+      ],
+    });
+
+    const progress = await getMonthlyProgress(dependencies, campaignId, month);
+
+    expect(progress.paid).toEqual([
+      { donorName: "Maria Souza", amount: Money.fromReais(40), partialOf: Money.fromReais(50) },
+    ]);
+    expect(progress.pending).toEqual([
+      { donorName: "Maria Souza", amount: Money.fromReais(10), partialOf: Money.fromReais(50) },
+    ]);
+    expect(progress.receivedTotal.toCents()).toBe(4000);
   });
 
   it("trata doação avulsa sem nome como anônima", async () => {
@@ -84,7 +103,9 @@ describe("getMonthlyProgress", () => {
 
     const progress = await getMonthlyProgress(dependencies, campaignId, month);
 
-    expect(progress.paid).toEqual([{ donorName: "Anônimo", amount: Money.fromReais(50) }]);
+    expect(progress.paid).toEqual([
+      { donorName: "Anônimo", amount: Money.fromReais(50), partialOf: null },
+    ]);
   });
 
   it("rejeita quando a campanha não existe", async () => {

@@ -1,62 +1,59 @@
-import { z } from "zod";
 import { calculateAvailableBalance } from "../domain/custody-transfer";
 import {
   correctInstallmentPayment as computeCorrection,
-  type InstallmentPayment,
-  type InstallmentState,
+  findInstallmentPayment,
+  remainingToPay,
+  type InstallmentPaymentRecord,
 } from "../domain/installment";
-import { parsePaymentMethod } from "../domain/payment-method";
+import type { Money } from "../domain/money";
 import type { CustodyBalanceReader } from "./create-custody-transfer";
-
-export interface InstallmentReader {
-  findById(installmentId: string): Promise<InstallmentState | null>;
-}
-
-export interface InstallmentRepository {
-  markAsPaid(installmentId: string, payment: InstallmentPayment): Promise<void>;
-}
+import {
+  findInstallmentOrFail,
+  parseInstallmentPaymentInput,
+  type InstallmentPaymentWriter,
+  type InstallmentReader,
+} from "./pay-installment";
 
 export interface CorrectInstallmentPaymentDependencies {
   installmentReader: InstallmentReader;
-  installmentRepository: InstallmentRepository;
+  paymentWriter: Pick<InstallmentPaymentWriter, "updatePayment">;
   balanceReader: CustodyBalanceReader;
 }
-
-const correctionSchema = z.object({
-  paidAt: z.coerce.date(),
-  paymentMethod: z.string().min(1, "Forma de pagamento é obrigatória"),
-  receivedByUserId: z.string().trim().min(1, "Recebido por é obrigatório"),
-});
 
 export async function correctInstallmentPayment(
   dependencies: CorrectInstallmentPaymentDependencies,
   campaignId: string,
   installmentId: string,
+  paymentId: string,
   input: unknown,
   today: Date = new Date(),
-): Promise<{ before: InstallmentState; after: InstallmentPayment }> {
-  const data = correctionSchema.parse(input);
-  const correction = {
-    paidAt: data.paidAt,
-    paymentMethod: parsePaymentMethod(data.paymentMethod),
-    receivedByUserId: data.receivedByUserId,
-  };
+): Promise<{
+  before: InstallmentPaymentRecord;
+  after: InstallmentPaymentRecord;
+  remaining: Money;
+}> {
+  const correction = parseInstallmentPaymentInput(input);
+  const installment = await findInstallmentOrFail(dependencies.installmentReader, installmentId);
+  const before = findInstallmentPayment(installment, paymentId);
 
-  const installment = await dependencies.installmentReader.findById(installmentId);
-  if (!installment) {
-    throw new Error("Parcela não encontrada");
-  }
-
-  const totals = installment.receivedByUserId
-    ? await dependencies.balanceReader.getAvailableBalance(campaignId, installment.receivedByUserId)
+  const totals = before.receivedByUserId
+    ? await dependencies.balanceReader.getAvailableBalance(campaignId, before.receivedByUserId)
     : { receivedCents: 0, transferredCents: 0 };
-  const payment = computeCorrection(
+  const after = computeCorrection(
     installment,
+    paymentId,
     correction,
     calculateAvailableBalance(totals.receivedCents, totals.transferredCents),
     today,
   );
 
-  await dependencies.installmentRepository.markAsPaid(installmentId, payment);
-  return { before: installment, after: payment };
+  await dependencies.paymentWriter.updatePayment(after);
+  const payments = installment.payments.map((payment) =>
+    payment.id === paymentId ? after : payment,
+  );
+  return {
+    before,
+    after,
+    remaining: remainingToPay({ amount: installment.amount, payments }),
+  };
 }

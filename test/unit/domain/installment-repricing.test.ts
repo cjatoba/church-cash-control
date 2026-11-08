@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { repriceInstallments, type InstallmentSlot } from "@/server/domain/installment-repricing";
+import {
+  repriceInstallments,
+  type InstallmentSlot,
+  type SlotPayment,
+} from "@/server/domain/installment-repricing";
 
-function payment(
-  paidAmountCents: number,
-  overrides: Partial<NonNullable<InstallmentSlot["payment"]>> = {},
-): NonNullable<InstallmentSlot["payment"]> {
+function payment(paidAmountCents: number, overrides: Partial<SlotPayment> = {}): SlotPayment {
   return {
     paidAt: new Date("2026-01-10T12:00:00Z"),
     paidAmountCents,
@@ -15,20 +16,20 @@ function payment(
   };
 }
 
-function slots(amountCents: number, payments: (InstallmentSlot["payment"] | undefined)[]) {
+function slots(amountCents: number, payments: (SlotPayment | SlotPayment[] | null)[]) {
   return payments.map((paid, index) => ({
     id: `i${String(index + 1)}`,
     dueDate: new Date(Date.UTC(2026, index, 1)),
     amountCents,
-    payment: paid ?? null,
+    payments: paid === null ? [] : Array.isArray(paid) ? paid : [paid],
   }));
 }
 
 function summarize(result: InstallmentSlot[]) {
-  return result.map(
-    (slot) =>
-      `${slot.id}:${String(slot.amountCents)}:${slot.payment ? `pago ${String(slot.payment.paidAmountCents)}` : "a pagar"}`,
-  );
+  return result.map((slot) => {
+    const paid = slot.payments.map((item) => String(item.paidAmountCents)).join("+");
+    return `${slot.id}:${String(slot.amountCents)}:${paid ? `pago ${paid}` : "a pagar"}`;
+  });
 }
 
 describe("repriceInstallments", () => {
@@ -41,7 +42,7 @@ describe("repriceInstallments", () => {
       "i3:5000:a pagar",
       "i4:5000:a pagar",
     ]);
-    expect(result.installments[1]?.payment).toMatchObject({
+    expect(result.installments[1]?.payments[0]).toMatchObject({
       paymentMethod: "pix",
       receivedByUserId: "user-1",
     });
@@ -100,5 +101,39 @@ describe("repriceInstallments", () => {
 
     expect(summarize(result.installments)).toEqual(["i1:5000:a pagar", "i2:5000:a pagar"]);
     expect(result.paymentsRedistributed).toBe(false);
+  });
+
+  it("mantém a parcela paga em parte com o valor antigo e o mesmo que falta", () => {
+    const result = repriceInstallments(
+      slots(5000, [payment(5000), payment(4000, { id: "p2" }), null]),
+      3000,
+    );
+
+    expect(summarize(result.installments)).toEqual([
+      "i1:5000:pago 5000",
+      "i2:5000:pago 4000",
+      "i3:3000:a pagar",
+    ]);
+    expect(result.installments[1]?.payments[0]?.id).toBe("p2");
+  });
+
+  it("mantém a parcela paga em mais de uma vez como está e reconta as demais", () => {
+    const result = repriceInstallments(
+      slots(5000, [
+        [payment(3000), payment(2000, { paidAt: new Date("2026-02-10T12:00:00Z") })],
+        payment(10000),
+        null,
+        null,
+      ]),
+      5000,
+    );
+
+    expect(summarize(result.installments)).toEqual([
+      "i1:5000:pago 3000+2000",
+      "i2:5000:pago 5000",
+      "i3:5000:pago 5000",
+      "i4:5000:a pagar",
+    ]);
+    expect(result.paymentsRedistributed).toBe(true);
   });
 });

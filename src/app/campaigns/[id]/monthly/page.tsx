@@ -101,7 +101,15 @@ export default async function MonthlyProgressPage({
           >
             <span className="flex items-center gap-2 text-[17px]">
               <CheckCircleIcon className="h-5 w-5 shrink-0 text-green-700 dark:text-green-400" />
-              {contribution.donorName}
+              <span className="flex flex-col">
+                {contribution.donorName}
+                {contribution.partialOf ? (
+                  <span className="text-sm text-amber-800 dark:text-amber-300">
+                    em parte · falta{" "}
+                    {formatCurrency(contribution.partialOf.subtract(contribution.amount))}
+                  </span>
+                ) : null}
+              </span>
             </span>
             <span className="text-[17px] font-semibold">{formatCurrency(contribution.amount)}</span>
           </li>
@@ -123,7 +131,15 @@ export default async function MonthlyProgressPage({
           >
             <span className="flex items-center gap-2 text-[17px]">
               <ClockIcon className="h-5 w-5 shrink-0 text-amber-700 dark:text-amber-400" />
-              {contribution.donorName}
+              <span className="flex flex-col">
+                {contribution.donorName}
+                {contribution.partialOf ? (
+                  <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                    pagou {formatCurrency(contribution.partialOf.subtract(contribution.amount))} de{" "}
+                    {formatCurrency(contribution.partialOf)}
+                  </span>
+                ) : null}
+              </span>
             </span>
             <span className="text-[17px] font-semibold text-amber-800 dark:text-amber-300">
               {formatCurrency(contribution.amount)}

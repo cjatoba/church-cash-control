@@ -1,17 +1,21 @@
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { PledgeRepository } from "@/server/application/create-pledge";
 import type { PledgeListRepository } from "@/server/application/list-pledges";
 import type { PledgeDetailReader } from "@/server/application/get-pledge-detail";
 import type { DonorPledgeListRepository } from "@/server/application/list-donor-pledges";
 import { Money } from "@/server/domain/money";
-import type { PaymentMethod } from "@/server/domain/payment-method";
 import type { DbClient } from "./client";
-import { campaigns, donors, installments, pledges, pledgeTypes, users } from "./schema";
-
-function toPaymentMethod(value: string | null): PaymentMethod | null {
-  return value === "pix" || value === "cash" ? value : null;
-}
+import { toPaymentMethod } from "./installment-repository";
+import {
+  campaigns,
+  donors,
+  installmentPayments,
+  installments,
+  pledges,
+  pledgeTypes,
+  users,
+} from "./schema";
 
 // Todo Pledge referencia um PledgeType com valor fixo (createPledge rejeita
 // tipos avulsos) — um valor nulo aqui indica inconsistência de dados.
@@ -170,22 +174,37 @@ export function createPledgeRepository(
         return null;
       }
 
-      const installmentRows = await db
-        .select({
-          id: installments.id,
-          dueDate: installments.dueDate,
-          amountCents: installments.amountCents,
-          paidAt: installments.paidAt,
-          paidAmountCents: installments.paidAmountCents,
-          paymentMethod: installments.paymentMethod,
-          receivedByUserId: installments.receivedByUserId,
-          receivedByName: receivedByUser.name,
-          registeredByName: registeredByUser.name,
-        })
-        .from(installments)
-        .leftJoin(receivedByUser, eq(installments.receivedByUserId, receivedByUser.id))
-        .leftJoin(registeredByUser, eq(installments.registeredByUserId, registeredByUser.id))
-        .where(eq(installments.pledgeId, pledgeId));
+      const [installmentRows, paymentRows] = await Promise.all([
+        db
+          .select({
+            id: installments.id,
+            dueDate: installments.dueDate,
+            amountCents: installments.amountCents,
+            paidAt: installments.paidAt,
+          })
+          .from(installments)
+          .where(eq(installments.pledgeId, pledgeId)),
+        db
+          .select({
+            id: installmentPayments.id,
+            installmentId: installmentPayments.installmentId,
+            amountCents: installmentPayments.amountCents,
+            paidAt: installmentPayments.paidAt,
+            paymentMethod: installmentPayments.paymentMethod,
+            receivedByUserId: installmentPayments.receivedByUserId,
+            receivedByName: receivedByUser.name,
+            registeredByName: registeredByUser.name,
+          })
+          .from(installmentPayments)
+          .innerJoin(installments, eq(installmentPayments.installmentId, installments.id))
+          .leftJoin(receivedByUser, eq(installmentPayments.receivedByUserId, receivedByUser.id))
+          .leftJoin(
+            registeredByUser,
+            eq(installmentPayments.registeredByUserId, registeredByUser.id),
+          )
+          .where(eq(installments.pledgeId, pledgeId))
+          .orderBy(asc(installmentPayments.paidAt), asc(installmentPayments.createdAt)),
+      ]);
 
       return {
         id: pledgeRow.id,
@@ -201,11 +220,17 @@ export function createPledgeRepository(
             dueDate: row.dueDate,
             amount: Money.fromCents(row.amountCents),
             paidAt: row.paidAt,
-            paidAmount: row.paidAmountCents === null ? null : Money.fromCents(row.paidAmountCents),
-            paymentMethod: toPaymentMethod(row.paymentMethod),
-            receivedByUserId: row.receivedByUserId,
-            receivedByLabel: row.receivedByName,
-            registeredByLabel: row.registeredByName,
+            payments: paymentRows
+              .filter((payment) => payment.installmentId === row.id)
+              .map((payment) => ({
+                id: payment.id,
+                amount: Money.fromCents(payment.amountCents),
+                paidAt: payment.paidAt,
+                paymentMethod: toPaymentMethod(payment.paymentMethod),
+                receivedByUserId: payment.receivedByUserId,
+                receivedByLabel: payment.receivedByName,
+                registeredByLabel: payment.registeredByName,
+              })),
           }))
           .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()),
       };

@@ -153,14 +153,32 @@ export const installments = pgTable(
       .references(() => pledges.id, { onDelete: "cascade" }),
     dueDate: date("due_date", { mode: "date" }).notNull(),
     amountCents: integer("amount_cents").notNull(),
+    // Quando a parcela ficou paga por inteiro (data do pagamento que a
+    // completou); null enquanto falta algo. Recalculado a cada mudança em
+    // installment_payments, para as listas não precisarem somar pagamentos.
     paidAt: timestamp("paid_at", { withTimezone: true }),
-    paidAmountCents: integer("paid_amount_cents"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("installments_pledge_id_idx").on(table.pledgeId)],
+);
+
+// Uma parcela pode ser paga em mais de uma vez. Forma e quem recebeu/registrou
+// ficam vazios só em pagamentos antigos, de antes de o app guardá-los.
+export const installmentPayments = pgTable(
+  "installment_payments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    installmentId: uuid("installment_id")
+      .notNull()
+      .references(() => installments.id, { onDelete: "cascade" }),
+    amountCents: integer("amount_cents").notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true }).notNull(),
     paymentMethod: paymentMethodEnum("payment_method"),
     receivedByUserId: uuid("received_by_user_id").references(() => users.id),
     registeredByUserId: uuid("registered_by_user_id").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("installments_pledge_id_idx").on(table.pledgeId)],
+  (table) => [index("installment_payments_installment_id_idx").on(table.installmentId)],
 );
 
 export const activityLogActionEnum = pgEnum("activity_log_action", ACTIVITY_LOG_ACTIONS);
