@@ -1142,6 +1142,16 @@ ALTER COLUMN installment_value_cents DROP NOT NULL` +
   - Depois do deploy (tarefa de dados, com aprovação do usuário): passar
     para a parcela certa o valor parcial lançado antes como doação sem
     carnê.
+  - **Bug corrigido depois do merge** — PR #97 (achado pelo usuário em
+    produção): a tela do carnê dava erro já ao abrir (digest `498694936`),
+    impedindo dar baixa. As server actions declaradas dentro da página
+    passaram a usar duas funções auxiliares também declaradas dentro do
+    componente; o Next serializa o que a action captura do escopo e não
+    consegue serializar função. Corrigido levando as funções para o nível
+    do módulo. Regra prática: server action declarada dentro de uma página
+    só pode capturar valores simples (texto, número), nunca uma função
+    local — esse erro só aparece com a página renderizada de verdade, não
+    em lint, tipos, testes ou build.
 
 ## Em andamento (PRs abertas)
 
