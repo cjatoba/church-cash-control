@@ -41,6 +41,21 @@ const paymentMethodLabels = {
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
+// Fora do componente de propósito: uma server action declarada dentro da
+// página não pode usar função local da página (o Next tentaria enviá-la junto
+// com a action e a tela quebra ao abrir).
+function readText(formData: FormData, name: string): string {
+  const value = formData.get(name);
+  if (typeof value !== "string") {
+    throw new Error("Dados inválidos para o pagamento da parcela");
+  }
+  return value;
+}
+
+function describeRemaining(remaining: Money): string | null {
+  return remaining.toCents() > 0 ? `Pagamento em parte: falta ${formatCurrency(remaining)}` : null;
+}
+
 export type RevertPaymentState = ActionErrorState;
 
 export default async function PledgeDetailPage({
@@ -65,20 +80,6 @@ export default async function PledgeDetailPage({
   }
 
   const pledgeDonorId = pledge.donorId;
-
-  function readText(formData: FormData, name: string): string {
-    const value = formData.get(name);
-    if (typeof value !== "string") {
-      throw new Error("Dados inválidos para o pagamento da parcela");
-    }
-    return value;
-  }
-
-  function describeRemaining(remaining: Money): string | null {
-    return remaining.toCents() > 0
-      ? `Pagamento em parte: falta ${formatCurrency(remaining)}`
-      : null;
-  }
 
   async function markInstallmentAsPaid(
     _prevState: PayInstallmentState,
